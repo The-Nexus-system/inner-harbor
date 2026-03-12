@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, Users, ArrowRightLeft, BookOpen, MessageSquare, 
-  CheckSquare, CalendarDays, Shield, Settings, LogOut, Leaf 
+  CheckSquare, CalendarDays, Shield, Settings, LogOut, Leaf, Lightbulb, Clock 
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
