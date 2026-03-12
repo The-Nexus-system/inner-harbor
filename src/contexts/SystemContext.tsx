@@ -449,7 +449,9 @@ export function SystemProvider({ children }: { children: ReactNode }) {
       assigned_to: data.assignedTo || 'system',
       category: (data.category || 'general') as Database['public']['Enums']['task_category'],
       due_date: data.dueDate || null,
-    }]);
+      is_recurring: !!data.recurrencePattern,
+      recurrence_pattern: data.recurrencePattern || null,
+    } as any]);
     qc.invalidateQueries({ queryKey: ['tasks', userId] });
   }, [userId, qc]);
 
