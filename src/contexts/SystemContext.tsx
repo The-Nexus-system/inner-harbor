@@ -539,8 +539,8 @@ export function SystemProvider({ children }: { children: ReactNode }) {
       safetyPlans, calendarEvents, checkIn, settings, isLoading,
       getAlter, setCurrentFronter, addFrontEvent, updateSettings,
       toggleTask, markMessageRead, updateCheckIn,
-      createAlter, updateAlter, createJournalEntry, createTask, deleteTask, createMessage,
-      createSafetyPlan, createCalendarEvent,
+      createAlter, updateAlter, createJournalEntry, createTask, updateTask, deleteTask, createMessage,
+      createSafetyPlan, createCalendarEvent, updateCalendarEvent, deleteCalendarEvent,
     }}>
       {children}
     </SystemContext.Provider>
