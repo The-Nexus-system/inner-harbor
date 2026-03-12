@@ -463,6 +463,10 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     if (data.assignedTo !== undefined) update.assigned_to = data.assignedTo;
     if (data.category !== undefined) update.category = data.category;
     if (data.dueDate !== undefined) update.due_date = data.dueDate || null;
+    if (data.recurrencePattern !== undefined) {
+      update.recurrence_pattern = data.recurrencePattern || null;
+      update.is_recurring = !!data.recurrencePattern;
+    }
     await supabase.from('tasks').update(update).eq('id', id).eq('user_id', userId);
     qc.invalidateQueries({ queryKey: ['tasks', userId] });
   }, [userId, qc]);
