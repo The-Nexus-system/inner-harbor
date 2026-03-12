@@ -107,6 +107,7 @@ function mapSettings(r: DbSettings): AppSettings {
     fontSize: r.font_size as AppSettings['fontSize'], spacing: r.spacing as AppSettings['spacing'],
     reducedMotion: r.reduced_motion, plainLanguage: r.plain_language,
     soundOff: r.sound_off, screenReaderOptimized: r.screen_reader_optimized,
+    themeColor: ((r as any).theme_color as AppSettings['themeColor']) ?? 'sage',
   };
 }
 
