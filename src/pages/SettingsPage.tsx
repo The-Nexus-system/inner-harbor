@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Download, FileText, FileJson, Check, Bell, BellOff, Lightbulb } from "lucide-react";
+import { Download, FileText, FileJson, Check, Bell, BellOff, Lightbulb, RotateCcw } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useInsights } from "@/hooks/useInsights";
 import {
