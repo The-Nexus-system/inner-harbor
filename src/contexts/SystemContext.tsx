@@ -86,7 +86,7 @@ function mapCalendar(r: DbCalendar): CalendarEvent {
     preferredFronter: r.preferred_fronter ?? undefined,
     supportNeeded: r.support_needed ?? undefined, sensoryPrep: r.sensory_prep ?? undefined,
     recoveryTime: r.recovery_time ?? undefined, transportNotes: r.transport_notes ?? undefined,
-    notes: r.notes ?? undefined,
+    notes: r.notes ?? undefined, reminderMinutes: r.reminder_minutes ?? undefined,
   };
 }
 
