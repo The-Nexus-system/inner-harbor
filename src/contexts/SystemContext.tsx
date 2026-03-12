@@ -269,13 +269,20 @@ export function SystemProvider({ children }: { children: ReactNode }) {
 
   // Apply settings to DOM
   useEffect(() => {
-    if (settings.darkMode) document.documentElement.classList.add('dark');
-    else document.documentElement.classList.remove('dark');
-    if (settings.highContrast) document.documentElement.classList.add('high-contrast');
-    else document.documentElement.classList.remove('high-contrast');
-    if (settings.reducedMotion) document.documentElement.classList.add('reduce-motion');
-    else document.documentElement.classList.remove('reduce-motion');
-    document.documentElement.style.fontSize = { small: '14px', medium: '16px', large: '18px', xlarge: '20px' }[settings.fontSize];
+    const el = document.documentElement;
+    if (settings.darkMode) el.classList.add('dark');
+    else el.classList.remove('dark');
+    if (settings.highContrast) el.classList.add('high-contrast');
+    else el.classList.remove('high-contrast');
+    if (settings.reducedMotion) el.classList.add('reduce-motion');
+    else el.classList.remove('reduce-motion');
+    el.style.fontSize = { small: '14px', medium: '16px', large: '18px', xlarge: '20px' }[settings.fontSize];
+    // Theme color
+    const themes = ['sage', 'ocean', 'lavender', 'rose', 'amber', 'forest'];
+    themes.forEach(t => el.classList.remove(`theme-${t}`));
+    if (settings.themeColor && settings.themeColor !== 'sage') {
+      el.classList.add(`theme-${settings.themeColor}`);
+    }
   }, [settings]);
 
   // ============================================================
