@@ -86,6 +86,19 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* Sign out */}
+        <div className="mt-auto p-3 border-t border-sidebar-border">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={signOut}
+            className="w-full justify-start tap-target text-muted-foreground hover:text-foreground"
+          >
+            <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
+            {!collapsed && <span>Sign out</span>}
+          </Button>
+        </div>
       </SidebarContent>
     </Sidebar>
   );
