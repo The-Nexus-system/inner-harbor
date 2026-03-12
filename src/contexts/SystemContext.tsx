@@ -281,7 +281,17 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     // Theme color
     const themes = ['sage', 'ocean', 'lavender', 'rose', 'amber', 'forest'];
     themes.forEach(t => el.classList.remove(`theme-${t}`));
-    if (settings.themeColor && settings.themeColor !== 'sage') {
+    // Remove custom inline properties
+    el.style.removeProperty('--primary');
+    el.style.removeProperty('--ring');
+    el.style.removeProperty('--sidebar-primary');
+    el.style.removeProperty('--sidebar-ring');
+    if (settings.themeColor === 'custom' && settings.customThemeHsl) {
+      el.style.setProperty('--primary', settings.customThemeHsl);
+      el.style.setProperty('--ring', settings.customThemeHsl);
+      el.style.setProperty('--sidebar-primary', settings.customThemeHsl);
+      el.style.setProperty('--sidebar-ring', settings.customThemeHsl);
+    } else if (settings.themeColor && settings.themeColor !== 'sage') {
       el.classList.add(`theme-${settings.themeColor}`);
     }
   }, [settings]);
