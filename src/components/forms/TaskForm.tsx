@@ -44,6 +44,7 @@ export function TaskForm({ alters, onSubmit, editTask, open: controlledOpen, onO
   const [form, setForm] = useState({
     title: '', description: '', category: 'general' as SystemTask['category'],
     assignedTo: 'system', dueDate: '', recurrencePattern: '' as string,
+    reminderMinutes: '' as string,
   });
 
   const reset = () => setForm({
@@ -53,6 +54,7 @@ export function TaskForm({ alters, onSubmit, editTask, open: controlledOpen, onO
     assignedTo: editTask?.assignedTo || 'system',
     dueDate: editTask?.dueDate || '',
     recurrencePattern: editTask?.recurrencePattern || '',
+    reminderMinutes: editTask?.reminderMinutes?.toString() || '',
   });
 
   useEffect(() => {
@@ -71,6 +73,7 @@ export function TaskForm({ alters, onSubmit, editTask, open: controlledOpen, onO
         assignedTo: form.assignedTo,
         dueDate: form.dueDate || undefined,
         recurrencePattern: (form.recurrencePattern || undefined) as RecurrencePattern | undefined,
+        reminderMinutes: form.reminderMinutes ? parseInt(form.reminderMinutes) : undefined,
       });
       setOpen(false);
     } finally {
@@ -132,6 +135,21 @@ export function TaskForm({ alters, onSubmit, editTask, open: controlledOpen, onO
             </Select>
           </div>
         </div>
+        {form.dueDate && (
+          <div className="space-y-1.5">
+            <Label htmlFor="task-reminder">Remind me</Label>
+            <Select value={form.reminderMinutes || '__none__'} onValueChange={v => setForm(p => ({ ...p, reminderMinutes: v === '__none__' ? '' : v }))}>
+              <SelectTrigger id="task-reminder"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">No reminder</SelectItem>
+                <SelectItem value="15">15 minutes before</SelectItem>
+                <SelectItem value="30">30 minutes before</SelectItem>
+                <SelectItem value="60">1 hour before</SelectItem>
+                <SelectItem value="1440">1 day before</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
           <Button type="submit" disabled={saving || !form.title.trim()}>

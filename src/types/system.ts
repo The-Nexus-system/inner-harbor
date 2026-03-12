@@ -84,11 +84,12 @@ export interface SystemTask {
   id: string;
   title: string;
   description?: string;
-  assignedTo: 'system' | 'next-fronter' | string; // alter ID or special values
+  assignedTo: 'system' | 'next-fronter' | string;
   isCompleted: boolean;
   dueDate?: string;
   isRecurring: boolean;
   recurrencePattern?: RecurrencePattern;
+  reminderMinutes?: number;
   category: 'general' | 'medication' | 'hygiene' | 'meals' | 'hydration' | 'therapy' | 'mobility' | 'community';
   createdAt: string;
 }
@@ -114,6 +115,7 @@ export interface CalendarEvent {
   recoveryTime?: string;
   transportNotes?: string;
   notes?: string;
+  reminderMinutes?: number;
 }
 
 export interface DailyCheckIn {

@@ -31,7 +31,7 @@ export function CalendarEventForm({ alters, onSubmit, editEvent, open: controlle
   const [form, setForm] = useState({
     title: '', time: '', preferredFronter: '',
     supportNeeded: '', sensoryPrep: '', recoveryTime: '',
-    transportNotes: '', notes: '',
+    transportNotes: '', notes: '', reminderMinutes: '',
   });
 
   const reset = () => {
@@ -45,10 +45,11 @@ export function CalendarEventForm({ alters, onSubmit, editEvent, open: controlle
         recoveryTime: editEvent.recoveryTime || '',
         transportNotes: editEvent.transportNotes || '',
         notes: editEvent.notes || '',
+        reminderMinutes: editEvent.reminderMinutes?.toString() || '',
       });
     } else {
       setDate(undefined);
-      setForm({ title: '', time: '', preferredFronter: '', supportNeeded: '', sensoryPrep: '', recoveryTime: '', transportNotes: '', notes: '' });
+      setForm({ title: '', time: '', preferredFronter: '', supportNeeded: '', sensoryPrep: '', recoveryTime: '', transportNotes: '', notes: '', reminderMinutes: '' });
     }
   };
 
@@ -71,6 +72,7 @@ export function CalendarEventForm({ alters, onSubmit, editEvent, open: controlle
         recoveryTime: form.recoveryTime || undefined,
         transportNotes: form.transportNotes || undefined,
         notes: form.notes || undefined,
+        reminderMinutes: form.reminderMinutes ? parseInt(form.reminderMinutes) : undefined,
       });
       setOpen(false);
     } finally {
@@ -140,9 +142,24 @@ export function CalendarEventForm({ alters, onSubmit, editEvent, open: controlle
           <Label htmlFor="ce-transport">Transport notes</Label>
           <Input id="ce-transport" value={form.transportNotes} onChange={e => set('transportNotes', e.target.value)} maxLength={200} placeholder="e.g. Bus route 42, or carer drives" />
         </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="ce-notes">Notes</Label>
-          <Textarea id="ce-notes" value={form.notes} onChange={e => set('notes', e.target.value)} rows={2} maxLength={1000} />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="ce-notes">Notes</Label>
+            <Textarea id="ce-notes" value={form.notes} onChange={e => set('notes', e.target.value)} rows={2} maxLength={1000} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="ce-reminder">Remind me</Label>
+            <Select value={form.reminderMinutes || '__none__'} onValueChange={v => set('reminderMinutes', v === '__none__' ? '' : v)}>
+              <SelectTrigger id="ce-reminder"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">No reminder</SelectItem>
+                <SelectItem value="15">15 minutes before</SelectItem>
+                <SelectItem value="30">30 minutes before</SelectItem>
+                <SelectItem value="60">1 hour before</SelectItem>
+                <SelectItem value="1440">1 day before</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>

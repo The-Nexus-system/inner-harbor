@@ -66,6 +66,7 @@ function mapTask(r: DbTask): SystemTask {
     assignedTo: r.assigned_to, isCompleted: r.is_completed,
     dueDate: r.due_date ?? undefined, isRecurring: r.is_recurring,
     recurrencePattern: (r as any).recurrence_pattern as RecurrencePattern | undefined,
+    reminderMinutes: r.reminder_minutes ?? undefined,
     category: r.category as SystemTask['category'], createdAt: r.created_at,
   };
 }
@@ -85,7 +86,7 @@ function mapCalendar(r: DbCalendar): CalendarEvent {
     preferredFronter: r.preferred_fronter ?? undefined,
     supportNeeded: r.support_needed ?? undefined, sensoryPrep: r.sensory_prep ?? undefined,
     recoveryTime: r.recovery_time ?? undefined, transportNotes: r.transport_notes ?? undefined,
-    notes: r.notes ?? undefined,
+    notes: r.notes ?? undefined, reminderMinutes: r.reminder_minutes ?? undefined,
   };
 }
 
@@ -451,6 +452,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
       due_date: data.dueDate || null,
       is_recurring: !!data.recurrencePattern,
       recurrence_pattern: data.recurrencePattern || null,
+      reminder_minutes: data.reminderMinutes ?? null,
     } as any]);
     qc.invalidateQueries({ queryKey: ['tasks', userId] });
   }, [userId, qc]);
@@ -463,6 +465,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     if (data.assignedTo !== undefined) update.assigned_to = data.assignedTo;
     if (data.category !== undefined) update.category = data.category;
     if (data.dueDate !== undefined) update.due_date = data.dueDate || null;
+    if (data.reminderMinutes !== undefined) update.reminder_minutes = data.reminderMinutes ?? null;
     if (data.recurrencePattern !== undefined) {
       update.recurrence_pattern = data.recurrencePattern || null;
       update.is_recurring = !!data.recurrencePattern;
@@ -514,6 +517,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
       recovery_time: data.recoveryTime || null,
       transport_notes: data.transportNotes || null,
       notes: data.notes || null,
+      reminder_minutes: data.reminderMinutes ?? null,
     }]);
     qc.invalidateQueries({ queryKey: ['calendar_events', userId] });
   }, [userId, qc]);
@@ -530,6 +534,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     if (data.recoveryTime !== undefined) update.recovery_time = data.recoveryTime || null;
     if (data.transportNotes !== undefined) update.transport_notes = data.transportNotes || null;
     if (data.notes !== undefined) update.notes = data.notes || null;
+    if (data.reminderMinutes !== undefined) update.reminder_minutes = data.reminderMinutes ?? null;
     await supabase.from('calendar_events').update(update).eq('id', id).eq('user_id', userId);
     qc.invalidateQueries({ queryKey: ['calendar_events', userId] });
   }, [userId, qc]);
