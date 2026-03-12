@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
+import { TaskForm } from "@/components/forms/TaskForm";
 
 const categoryEmoji: Record<string, string> = {
   general: '📋', medication: '💊', hygiene: '🪥', meals: '🍽️',
@@ -10,7 +11,7 @@ const categoryEmoji: Record<string, string> = {
 };
 
 export default function TasksPage() {
-  const { tasks, toggleTask, getAlter, isLoading } = useSystem();
+  const { tasks, alters, toggleTask, getAlter, isLoading, createTask } = useSystem();
 
   if (isLoading) return <PageSkeleton message="Loading tasks..." />;
 
@@ -19,9 +20,12 @@ export default function TasksPage() {
 
   return (
     <div className="space-y-6 max-w-3xl mx-auto animate-fade-in">
-      <header>
-        <h1 className="text-2xl md:text-3xl font-heading font-bold">Tasks</h1>
-        <p className="text-muted-foreground mt-1">Daily tasks, medication, self-care, and responsibilities. Assign to anyone or the whole system.</p>
+      <header className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-heading font-bold">Tasks</h1>
+          <p className="text-muted-foreground mt-1">Daily tasks, medication, self-care, and responsibilities.</p>
+        </div>
+        <TaskForm alters={alters} onSubmit={createTask} />
       </header>
 
       <Card>
@@ -30,7 +34,10 @@ export default function TasksPage() {
         </CardHeader>
         <CardContent>
           {incomplete.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No tasks right now. Nice work, or add some when ready.</p>
+            <div className="text-center space-y-3 py-4">
+              <p className="text-sm text-muted-foreground">No tasks right now. Nice work, or add some when ready.</p>
+              <TaskForm alters={alters} onSubmit={createTask} />
+            </div>
           ) : (
             <ul className="space-y-1" role="list">
               {incomplete.map(task => {

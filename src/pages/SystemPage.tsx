@@ -1,24 +1,31 @@
 import { useSystem } from "@/contexts/SystemContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Pencil } from "lucide-react";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
+import { AlterForm } from "@/components/forms/AlterForm";
 
 export default function SystemPage() {
-  const { alters, isLoading } = useSystem();
+  const { alters, isLoading, createAlter, updateAlter } = useSystem();
 
   if (isLoading) return <PageSkeleton message="Loading system profiles..." />;
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto animate-fade-in">
-      <header>
-        <h1 className="text-2xl md:text-3xl font-heading font-bold">System</h1>
-        <p className="text-muted-foreground mt-1">Profiles for everyone in the system. Each person defines their own information.</p>
+      <header className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-heading font-bold">System</h1>
+          <p className="text-muted-foreground mt-1">Profiles for everyone in the system. Each person defines their own information.</p>
+        </div>
+        <AlterForm onSubmit={createAlter} />
       </header>
 
       {alters.length === 0 ? (
         <Card>
-          <CardContent className="py-8 text-center">
-            <p className="text-muted-foreground">No alter profiles yet. They will appear here once created.</p>
+          <CardContent className="py-8 text-center space-y-3">
+            <p className="text-muted-foreground">No alter profiles yet.</p>
+            <AlterForm onSubmit={createAlter} />
           </CardContent>
         </Card>
       ) : (
@@ -27,11 +34,18 @@ export default function SystemPage() {
             <Card key={alter.id} className="relative overflow-hidden" aria-label={`Profile: ${alter.name}`}>
               <div className="h-1.5 w-full" style={{ backgroundColor: alter.color || 'hsl(var(--primary))' }} aria-hidden="true" />
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg font-heading flex items-center gap-2">
-                  <span>{alter.emoji}</span>
-                  <span>{alter.name}</span>
-                  {alter.nickname && <span className="text-sm text-muted-foreground font-normal">({alter.nickname})</span>}
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-heading flex items-center gap-2">
+                    <span>{alter.emoji}</span>
+                    <span>{alter.name}</span>
+                    {alter.nickname && <span className="text-sm text-muted-foreground font-normal">({alter.nickname})</span>}
+                  </CardTitle>
+                  <AlterForm
+                    alter={alter}
+                    onSubmit={data => updateAlter(alter.id, data)}
+                    trigger={<Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Edit ${alter.name}`}><Pencil className="h-3.5 w-3.5" /></Button>}
+                  />
+                </div>
                 <p className="text-sm text-muted-foreground">{alter.pronouns}</p>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">

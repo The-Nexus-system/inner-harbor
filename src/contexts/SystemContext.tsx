@@ -131,6 +131,12 @@ interface SystemContextType {
   toggleTask: (id: string) => void;
   markMessageRead: (id: string) => void;
   updateCheckIn: (c: Partial<DailyCheckIn>) => void;
+  createAlter: (data: Partial<Alter>) => Promise<void>;
+  updateAlter: (id: string, data: Partial<Alter>) => Promise<void>;
+  createJournalEntry: (data: Partial<JournalEntry>) => Promise<void>;
+  createTask: (data: Partial<SystemTask>) => Promise<void>;
+  deleteTask: (id: string) => Promise<void>;
+  createMessage: (data: Partial<InternalMessage>) => Promise<void>;
 }
 
 const defaultSettings: AppSettings = {
@@ -357,7 +363,6 @@ export function SystemProvider({ children }: { children: ReactNode }) {
   const updateSettings = useCallback(async (s: Partial<AppSettings>) => {
     if (!userId) return;
     const next = { ...settings, ...s };
-    // Optimistic update
     qc.setQueryData(['app_settings', userId], next);
 
     const dbUpdate: Record<string, unknown> = {};
@@ -370,7 +375,6 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     if (s.soundOff !== undefined) dbUpdate.sound_off = s.soundOff;
     if (s.screenReaderOptimized !== undefined) dbUpdate.screen_reader_optimized = s.screenReaderOptimized;
 
-    // Upsert settings
     const { data: existing } = await supabase.from('app_settings').select('user_id').eq('user_id', userId).maybeSingle();
     if (existing) {
       await supabase.from('app_settings').update(dbUpdate).eq('user_id', userId);
@@ -380,12 +384,93 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     qc.invalidateQueries({ queryKey: ['app_settings', userId] });
   }, [userId, settings, qc]);
 
+  // CRUD mutations
+  const createAlter = useCallback(async (data: Partial<Alter>) => {
+    if (!userId) return;
+    await supabase.from('alters').insert([{
+      user_id: userId, name: data.name!, pronouns: data.pronouns || 'they/them',
+      nickname: data.nickname || null, role: data.role || null, age_range: data.ageRange || null,
+      species: data.species || null, communication_style: data.communicationStyle || null,
+      access_needs: data.accessNeeds || null, triggers_to_avoid: data.triggersToAvoid || null,
+      grounding_preferences: data.groundingPreferences || null, safe_foods: data.safeFoods || null,
+      music_preferences: data.musicPreferences || null, color: data.color || null,
+      emoji: data.emoji || null, notes: data.notes || null,
+      visibility: (data.visibility || 'shared') as Database['public']['Enums']['visibility'],
+    }]);
+    qc.invalidateQueries({ queryKey: ['alters', userId] });
+  }, [userId, qc]);
+
+  const updateAlter = useCallback(async (id: string, data: Partial<Alter>) => {
+    if (!userId) return;
+    const update: Record<string, unknown> = {};
+    if (data.name !== undefined) update.name = data.name;
+    if (data.pronouns !== undefined) update.pronouns = data.pronouns;
+    if (data.nickname !== undefined) update.nickname = data.nickname || null;
+    if (data.role !== undefined) update.role = data.role || null;
+    if (data.ageRange !== undefined) update.age_range = data.ageRange || null;
+    if (data.species !== undefined) update.species = data.species || null;
+    if (data.communicationStyle !== undefined) update.communication_style = data.communicationStyle || null;
+    if (data.accessNeeds !== undefined) update.access_needs = data.accessNeeds || null;
+    if (data.triggersToAvoid !== undefined) update.triggers_to_avoid = data.triggersToAvoid || null;
+    if (data.groundingPreferences !== undefined) update.grounding_preferences = data.groundingPreferences || null;
+    if (data.safeFoods !== undefined) update.safe_foods = data.safeFoods || null;
+    if (data.musicPreferences !== undefined) update.music_preferences = data.musicPreferences || null;
+    if (data.color !== undefined) update.color = data.color || null;
+    if (data.emoji !== undefined) update.emoji = data.emoji || null;
+    if (data.notes !== undefined) update.notes = data.notes || null;
+    if (data.visibility !== undefined) update.visibility = data.visibility;
+    await supabase.from('alters').update(update).eq('id', id).eq('user_id', userId);
+    qc.invalidateQueries({ queryKey: ['alters', userId] });
+  }, [userId, qc]);
+
+  const createJournalEntry = useCallback(async (data: Partial<JournalEntry>) => {
+    if (!userId) return;
+    await supabase.from('journal_entries').insert([{
+      user_id: userId, content: data.content!,
+      title: data.title || null, alter_id: data.alterId || null,
+      mood: data.mood ?? null, tags: data.tags || [],
+      type: (data.type || 'text') as Database['public']['Enums']['journal_type'],
+      visibility: (data.visibility || 'shared') as Database['public']['Enums']['visibility'],
+    }]);
+    qc.invalidateQueries({ queryKey: ['journal_entries', userId] });
+  }, [userId, qc]);
+
+  const createTask = useCallback(async (data: Partial<SystemTask>) => {
+    if (!userId) return;
+    await supabase.from('tasks').insert([{
+      user_id: userId, title: data.title!,
+      description: data.description || null,
+      assigned_to: data.assignedTo || 'system',
+      category: (data.category || 'general') as Database['public']['Enums']['task_category'],
+      due_date: data.dueDate || null,
+    }]);
+    qc.invalidateQueries({ queryKey: ['tasks', userId] });
+  }, [userId, qc]);
+
+  const deleteTask = useCallback(async (id: string) => {
+    if (!userId) return;
+    await supabase.from('tasks').update({ archived_at: new Date().toISOString() }).eq('id', id).eq('user_id', userId);
+    qc.invalidateQueries({ queryKey: ['tasks', userId] });
+  }, [userId, qc]);
+
+  const createMessage = useCallback(async (data: Partial<InternalMessage>) => {
+    if (!userId) return;
+    await supabase.from('internal_messages').insert([{
+      user_id: userId, content: data.content!,
+      from_alter_id: data.fromAlterId || null,
+      to_alter_ids: data.toAlterIds || [],
+      priority: (data.priority || 'normal') as Database['public']['Enums']['message_priority'],
+    }]);
+    qc.invalidateQueries({ queryKey: ['internal_messages', userId] });
+  }, [userId, qc]);
+
   return (
     <SystemContext.Provider value={{
       alters, frontEvents, currentFront, journalEntries, messages, tasks,
       safetyPlans, calendarEvents, checkIn, settings, isLoading,
       getAlter, setCurrentFronter, addFrontEvent, updateSettings,
       toggleTask, markMessageRead, updateCheckIn,
+      createAlter, updateAlter, createJournalEntry, createTask, deleteTask, createMessage,
     }}>
       {children}
     </SystemContext.Provider>
