@@ -5,6 +5,8 @@ import { CheckSquare, MessageSquare, BookOpen, Shield, CalendarDays } from "luci
 import { DailyCheckInWidget } from "@/components/DailyCheckInWidget";
 import { CheckInTrends } from "@/components/CheckInTrends";
 import { QuickNotesWidget } from "@/components/QuickNotesWidget";
+import { InsightCard } from "@/components/InsightCard";
+import { DailySummaryCard } from "@/components/DailySummaryCard";
 import { Link } from "react-router-dom";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
 
