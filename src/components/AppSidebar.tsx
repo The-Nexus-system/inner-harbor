@@ -29,6 +29,7 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { currentFront, getAlter } = useSystem();
+  const { signOut } = useAuth();
 
   const currentAlter = currentFront?.alterIds?.[0] ? getAlter(currentFront.alterIds[0]) : null;
 
