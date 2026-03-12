@@ -98,6 +98,7 @@ export type Database = {
       app_settings: {
         Row: {
           created_at: string
+          custom_theme_hsl: string | null
           dark_mode: boolean
           font_size: string
           high_contrast: boolean
@@ -112,6 +113,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          custom_theme_hsl?: string | null
           dark_mode?: boolean
           font_size?: string
           high_contrast?: boolean
@@ -126,6 +128,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          custom_theme_hsl?: string | null
           dark_mode?: boolean
           font_size?: string
           high_contrast?: boolean
