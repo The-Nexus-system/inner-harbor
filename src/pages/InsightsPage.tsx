@@ -105,6 +105,11 @@ export default function InsightsPage() {
           )}
         </TabsContent>
 
+
+        <TabsContent value="charts" className="mt-4">
+          <InsightCharts frontEvents={frontEvents} checkIns={checkIns} />
+        </TabsContent>
+
         <TabsContent value="saved" className="space-y-4 mt-4">
           {savedOnly.length === 0 ? (
             <Card>
