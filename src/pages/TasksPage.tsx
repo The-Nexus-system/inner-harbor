@@ -51,6 +51,11 @@ const recurrenceLabel: Record<string, string> = {
               {!isComplete && task.description && <p className="text-xs text-muted-foreground">{task.description}</p>}
             </div>
           </label>
+          {!isComplete && task.recurrencePattern && (
+            <Badge variant="secondary" className="text-xs flex-shrink-0 gap-1">
+              <RefreshCw className="h-3 w-3" /> {recurrenceLabel[task.recurrencePattern]}
+            </Badge>
+          )}
           {!isComplete && <Badge variant="outline" className="text-xs flex-shrink-0">{assignee}</Badge>}
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditingTask(task)} aria-label="Edit task">
