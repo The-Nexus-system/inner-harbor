@@ -78,10 +78,10 @@ export function JournalForm({ alters, onSubmit }: JournalFormProps) {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="journal-author">Who's writing?</Label>
-              <Select value={form.alterId} onValueChange={v => setForm(p => ({ ...p, alterId: v }))}>
+              <Select value={form.alterId || '__none__'} onValueChange={v => setForm(p => ({ ...p, alterId: v === '__none__' ? '' : v }))}>
                 <SelectTrigger id="journal-author"><SelectValue placeholder="Unknown / not sure" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Unknown / not sure</SelectItem>
+                  <SelectItem value="__none__">Unknown / not sure</SelectItem>
                   {alters.map(a => <SelectItem key={a.id} value={a.id}>{a.emoji} {a.name}</SelectItem>)}
                 </SelectContent>
               </Select>
