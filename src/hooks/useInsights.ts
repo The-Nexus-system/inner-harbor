@@ -61,6 +61,7 @@ export function useInsights() {
         summariesEnabled: data.summaries_enabled,
         detailMode: data.detail_mode as 'brief' | 'detailed',
         excludedDataTypes: data.excluded_data_types ?? [],
+        suppressedCategories: (data as any).suppressed_categories ?? [],
         includeLocation: data.include_location,
         lowStimulation: data.low_stimulation,
       } as InsightPreferences;
