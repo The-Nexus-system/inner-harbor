@@ -466,6 +466,36 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     qc.invalidateQueries({ queryKey: ['internal_messages', userId] });
   }, [userId, qc]);
 
+  const createSafetyPlan = useCallback(async (data: Partial<SafetyPlan>) => {
+    if (!userId) return;
+    await supabase.from('safety_plans').insert([{
+      user_id: userId,
+      title: data.title!,
+      type: data.type as Database['public']['Enums']['safety_plan_type'],
+      steps: data.steps || [],
+      trusted_contacts: JSON.parse(JSON.stringify(data.trustedContacts || [])),
+      notes: data.notes || null,
+    }]);
+    qc.invalidateQueries({ queryKey: ['safety_plans', userId] });
+  }, [userId, qc]);
+
+  const createCalendarEvent = useCallback(async (data: Partial<CalendarEvent>) => {
+    if (!userId) return;
+    await supabase.from('calendar_events').insert([{
+      user_id: userId,
+      title: data.title!,
+      event_date: data.date!,
+      event_time: data.time || null,
+      preferred_fronter: data.preferredFronter || null,
+      support_needed: data.supportNeeded || null,
+      sensory_prep: data.sensoryPrep || null,
+      recovery_time: data.recoveryTime || null,
+      transport_notes: data.transportNotes || null,
+      notes: data.notes || null,
+    }]);
+    qc.invalidateQueries({ queryKey: ['calendar_events', userId] });
+  }, [userId, qc]);
+
   return (
     <SystemContext.Provider value={{
       alters, frontEvents, currentFront, journalEntries, messages, tasks,
@@ -473,6 +503,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
       getAlter, setCurrentFronter, addFrontEvent, updateSettings,
       toggleTask, markMessageRead, updateCheckIn,
       createAlter, updateAlter, createJournalEntry, createTask, deleteTask, createMessage,
+      createSafetyPlan, createCalendarEvent,
     }}>
       {children}
     </SystemContext.Provider>

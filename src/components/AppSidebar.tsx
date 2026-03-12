@@ -21,6 +21,7 @@ const items = [
   { title: "Tasks", url: "/tasks", icon: CheckSquare },
   { title: "Calendar", url: "/calendar", icon: CalendarDays },
   { title: "Safety", url: "/safety", icon: Shield },
+  { title: "Grounding", url: "/grounding", icon: Leaf },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 

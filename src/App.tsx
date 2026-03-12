@@ -59,6 +59,7 @@ const App = () => (
                         <Route path="/tasks" element={<TasksPage />} />
                         <Route path="/calendar" element={<CalendarPage />} />
                         <Route path="/safety" element={<SafetyPage />} />
+                        <Route path="/grounding" element={<GroundingPage />} />
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
