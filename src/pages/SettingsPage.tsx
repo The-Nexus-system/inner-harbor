@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useSystem } from "@/contexts/SystemContext";
+import { useNotifications } from "@/hooks/useNotifications";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Download, FileText, FileJson, Check } from "lucide-react";
+import { Download, FileText, FileJson, Check, Bell, BellOff } from "lucide-react";
 import {
   exportAsText, exportAsJson,
   formatJournalForExport, formatFrontHistoryForExport, formatSafetyPlanForExport,
@@ -26,6 +27,7 @@ type ExportKey = 'journal' | 'front' | 'tasks' | 'safety';
 
 export default function SettingsPage() {
   const { settings, updateSettings, journalEntries, frontEvents, tasks, safetyPlans, alters, getAlter } = useSystem();
+  const { isSupported, permission, isSubscribed, isLoading: notifLoading, enableNotifications, disableNotifications } = useNotifications();
   const [exported, setExported] = useState<Record<string, boolean>>({});
 
   const flash = (key: string) => {
@@ -61,6 +63,14 @@ export default function SettingsPage() {
     { key: 'tasks', label: 'Tasks', count: tasks.length },
     { key: 'safety', label: 'Safety plans', count: safetyPlans.length },
   ];
+
+  const handleNotificationToggle = async (enabled: boolean) => {
+    if (enabled) {
+      await enableNotifications();
+    } else {
+      await disableNotifications();
+    }
+  };
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto animate-fade-in">
@@ -100,6 +110,52 @@ export default function SettingsPage() {
               </SelectContent>
             </Select>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Notifications */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg font-heading flex items-center gap-2">
+            <Bell className="h-5 w-5" /> Notifications
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Get reminded about upcoming tasks and calendar events.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {!isSupported ? (
+            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+              <BellOff className="h-4 w-4" />
+              <p>Push notifications are not supported in this browser. Try installing the app or using a different browser.</p>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between tap-target">
+                <div>
+                  <Label htmlFor="push-notifications">Push notifications</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {isSubscribed
+                      ? 'You will receive reminders for tasks and events.'
+                      : permission === 'denied'
+                        ? 'Notifications are blocked. Please enable them in your browser settings.'
+                        : 'Enable to receive task and calendar reminders.'}
+                  </p>
+                </div>
+                <Switch
+                  id="push-notifications"
+                  checked={isSubscribed}
+                  onCheckedChange={handleNotificationToggle}
+                  disabled={notifLoading || permission === 'denied'}
+                />
+              </div>
+              {isSubscribed && (
+                <p className="text-xs text-muted-foreground">
+                  Set reminder times when creating or editing tasks and calendar events.
+                </p>
+              )}
+            </>
+          )}
         </CardContent>
       </Card>
 
