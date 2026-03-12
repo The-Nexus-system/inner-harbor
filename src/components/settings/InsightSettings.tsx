@@ -125,15 +125,28 @@ export default function InsightSettings() {
 
         {/* Reset to defaults */}
         <div className="pt-2 border-t border-border">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1.5"
-            onClick={() => updatePreferences(defaultInsightPreferences)}
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-            Reset to defaults
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <RotateCcw className="h-3.5 w-3.5" />
+                Reset to defaults
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Reset insight preferences?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will restore all insight and summary settings to their defaults, including data type exclusions and category filters.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => updatePreferences(defaultInsightPreferences)}>
+                  Reset
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </CardContent>
     </Card>
