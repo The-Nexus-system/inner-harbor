@@ -131,6 +131,77 @@
     --border: 0 0% 60%;
     --muted-foreground: 0 0% 80%;
   }
+
+  /* Theme color variants */
+  .theme-ocean {
+    --primary: 200 40% 40%;
+    --ring: 200 40% 40%;
+    --safe: 180 35% 45%;
+    --sidebar-primary: 200 40% 40%;
+    --sidebar-ring: 200 40% 40%;
+  }
+  .theme-ocean.dark {
+    --primary: 200 45% 55%;
+    --ring: 200 45% 55%;
+    --sidebar-primary: 200 45% 55%;
+    --sidebar-ring: 200 45% 55%;
+  }
+
+  .theme-lavender {
+    --primary: 270 30% 50%;
+    --ring: 270 30% 50%;
+    --safe: 270 25% 55%;
+    --sidebar-primary: 270 30% 50%;
+    --sidebar-ring: 270 30% 50%;
+  }
+  .theme-lavender.dark {
+    --primary: 270 35% 65%;
+    --ring: 270 35% 65%;
+    --sidebar-primary: 270 35% 65%;
+    --sidebar-ring: 270 35% 65%;
+  }
+
+  .theme-rose {
+    --primary: 350 35% 50%;
+    --ring: 350 35% 50%;
+    --safe: 350 30% 55%;
+    --sidebar-primary: 350 35% 50%;
+    --sidebar-ring: 350 35% 50%;
+  }
+  .theme-rose.dark {
+    --primary: 350 40% 60%;
+    --ring: 350 40% 60%;
+    --sidebar-primary: 350 40% 60%;
+    --sidebar-ring: 350 40% 60%;
+  }
+
+  .theme-amber {
+    --primary: 35 50% 45%;
+    --ring: 35 50% 45%;
+    --safe: 40 45% 50%;
+    --sidebar-primary: 35 50% 45%;
+    --sidebar-ring: 35 50% 45%;
+  }
+  .theme-amber.dark {
+    --primary: 35 55% 55%;
+    --ring: 35 55% 55%;
+    --sidebar-primary: 35 55% 55%;
+    --sidebar-ring: 35 55% 55%;
+  }
+
+  .theme-forest {
+    --primary: 140 35% 35%;
+    --ring: 140 35% 35%;
+    --safe: 140 30% 40%;
+    --sidebar-primary: 140 35% 35%;
+    --sidebar-ring: 140 35% 35%;
+  }
+  .theme-forest.dark {
+    --primary: 140 40% 50%;
+    --ring: 140 40% 50%;
+    --sidebar-primary: 140 40% 50%;
+    --sidebar-ring: 140 40% 50%;
+  }
 }
 
 @layer base {

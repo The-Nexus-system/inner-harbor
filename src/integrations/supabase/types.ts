@@ -106,6 +106,7 @@ export type Database = {
           screen_reader_optimized: boolean
           sound_off: boolean
           spacing: string
+          theme_color: string
           updated_at: string
           user_id: string
         }
@@ -119,6 +120,7 @@ export type Database = {
           screen_reader_optimized?: boolean
           sound_off?: boolean
           spacing?: string
+          theme_color?: string
           updated_at?: string
           user_id: string
         }
@@ -132,6 +134,7 @@ export type Database = {
           screen_reader_optimized?: boolean
           sound_off?: boolean
           spacing?: string
+          theme_color?: string
           updated_at?: string
           user_id?: string
         }

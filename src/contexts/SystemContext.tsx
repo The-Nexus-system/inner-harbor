@@ -107,6 +107,7 @@ function mapSettings(r: DbSettings): AppSettings {
     fontSize: r.font_size as AppSettings['fontSize'], spacing: r.spacing as AppSettings['spacing'],
     reducedMotion: r.reduced_motion, plainLanguage: r.plain_language,
     soundOff: r.sound_off, screenReaderOptimized: r.screen_reader_optimized,
+    themeColor: ((r as any).theme_color as AppSettings['themeColor']) ?? 'sage',
   };
 }
 
@@ -149,6 +150,7 @@ interface SystemContextType {
 const defaultSettings: AppSettings = {
   highContrast: false, darkMode: false, fontSize: 'medium', spacing: 'normal',
   reducedMotion: false, plainLanguage: false, soundOff: true, screenReaderOptimized: false,
+  themeColor: 'sage',
 };
 
 const SystemContext = createContext<SystemContextType | null>(null);
@@ -267,13 +269,20 @@ export function SystemProvider({ children }: { children: ReactNode }) {
 
   // Apply settings to DOM
   useEffect(() => {
-    if (settings.darkMode) document.documentElement.classList.add('dark');
-    else document.documentElement.classList.remove('dark');
-    if (settings.highContrast) document.documentElement.classList.add('high-contrast');
-    else document.documentElement.classList.remove('high-contrast');
-    if (settings.reducedMotion) document.documentElement.classList.add('reduce-motion');
-    else document.documentElement.classList.remove('reduce-motion');
-    document.documentElement.style.fontSize = { small: '14px', medium: '16px', large: '18px', xlarge: '20px' }[settings.fontSize];
+    const el = document.documentElement;
+    if (settings.darkMode) el.classList.add('dark');
+    else el.classList.remove('dark');
+    if (settings.highContrast) el.classList.add('high-contrast');
+    else el.classList.remove('high-contrast');
+    if (settings.reducedMotion) el.classList.add('reduce-motion');
+    else el.classList.remove('reduce-motion');
+    el.style.fontSize = { small: '14px', medium: '16px', large: '18px', xlarge: '20px' }[settings.fontSize];
+    // Theme color
+    const themes = ['sage', 'ocean', 'lavender', 'rose', 'amber', 'forest'];
+    themes.forEach(t => el.classList.remove(`theme-${t}`));
+    if (settings.themeColor && settings.themeColor !== 'sage') {
+      el.classList.add(`theme-${settings.themeColor}`);
+    }
   }, [settings]);
 
   // ============================================================
@@ -381,6 +390,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     if (s.plainLanguage !== undefined) dbUpdate.plain_language = s.plainLanguage;
     if (s.soundOff !== undefined) dbUpdate.sound_off = s.soundOff;
     if (s.screenReaderOptimized !== undefined) dbUpdate.screen_reader_optimized = s.screenReaderOptimized;
+    if (s.themeColor !== undefined) dbUpdate.theme_color = s.themeColor;
 
     const { data: existing } = await supabase.from('app_settings').select('user_id').eq('user_id', userId).maybeSingle();
     if (existing) {
