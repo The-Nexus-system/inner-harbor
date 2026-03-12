@@ -54,10 +54,10 @@ export function MessageForm({ alters, onSubmit }: MessageFormProps) {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label htmlFor="msg-from">From</Label>
-              <Select value={form.fromAlterId} onValueChange={v => setForm(p => ({ ...p, fromAlterId: v }))}>
+              <Select value={form.fromAlterId || '__none__'} onValueChange={v => setForm(p => ({ ...p, fromAlterId: v === '__none__' ? '' : v }))}>
                 <SelectTrigger id="msg-from"><SelectValue placeholder="Anonymous" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Anonymous</SelectItem>
+                  <SelectItem value="__none__">Anonymous</SelectItem>
                   {alters.map(a => <SelectItem key={a.id} value={a.id}>{a.emoji} {a.name}</SelectItem>)}
                 </SelectContent>
               </Select>
