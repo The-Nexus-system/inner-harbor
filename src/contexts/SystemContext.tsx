@@ -65,6 +65,7 @@ function mapTask(r: DbTask): SystemTask {
     id: r.id, title: r.title, description: r.description ?? undefined,
     assignedTo: r.assigned_to, isCompleted: r.is_completed,
     dueDate: r.due_date ?? undefined, isRecurring: r.is_recurring,
+    recurrencePattern: (r as any).recurrence_pattern as RecurrencePattern | undefined,
     category: r.category as SystemTask['category'], createdAt: r.created_at,
   };
 }
