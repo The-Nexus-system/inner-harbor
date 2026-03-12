@@ -15,7 +15,9 @@ const categoryEmoji: Record<string, string> = {
   hydration: '💧', therapy: '🧠', mobility: '🚶', community: '🤝',
 };
 
-export default function TasksPage() {
+const recurrenceLabel: Record<string, string> = {
+  daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly',
+};
   const { tasks, alters, toggleTask, updateTask, deleteTask, getAlter, isLoading, createTask } = useSystem();
   const [editingTask, setEditingTask] = useState<SystemTask | null>(null);
   const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
