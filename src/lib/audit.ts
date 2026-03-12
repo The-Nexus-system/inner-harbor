@@ -7,6 +7,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from './logger';
+import type { Json } from '@/integrations/supabase/types';
 
 export type AuditAction =
   | 'login'
