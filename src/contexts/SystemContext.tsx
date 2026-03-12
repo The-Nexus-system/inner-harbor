@@ -402,6 +402,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     if (s.soundOff !== undefined) dbUpdate.sound_off = s.soundOff;
     if (s.screenReaderOptimized !== undefined) dbUpdate.screen_reader_optimized = s.screenReaderOptimized;
     if (s.themeColor !== undefined) dbUpdate.theme_color = s.themeColor;
+    if (s.customThemeHsl !== undefined) dbUpdate.custom_theme_hsl = s.customThemeHsl;
 
     const { data: existing } = await supabase.from('app_settings').select('user_id').eq('user_id', userId).maybeSingle();
     if (existing) {

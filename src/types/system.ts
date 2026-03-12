@@ -131,7 +131,7 @@ export interface DailyCheckIn {
   notes?: string;
 }
 
-export type ThemeColor = 'sage' | 'ocean' | 'lavender' | 'rose' | 'amber' | 'forest';
+export type ThemeColor = 'sage' | 'ocean' | 'lavender' | 'rose' | 'amber' | 'forest' | 'custom';
 
 export interface AppSettings {
   highContrast: boolean;
@@ -143,4 +143,5 @@ export interface AppSettings {
   soundOff: boolean;
   screenReaderOptimized: boolean;
   themeColor: ThemeColor;
+  customThemeHsl?: string; // e.g. "200 40% 40%"
 }
