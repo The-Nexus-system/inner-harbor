@@ -233,6 +233,41 @@ export default function SettingsPage() {
               })}
             </div>
           </div>
+
+          {/* Category suppression */}
+          <div className="space-y-3">
+            <Label>Show insight categories</Label>
+            <p className="text-xs text-muted-foreground">Uncheck categories you do not want to see in your insights.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {[
+                { key: 'switching', label: 'Switching' },
+                { key: 'wellbeing', label: 'Wellbeing' },
+                { key: 'medical', label: 'Medical' },
+                { key: 'environment', label: 'Environment' },
+                { key: 'recovery', label: 'Recovery' },
+                { key: 'grounding', label: 'Grounding' },
+                { key: 'continuity', label: 'Continuity' },
+              ].map(cat => {
+                const suppressed = insightPrefs.suppressedCategories ?? [];
+                const isSuppressed = suppressed.includes(cat.key);
+                return (
+                  <div key={cat.key} className="flex items-center gap-2 tap-target">
+                    <Checkbox
+                      id={`cat-${cat.key}`}
+                      checked={!isSuppressed}
+                      onCheckedChange={(checked) => {
+                        const next = checked
+                          ? suppressed.filter(k => k !== cat.key)
+                          : [...suppressed, cat.key];
+                        updatePreferences({ suppressedCategories: next });
+                      }}
+                    />
+                    <Label htmlFor={`cat-${cat.key}`} className="text-sm font-normal cursor-pointer">{cat.label}</Label>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </CardContent>
       </Card>
 

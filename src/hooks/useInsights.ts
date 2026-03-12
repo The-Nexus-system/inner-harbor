@@ -132,6 +132,7 @@ export function useInsights() {
     if (updates.excludedDataTypes !== undefined) dbUpdate.excluded_data_types = updates.excludedDataTypes;
     if (updates.includeLocation !== undefined) dbUpdate.include_location = updates.includeLocation;
     if (updates.lowStimulation !== undefined) dbUpdate.low_stimulation = updates.lowStimulation;
+    if (updates.suppressedCategories !== undefined) dbUpdate.suppressed_categories = updates.suppressedCategories;
 
     const { data: existing } = await supabase.from('insight_preferences').select('user_id').eq('user_id', userId).maybeSingle();
     if (existing) {
