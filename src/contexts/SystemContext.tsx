@@ -137,6 +137,8 @@ interface SystemContextType {
   createTask: (data: Partial<SystemTask>) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   createMessage: (data: Partial<InternalMessage>) => Promise<void>;
+  createSafetyPlan: (data: Partial<SafetyPlan>) => Promise<void>;
+  createCalendarEvent: (data: Partial<CalendarEvent>) => Promise<void>;
 }
 
 const defaultSettings: AppSettings = {
