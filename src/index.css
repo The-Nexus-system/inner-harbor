@@ -2,95 +2,134 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Nunito:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Calm sage/teal palette - trauma-informed, warm, non-clinical */
+    --background: 140 20% 98%;
+    --foreground: 200 15% 20%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 140 15% 96%;
+    --card-foreground: 200 15% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 200 15% 20%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 160 30% 40%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 30 25% 93%;
+    --secondary-foreground: 200 15% 25%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 140 10% 92%;
+    --muted-foreground: 200 10% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 200 25% 88%;
+    --accent-foreground: 200 20% 25%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 55% 55%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 140 12% 88%;
+    --input: 140 12% 88%;
+    --ring: 160 30% 40%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Custom tokens */
+    --safe: 145 40% 45%;
+    --safe-foreground: 0 0% 100%;
+    --warning: 35 80% 55%;
+    --warning-foreground: 35 80% 15%;
+    --info: 200 50% 50%;
+    --info-foreground: 0 0% 100%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --surface-calm: 140 15% 96%;
+    --surface-warm: 30 20% 96%;
+    --surface-cool: 200 20% 96%;
 
-    --sidebar-primary: 240 5.9% 10%;
+    --focus-ring: 200 80% 55%;
+    --focus-ring-offset: 0 0% 100%;
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-background: 140 15% 96%;
+    --sidebar-foreground: 200 15% 25%;
+    --sidebar-primary: 160 30% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 140 15% 92%;
+    --sidebar-accent-foreground: 200 15% 20%;
+    --sidebar-border: 140 12% 88%;
+    --sidebar-ring: 160 30% 40%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --font-body: 'Atkinson Hyperlegible', system-ui, sans-serif;
+    --font-heading: 'Nunito', system-ui, sans-serif;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 200 15% 10%;
+    --foreground: 140 10% 90%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 200 15% 13%;
+    --card-foreground: 140 10% 90%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 200 15% 12%;
+    --popover-foreground: 140 10% 90%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 160 35% 55%;
+    --primary-foreground: 200 15% 8%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 200 12% 18%;
+    --secondary-foreground: 140 10% 85%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 200 12% 18%;
+    --muted-foreground: 140 8% 60%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 200 15% 22%;
+    --accent-foreground: 140 10% 85%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 50% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 200 12% 20%;
+    --input: 200 12% 20%;
+    --ring: 160 35% 55%;
+
+    --safe: 145 35% 50%;
+    --warning: 35 70% 55%;
+    --info: 200 45% 55%;
+
+    --surface-calm: 200 15% 13%;
+    --surface-warm: 30 10% 14%;
+    --surface-cool: 200 15% 15%;
+
+    --focus-ring: 200 70% 60%;
+    --focus-ring-offset: 200 15% 10%;
+
+    --sidebar-background: 200 15% 11%;
+    --sidebar-foreground: 140 10% 85%;
+    --sidebar-primary: 160 35% 55%;
+    --sidebar-primary-foreground: 200 15% 8%;
+    --sidebar-accent: 200 12% 16%;
+    --sidebar-accent-foreground: 140 10% 85%;
+    --sidebar-border: 200 12% 18%;
+    --sidebar-ring: 160 35% 55%;
+  }
+
+  .high-contrast {
+    --foreground: 0 0% 0%;
+    --card-foreground: 0 0% 0%;
+    --primary: 160 50% 25%;
+    --border: 0 0% 40%;
+    --muted-foreground: 0 0% 25%;
+    --focus-ring: 220 100% 45%;
+  }
+
+  .dark.high-contrast {
+    --foreground: 0 0% 100%;
+    --card-foreground: 0 0% 100%;
+    --primary: 160 60% 70%;
+    --border: 0 0% 60%;
+    --muted-foreground: 0 0% 80%;
   }
 }
 
@@ -101,5 +140,53 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+
+  /* Strong visible focus indicators */
+  *:focus-visible {
+    outline: 3px solid hsl(var(--focus-ring));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Skip link */
+  .skip-link {
+    @apply absolute -top-full left-4 z-50 bg-primary text-primary-foreground px-4 py-2 rounded-md font-medium;
+    transition: top 0.15s ease;
+  }
+  .skip-link:focus {
+    @apply top-4;
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  .reduce-motion *, .reduce-motion *::before, .reduce-motion *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* Large tap targets */
+  .tap-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
   }
 }
