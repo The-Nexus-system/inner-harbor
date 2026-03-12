@@ -63,6 +63,8 @@ const App = () => (
                         <Route path="/safety" element={<SafetyPage />} />
                         <Route path="/grounding" element={<GroundingPage />} />
                         <Route path="/settings" element={<SettingsPage />} />
+                        <Route path="/insights" element={<InsightsPage />} />
+                        <Route path="/timeline" element={<TimelinePage />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </AppLayout>

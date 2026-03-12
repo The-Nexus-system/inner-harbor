@@ -22,6 +22,8 @@ const items = [
   { title: "Calendar", url: "/calendar", icon: CalendarDays },
   { title: "Safety", url: "/safety", icon: Shield },
   { title: "Grounding", url: "/grounding", icon: Leaf },
+  { title: "Insights", url: "/insights", icon: Lightbulb },
+  { title: "Timeline", url: "/timeline", icon: Clock },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 

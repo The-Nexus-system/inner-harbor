@@ -57,6 +57,12 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
+      {/* Insight + Summary cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <InsightCard />
+        <DailySummaryCard />
+      </div>
+
       {/* Grid of widgets */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <DailyCheckInWidget />
