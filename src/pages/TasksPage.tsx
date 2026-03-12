@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
 import { TaskForm } from "@/components/forms/TaskForm";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, RefreshCw } from "lucide-react";
 import type { SystemTask } from "@/types/system";
 
 const categoryEmoji: Record<string, string> = {
