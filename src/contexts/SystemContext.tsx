@@ -517,6 +517,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
       recovery_time: data.recoveryTime || null,
       transport_notes: data.transportNotes || null,
       notes: data.notes || null,
+      reminder_minutes: data.reminderMinutes ?? null,
     }]);
     qc.invalidateQueries({ queryKey: ['calendar_events', userId] });
   }, [userId, qc]);
