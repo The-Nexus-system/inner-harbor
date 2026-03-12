@@ -114,6 +114,7 @@ export interface CalendarEvent {
   recoveryTime?: string;
   transportNotes?: string;
   notes?: string;
+  reminderMinutes?: number;
 }
 
 export interface DailyCheckIn {
