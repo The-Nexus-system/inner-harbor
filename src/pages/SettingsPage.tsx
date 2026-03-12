@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Download, FileText, FileJson, Check, Bell, BellOff, Lightbulb, RotateCcw } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useInsights } from "@/hooks/useInsights";
+import { defaultInsightPreferences } from "@/lib/insights";
 import {
   exportAsText, exportAsJson,
   formatJournalForExport, formatFrontHistoryForExport, formatSafetyPlanForExport,
