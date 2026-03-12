@@ -64,10 +64,10 @@ export function MessageForm({ alters, onSubmit }: MessageFormProps) {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="msg-to">To</Label>
-              <Select value={form.toAlterId} onValueChange={v => setForm(p => ({ ...p, toAlterId: v }))}>
+              <Select value={form.toAlterId || '__none__'} onValueChange={v => setForm(p => ({ ...p, toAlterId: v === '__none__' ? '' : v }))}>
                 <SelectTrigger id="msg-to"><SelectValue placeholder="Everyone" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Everyone</SelectItem>
+                  <SelectItem value="__none__">Everyone</SelectItem>
                   {alters.map(a => <SelectItem key={a.id} value={a.id}>{a.emoji} {a.name}</SelectItem>)}
                 </SelectContent>
               </Select>
