@@ -73,6 +73,7 @@ export function TaskForm({ alters, onSubmit, editTask, open: controlledOpen, onO
         assignedTo: form.assignedTo,
         dueDate: form.dueDate || undefined,
         recurrencePattern: (form.recurrencePattern || undefined) as RecurrencePattern | undefined,
+        reminderMinutes: form.reminderMinutes ? parseInt(form.reminderMinutes) : undefined,
       });
       setOpen(false);
     } finally {
