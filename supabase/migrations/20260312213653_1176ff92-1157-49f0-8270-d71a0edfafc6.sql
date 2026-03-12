@@ -1,0 +1,1 @@
+ALTER TABLE public.app_settings ADD COLUMN custom_theme_hsl text DEFAULT NULL;

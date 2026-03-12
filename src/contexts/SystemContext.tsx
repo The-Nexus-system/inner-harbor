@@ -108,6 +108,7 @@ function mapSettings(r: DbSettings): AppSettings {
     reducedMotion: r.reduced_motion, plainLanguage: r.plain_language,
     soundOff: r.sound_off, screenReaderOptimized: r.screen_reader_optimized,
     themeColor: ((r as any).theme_color as AppSettings['themeColor']) ?? 'sage',
+    customThemeHsl: (r as any).custom_theme_hsl ?? undefined,
   };
 }
 
@@ -280,7 +281,17 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     // Theme color
     const themes = ['sage', 'ocean', 'lavender', 'rose', 'amber', 'forest'];
     themes.forEach(t => el.classList.remove(`theme-${t}`));
-    if (settings.themeColor && settings.themeColor !== 'sage') {
+    // Remove custom inline properties
+    el.style.removeProperty('--primary');
+    el.style.removeProperty('--ring');
+    el.style.removeProperty('--sidebar-primary');
+    el.style.removeProperty('--sidebar-ring');
+    if (settings.themeColor === 'custom' && settings.customThemeHsl) {
+      el.style.setProperty('--primary', settings.customThemeHsl);
+      el.style.setProperty('--ring', settings.customThemeHsl);
+      el.style.setProperty('--sidebar-primary', settings.customThemeHsl);
+      el.style.setProperty('--sidebar-ring', settings.customThemeHsl);
+    } else if (settings.themeColor && settings.themeColor !== 'sage') {
       el.classList.add(`theme-${settings.themeColor}`);
     }
   }, [settings]);
@@ -391,6 +402,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     if (s.soundOff !== undefined) dbUpdate.sound_off = s.soundOff;
     if (s.screenReaderOptimized !== undefined) dbUpdate.screen_reader_optimized = s.screenReaderOptimized;
     if (s.themeColor !== undefined) dbUpdate.theme_color = s.themeColor;
+    if (s.customThemeHsl !== undefined) dbUpdate.custom_theme_hsl = s.customThemeHsl;
 
     const { data: existing } = await supabase.from('app_settings').select('user_id').eq('user_id', userId).maybeSingle();
     if (existing) {
