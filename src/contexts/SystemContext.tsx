@@ -135,10 +135,13 @@ interface SystemContextType {
   updateAlter: (id: string, data: Partial<Alter>) => Promise<void>;
   createJournalEntry: (data: Partial<JournalEntry>) => Promise<void>;
   createTask: (data: Partial<SystemTask>) => Promise<void>;
+  updateTask: (id: string, data: Partial<SystemTask>) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   createMessage: (data: Partial<InternalMessage>) => Promise<void>;
   createSafetyPlan: (data: Partial<SafetyPlan>) => Promise<void>;
   createCalendarEvent: (data: Partial<CalendarEvent>) => Promise<void>;
+  updateCalendarEvent: (id: string, data: Partial<CalendarEvent>) => Promise<void>;
+  deleteCalendarEvent: (id: string) => Promise<void>;
 }
 
 const defaultSettings: AppSettings = {
@@ -449,6 +452,18 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     qc.invalidateQueries({ queryKey: ['tasks', userId] });
   }, [userId, qc]);
 
+  const updateTask = useCallback(async (id: string, data: Partial<SystemTask>) => {
+    if (!userId) return;
+    const update: Record<string, unknown> = {};
+    if (data.title !== undefined) update.title = data.title;
+    if (data.description !== undefined) update.description = data.description || null;
+    if (data.assignedTo !== undefined) update.assigned_to = data.assignedTo;
+    if (data.category !== undefined) update.category = data.category;
+    if (data.dueDate !== undefined) update.due_date = data.dueDate || null;
+    await supabase.from('tasks').update(update).eq('id', id).eq('user_id', userId);
+    qc.invalidateQueries({ queryKey: ['tasks', userId] });
+  }, [userId, qc]);
+
   const deleteTask = useCallback(async (id: string) => {
     if (!userId) return;
     await supabase.from('tasks').update({ archived_at: new Date().toISOString() }).eq('id', id).eq('user_id', userId);
@@ -496,14 +511,36 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     qc.invalidateQueries({ queryKey: ['calendar_events', userId] });
   }, [userId, qc]);
 
+  const updateCalendarEvent = useCallback(async (id: string, data: Partial<CalendarEvent>) => {
+    if (!userId) return;
+    const update: Record<string, unknown> = {};
+    if (data.title !== undefined) update.title = data.title;
+    if (data.date !== undefined) update.event_date = data.date;
+    if (data.time !== undefined) update.event_time = data.time || null;
+    if (data.preferredFronter !== undefined) update.preferred_fronter = data.preferredFronter || null;
+    if (data.supportNeeded !== undefined) update.support_needed = data.supportNeeded || null;
+    if (data.sensoryPrep !== undefined) update.sensory_prep = data.sensoryPrep || null;
+    if (data.recoveryTime !== undefined) update.recovery_time = data.recoveryTime || null;
+    if (data.transportNotes !== undefined) update.transport_notes = data.transportNotes || null;
+    if (data.notes !== undefined) update.notes = data.notes || null;
+    await supabase.from('calendar_events').update(update).eq('id', id).eq('user_id', userId);
+    qc.invalidateQueries({ queryKey: ['calendar_events', userId] });
+  }, [userId, qc]);
+
+  const deleteCalendarEvent = useCallback(async (id: string) => {
+    if (!userId) return;
+    await supabase.from('calendar_events').delete().eq('id', id).eq('user_id', userId);
+    qc.invalidateQueries({ queryKey: ['calendar_events', userId] });
+  }, [userId, qc]);
+
   return (
     <SystemContext.Provider value={{
       alters, frontEvents, currentFront, journalEntries, messages, tasks,
       safetyPlans, calendarEvents, checkIn, settings, isLoading,
       getAlter, setCurrentFronter, addFrontEvent, updateSettings,
       toggleTask, markMessageRead, updateCheckIn,
-      createAlter, updateAlter, createJournalEntry, createTask, deleteTask, createMessage,
-      createSafetyPlan, createCalendarEvent,
+      createAlter, updateAlter, createJournalEntry, createTask, updateTask, deleteTask, createMessage,
+      createSafetyPlan, createCalendarEvent, updateCalendarEvent, deleteCalendarEvent,
     }}>
       {children}
     </SystemContext.Provider>
