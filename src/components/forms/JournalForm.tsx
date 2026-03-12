@@ -78,10 +78,10 @@ export function JournalForm({ alters, onSubmit }: JournalFormProps) {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="journal-author">Who's writing?</Label>
-              <Select value={form.alterId} onValueChange={v => setForm(p => ({ ...p, alterId: v }))}>
+              <Select value={form.alterId || '__none__'} onValueChange={v => setForm(p => ({ ...p, alterId: v === '__none__' ? '' : v }))}>
                 <SelectTrigger id="journal-author"><SelectValue placeholder="Unknown / not sure" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Unknown / not sure</SelectItem>
+                  <SelectItem value="__none__">Unknown / not sure</SelectItem>
                   {alters.map(a => <SelectItem key={a.id} value={a.id}>{a.emoji} {a.name}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -101,10 +101,10 @@ export function JournalForm({ alters, onSubmit }: JournalFormProps) {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label htmlFor="journal-mood">Mood (1-5)</Label>
-              <Select value={form.mood} onValueChange={v => setForm(p => ({ ...p, mood: v }))}>
+              <Select value={form.mood || '__none__'} onValueChange={v => setForm(p => ({ ...p, mood: v === '__none__' ? '' : v }))}>
                 <SelectTrigger id="journal-mood"><SelectValue placeholder="Optional" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Skip</SelectItem>
+                  <SelectItem value="__none__">Skip</SelectItem>
                   <SelectItem value="1">1 — Very low</SelectItem>
                   <SelectItem value="2">2 — Low</SelectItem>
                   <SelectItem value="3">3 — Neutral</SelectItem>
