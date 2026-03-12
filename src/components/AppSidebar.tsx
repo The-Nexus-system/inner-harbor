@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { 
   LayoutDashboard, Users, ArrowRightLeft, BookOpen, MessageSquare, 
   CheckSquare, CalendarDays, Shield, Settings, LogOut, Leaf, Lightbulb, Clock 
@@ -11,6 +12,7 @@ import {
 import { useSystem } from "@/contexts/SystemContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
@@ -32,9 +34,33 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { currentFront, getAlter } = useSystem();
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
 
   const currentAlter = currentFront?.alterIds?.[0] ? getAlter(currentFront.alterIds[0]) : null;
+
+  const [systemName, setSystemName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("system_name")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => setSystemName(data?.system_name ?? null));
+  }, [user]);
+
+  // Subscribe to profile changes so sidebar updates after settings save
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel("sidebar-profile")
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `user_id=eq.${user.id}` }, (payload) => {
+        setSystemName((payload.new as any).system_name ?? null);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
 
   return (
     <Sidebar collapsible="icon" aria-label="Main navigation">
@@ -43,7 +69,9 @@ export function AppSidebar() {
         <div className="p-4 border-b border-sidebar-border">
           {!collapsed && (
             <div className="space-y-1">
-              <h2 className="font-heading text-sm font-semibold text-sidebar-foreground">Mosaic</h2>
+              <h2 className="font-heading text-sm font-semibold text-sidebar-foreground">
+                {systemName || "Mosaic"}
+              </h2>
               {currentAlter && (
                 <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                   <span
