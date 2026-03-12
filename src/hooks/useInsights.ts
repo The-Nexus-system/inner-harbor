@@ -100,7 +100,8 @@ export function useInsights() {
 
   const insights = useMemo(() => {
     const all = analyzePatterns(frontEvents, journalEntries, checkIns, tasks, calendarEvents, preferences);
-    return all.filter(i => !dismissedKeys.has(i.key));
+    const suppressed = new Set(preferences.suppressedCategories ?? []);
+    return all.filter(i => !dismissedKeys.has(i.key) && !suppressed.has(i.category));
   }, [frontEvents, journalEntries, checkIns, tasks, calendarEvents, preferences, dismissedKeys]);
 
   // Actions
