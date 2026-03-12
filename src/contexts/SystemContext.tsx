@@ -465,6 +465,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     if (data.assignedTo !== undefined) update.assigned_to = data.assignedTo;
     if (data.category !== undefined) update.category = data.category;
     if (data.dueDate !== undefined) update.due_date = data.dueDate || null;
+    if (data.reminderMinutes !== undefined) update.reminder_minutes = data.reminderMinutes ?? null;
     if (data.recurrencePattern !== undefined) {
       update.recurrence_pattern = data.recurrencePattern || null;
       update.is_recurring = !!data.recurrencePattern;
