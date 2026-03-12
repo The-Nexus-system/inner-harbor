@@ -41,7 +41,7 @@ export async function logAuditEvent(entry: AuditEntry): Promise<void> {
       action: entry.action,
       resource_type: entry.resource_type || null,
       resource_id: entry.resource_id || null,
-      metadata: (entry.metadata || {}) as Record<string, unknown>,
+      metadata: (entry.metadata || {}) as Json,
     }]);
 
     if (error) {
