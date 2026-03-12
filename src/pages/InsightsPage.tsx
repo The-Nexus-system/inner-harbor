@@ -57,6 +57,7 @@ export default function InsightsPage() {
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
           <TabsTrigger value="current">Current ({insights.length})</TabsTrigger>
+          <TabsTrigger value="charts">Charts</TabsTrigger>
           <TabsTrigger value="saved">Saved ({savedOnly.length})</TabsTrigger>
           <TabsTrigger value="text">Plain text</TabsTrigger>
         </TabsList>
