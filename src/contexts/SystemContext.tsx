@@ -534,6 +534,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     if (data.recoveryTime !== undefined) update.recovery_time = data.recoveryTime || null;
     if (data.transportNotes !== undefined) update.transport_notes = data.transportNotes || null;
     if (data.notes !== undefined) update.notes = data.notes || null;
+    if (data.reminderMinutes !== undefined) update.reminder_minutes = data.reminderMinutes ?? null;
     await supabase.from('calendar_events').update(update).eq('id', id).eq('user_id', userId);
     qc.invalidateQueries({ queryKey: ['calendar_events', userId] });
   }, [userId, qc]);
