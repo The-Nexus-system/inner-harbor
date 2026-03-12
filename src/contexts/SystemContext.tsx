@@ -131,6 +131,12 @@ interface SystemContextType {
   toggleTask: (id: string) => void;
   markMessageRead: (id: string) => void;
   updateCheckIn: (c: Partial<DailyCheckIn>) => void;
+  createAlter: (data: Partial<Alter>) => Promise<void>;
+  updateAlter: (id: string, data: Partial<Alter>) => Promise<void>;
+  createJournalEntry: (data: Partial<JournalEntry>) => Promise<void>;
+  createTask: (data: Partial<SystemTask>) => Promise<void>;
+  deleteTask: (id: string) => Promise<void>;
+  createMessage: (data: Partial<InternalMessage>) => Promise<void>;
 }
 
 const defaultSettings: AppSettings = {
