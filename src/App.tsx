@@ -18,6 +18,8 @@ import CalendarPage from "./pages/CalendarPage";
 import SafetyPage from "./pages/SafetyPage";
 import GroundingPage from "./pages/GroundingPage";
 import SettingsPage from "./pages/SettingsPage";
+import InsightsPage from "./pages/InsightsPage";
+import TimelinePage from "./pages/TimelinePage";
 import LoginPage from "./pages/LoginPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
@@ -61,6 +63,8 @@ const App = () => (
                         <Route path="/safety" element={<SafetyPage />} />
                         <Route path="/grounding" element={<GroundingPage />} />
                         <Route path="/settings" element={<SettingsPage />} />
+                        <Route path="/insights" element={<InsightsPage />} />
+                        <Route path="/timeline" element={<TimelinePage />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </AppLayout>

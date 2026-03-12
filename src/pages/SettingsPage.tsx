@@ -6,7 +6,9 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Download, FileText, FileJson, Check, Bell, BellOff } from "lucide-react";
+import { Download, FileText, FileJson, Check, Bell, BellOff, Lightbulb } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useInsights } from "@/hooks/useInsights";
 import {
   exportAsText, exportAsJson,
   formatJournalForExport, formatFrontHistoryForExport, formatSafetyPlanForExport,
@@ -28,6 +30,7 @@ type ExportKey = 'journal' | 'front' | 'tasks' | 'safety';
 export default function SettingsPage() {
   const { settings, updateSettings, journalEntries, frontEvents, tasks, safetyPlans, alters, getAlter } = useSystem();
   const { isSupported, permission, isSubscribed, isLoading: notifLoading, enableNotifications, disableNotifications } = useNotifications();
+  const { preferences: insightPrefs, updatePreferences } = useInsights();
   const [exported, setExported] = useState<Record<string, boolean>>({});
 
   const flash = (key: string) => {
@@ -156,6 +159,46 @@ export default function SettingsPage() {
               )}
             </>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Insights & Summaries */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg font-heading flex items-center gap-2">
+            <Lightbulb className="h-5 w-5" /> Insights & Summaries
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">Control what patterns and summaries are shown.</p>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="flex items-center justify-between tap-target">
+            <Label htmlFor="insights-enabled">Pattern insights</Label>
+            <Switch id="insights-enabled" checked={insightPrefs.insightsEnabled} onCheckedChange={v => updatePreferences({ insightsEnabled: v })} />
+          </div>
+          <div className="flex items-center justify-between tap-target">
+            <Label htmlFor="summaries-enabled">Daily summaries</Label>
+            <Switch id="summaries-enabled" checked={insightPrefs.summariesEnabled} onCheckedChange={v => updatePreferences({ summariesEnabled: v })} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="detail-mode">Detail level</Label>
+            <Select value={insightPrefs.detailMode} onValueChange={v => updatePreferences({ detailMode: v as 'brief' | 'detailed' })}>
+              <SelectTrigger id="detail-mode" className="w-full max-w-xs tap-target">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="brief">Brief</SelectItem>
+                <SelectItem value="detailed">Detailed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center justify-between tap-target">
+            <Label htmlFor="low-stim">Low stimulation mode</Label>
+            <Switch id="low-stim" checked={insightPrefs.lowStimulation} onCheckedChange={v => updatePreferences({ lowStimulation: v })} />
+          </div>
+          <div className="flex items-center justify-between tap-target">
+            <Label htmlFor="include-location">Include location data</Label>
+            <Switch id="include-location" checked={insightPrefs.includeLocation} onCheckedChange={v => updatePreferences({ includeLocation: v })} />
+          </div>
         </CardContent>
       </Card>
 

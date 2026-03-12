@@ -266,6 +266,33 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_summaries: {
+        Row: {
+          created_at: string
+          id: string
+          summary_data: Json
+          summary_date: string
+          user_id: string
+          user_notes: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          summary_data?: Json
+          summary_date: string
+          user_id: string
+          user_notes?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          summary_data?: Json
+          summary_date?: string
+          user_id?: string
+          user_notes?: string | null
+        }
+        Relationships: []
+      }
       front_events: {
         Row: {
           alter_ids: string[]
@@ -309,6 +336,42 @@ export type Database = {
           status?: Database["public"]["Enums"]["front_status"]
           symptoms?: string | null
           trigger_info?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      insight_preferences: {
+        Row: {
+          created_at: string
+          detail_mode: string
+          excluded_data_types: string[]
+          include_location: boolean
+          insights_enabled: boolean
+          low_stimulation: boolean
+          summaries_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          detail_mode?: string
+          excluded_data_types?: string[]
+          include_location?: boolean
+          insights_enabled?: boolean
+          low_stimulation?: boolean
+          summaries_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          detail_mode?: string
+          excluded_data_types?: string[]
+          include_location?: boolean
+          insights_enabled?: boolean
+          low_stimulation?: boolean
+          summaries_enabled?: boolean
           updated_at?: string
           user_id?: string
         }
@@ -514,6 +577,36 @@ export type Database = {
           trusted_contacts?: Json
           type?: Database["public"]["Enums"]["safety_plan_type"]
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      saved_insights: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          insight_key: string
+          status: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          insight_key: string
+          status?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          insight_key?: string
+          status?: string
+          title?: string
           user_id?: string
         }
         Relationships: []
