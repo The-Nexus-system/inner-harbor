@@ -1,15 +1,20 @@
+import { useState } from "react";
 import { useSystem } from "@/contexts/SystemContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Download, ExternalLink, FileDown } from "lucide-react";
+import { CalendarDays, Download, ExternalLink, FileDown, Pencil, Trash2 } from "lucide-react";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
 import { CalendarEventForm } from "@/components/forms/CalendarEventForm";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { generateICSEvent, generateICSAll, downloadICS, googleCalendarUrl } from "@/lib/ics";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import type { CalendarEvent } from "@/types/system";
 
 export default function CalendarPage() {
-  const { calendarEvents, alters, getAlter, createCalendarEvent, isLoading } = useSystem();
+  const { calendarEvents, alters, getAlter, createCalendarEvent, updateCalendarEvent, deleteCalendarEvent, isLoading } = useSystem();
+  const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
+  const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
 
   if (isLoading) return <PageSkeleton message="Loading calendar..." />;
 
@@ -21,10 +26,21 @@ export default function CalendarPage() {
     downloadICS(ics, 'mosaic-calendar');
   };
 
-  const handleExportSingle = (event: typeof calendarEvents[0]) => {
+  const handleExportSingle = (event: CalendarEvent) => {
     const alterName = event.preferredFronter ? getAlter(event.preferredFronter)?.name : undefined;
     const ics = generateICSEvent(event, alterName);
     downloadICS(ics, `mosaic-${event.title.toLowerCase().replace(/\s+/g, '-')}`);
+  };
+
+  const handleEditSubmit = async (data: Partial<CalendarEvent>) => {
+    if (editingEvent) await updateCalendarEvent(editingEvent.id, data);
+  };
+
+  const handleDelete = async () => {
+    if (deletingEventId) {
+      await deleteCalendarEvent(deletingEventId);
+      setDeletingEventId(null);
+    }
   };
 
   return (
@@ -55,30 +71,38 @@ export default function CalendarPage() {
           {calendarEvents.map(event => {
             const preferred = event.preferredFronter ? getAlter(event.preferredFronter) : null;
             return (
-              <Card key={event.id} aria-label={`Event: ${event.title}`}>
+              <Card key={event.id} aria-label={`Event: ${event.title}`} className="group">
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <CalendarDays className="h-5 w-5 text-primary" aria-hidden="true" />
                       <CardTitle className="text-base font-heading">{event.title}</CardTitle>
                     </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="gap-1.5 text-xs">
-                          <ExternalLink className="h-3.5 w-3.5" /> Add to calendar
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleExportSingle(event)}>
-                          <FileDown className="h-4 w-4 mr-2" /> Download .ics file
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <a href={googleCalendarUrl(event)} target="_blank" rel="noopener noreferrer">
-                            <CalendarDays className="h-4 w-4 mr-2" /> Google Calendar
-                          </a>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => setEditingEvent(event)} aria-label="Edit event">
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => setDeletingEventId(event.id)} aria-label="Delete event">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="gap-1.5 text-xs">
+                            <ExternalLink className="h-3.5 w-3.5" /> Add to calendar
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleExportSingle(event)}>
+                            <FileDown className="h-4 w-4 mr-2" /> Download .ics file
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <a href={googleCalendarUrl(event)} target="_blank" rel="noopener noreferrer">
+                              <CalendarDays className="h-4 w-4 mr-2" /> Google Calendar
+                            </a>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {new Date(event.date).toLocaleDateString([], { dateStyle: 'full' })}
@@ -104,6 +128,24 @@ export default function CalendarPage() {
           })}
         </div>
       )}
+
+      {/* Edit dialog */}
+      <CalendarEventForm
+        alters={alters}
+        onSubmit={handleEditSubmit}
+        editEvent={editingEvent || undefined}
+        open={!!editingEvent}
+        onOpenChange={open => { if (!open) setEditingEvent(null); }}
+      />
+
+      {/* Delete confirmation */}
+      <ConfirmDialog
+        open={!!deletingEventId}
+        onOpenChange={open => { if (!open) setDeletingEventId(null); }}
+        title="Delete event"
+        description="This event will be permanently deleted. This cannot be undone."
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }
