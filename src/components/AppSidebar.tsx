@@ -9,6 +9,7 @@ import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar,
 } from "@/components/ui/sidebar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useSystem } from "@/contexts/SystemContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,12 @@ const items = [
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
+interface ProfileData {
+  system_name: string | null;
+  avatar_url: string | null;
+  display_name: string | null;
+}
+
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
@@ -38,16 +45,18 @@ export function AppSidebar() {
 
   const currentAlter = currentFront?.alterIds?.[0] ? getAlter(currentFront.alterIds[0]) : null;
 
-  const [systemName, setSystemName] = useState<string | null>(null);
+  const [profile, setProfile] = useState<ProfileData>({ system_name: null, avatar_url: null, display_name: null });
 
   useEffect(() => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("system_name")
+      .select("system_name, avatar_url, display_name")
       .eq("user_id", user.id)
       .maybeSingle()
-      .then(({ data }) => setSystemName(data?.system_name ?? null));
+      .then(({ data }) => {
+        if (data) setProfile(data);
+      });
   }, [user]);
 
   // Subscribe to profile changes so sidebar updates after settings save
@@ -56,11 +65,18 @@ export function AppSidebar() {
     const channel = supabase
       .channel("sidebar-profile")
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `user_id=eq.${user.id}` }, (payload) => {
-        setSystemName((payload.new as any).system_name ?? null);
+        const p = payload.new as any;
+        setProfile({
+          system_name: p.system_name ?? null,
+          avatar_url: p.avatar_url ?? null,
+          display_name: p.display_name ?? null,
+        });
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [user]);
+
+  const initials = (profile.display_name || "U").slice(0, 2).toUpperCase();
 
   return (
     <Sidebar collapsible="icon" aria-label="Main navigation">
@@ -68,29 +84,42 @@ export function AppSidebar() {
         {/* System identity */}
         <div className="p-4 border-b border-sidebar-border">
           {!collapsed && (
-            <div className="space-y-1">
-              <h2 className="font-heading text-sm font-semibold text-sidebar-foreground">
-                {systemName || "Mosaic"}
-              </h2>
-              {currentAlter && (
-                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                  <span
-                    className="inline-block w-2 h-2 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: currentAlter.color || 'hsl(var(--primary))' }}
-                    aria-hidden="true"
-                  />
-                  <span>{currentAlter.emoji} {currentAlter.name} is fronting</span>
-                </p>
-              )}
+            <div className="flex items-center gap-3">
+              <Avatar className="h-9 w-9 border border-sidebar-border flex-shrink-0">
+                {profile.avatar_url ? (
+                  <AvatarImage src={profile.avatar_url} alt="Avatar" />
+                ) : null}
+                <AvatarFallback className="text-xs font-heading bg-primary/10 text-primary">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 space-y-0.5">
+                <h2 className="font-heading text-sm font-semibold text-sidebar-foreground truncate">
+                  {profile.system_name || "Mosaic"}
+                </h2>
+                {currentAlter && (
+                  <p className="text-xs text-muted-foreground flex items-center gap-1.5 truncate">
+                    <span
+                      className="inline-block w-2 h-2 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: currentAlter.color || 'hsl(var(--primary))' }}
+                      aria-hidden="true"
+                    />
+                    <span className="truncate">{currentAlter.emoji} {currentAlter.name} is fronting</span>
+                  </p>
+                )}
+              </div>
             </div>
           )}
-          {collapsed && currentAlter && (
-            <div className="flex justify-center" title={`${currentAlter.name} is fronting`}>
-              <span
-                className="inline-block w-3 h-3 rounded-full"
-                style={{ backgroundColor: currentAlter.color || 'hsl(var(--primary))' }}
-                aria-label={`${currentAlter.name} is fronting`}
-              />
+          {collapsed && (
+            <div className="flex justify-center">
+              <Avatar className="h-8 w-8 border border-sidebar-border">
+                {profile.avatar_url ? (
+                  <AvatarImage src={profile.avatar_url} alt="Avatar" />
+                ) : null}
+                <AvatarFallback className="text-xs font-heading bg-primary/10 text-primary">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
             </div>
           )}
         </div>
