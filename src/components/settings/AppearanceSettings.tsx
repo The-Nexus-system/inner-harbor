@@ -5,9 +5,19 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
 import { Check, Palette } from "lucide-react";
 import type { ThemeColor } from "@/types/system";
 import { cn } from "@/lib/utils";
+
+function tryParseHslString(input: string): [number, number, number] | null {
+  // Accepts: "200 40% 40%", "hsl(200, 40%, 40%)", "200, 40, 40", etc.
+  const nums = input.replace(/hsl\(|\)|°|%|,/g, ' ').trim().split(/\s+/).map(Number);
+  if (nums.length < 3 || nums.some(isNaN)) return null;
+  const [h, s, l] = nums;
+  if (h < 0 || h > 360 || s < 0 || s > 100 || l < 0 || l > 100) return null;
+  return [Math.round(h), Math.round(Math.max(10, Math.min(80, s))), Math.round(Math.max(20, Math.min(60, l)))];
+}
 
 const THEME_COLORS: { key: ThemeColor; label: string; swatch: string }[] = [
   { key: 'sage', label: 'Sage', swatch: 'hsl(160, 30%, 40%)' },
