@@ -428,6 +428,30 @@ export type Database = {
         }
         Relationships: []
       }
+      quick_notes: {
+        Row: {
+          content: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       safety_plans: {
         Row: {
           created_at: string
