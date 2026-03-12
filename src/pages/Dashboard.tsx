@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckSquare, MessageSquare, BookOpen, Shield, CalendarDays } from "lucide-react";
 import { DailyCheckInWidget } from "@/components/DailyCheckInWidget";
+import { CheckInTrends } from "@/components/CheckInTrends";
+import { QuickNotesWidget } from "@/components/QuickNotesWidget";
 import { Link } from "react-router-dom";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
 
@@ -56,6 +58,7 @@ export default function Dashboard() {
       {/* Grid of widgets */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <DailyCheckInWidget />
+        <QuickNotesWidget />
 
         <Card aria-label="Today's tasks">
           <CardHeader className="pb-3">
@@ -185,10 +188,16 @@ export default function Dashboard() {
             ) : (
               <p className="text-sm text-muted-foreground">No safety plans yet.</p>
             )}
-            <Link to="/safety" className="text-sm text-primary underline mt-3 inline-block tap-target">Open safety center</Link>
+            <div className="flex gap-3 mt-3">
+              <Link to="/safety" className="text-sm text-primary underline tap-target">Open safety center</Link>
+              <Link to="/grounding" className="text-sm text-primary underline tap-target">Grounding toolbox</Link>
+            </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Check-in trends - full width */}
+      <CheckInTrends />
     </div>
   );
 }

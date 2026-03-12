@@ -3,17 +3,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays } from "lucide-react";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
+import { CalendarEventForm } from "@/components/forms/CalendarEventForm";
 
 export default function CalendarPage() {
-  const { calendarEvents, getAlter, isLoading } = useSystem();
+  const { calendarEvents, alters, getAlter, createCalendarEvent, isLoading } = useSystem();
 
   if (isLoading) return <PageSkeleton message="Loading calendar..." />;
 
   return (
     <div className="space-y-6 max-w-3xl mx-auto animate-fade-in">
-      <header>
-        <h1 className="text-2xl md:text-3xl font-heading font-bold">Calendar</h1>
-        <p className="text-muted-foreground mt-1">Upcoming appointments, events, and recurring needs. Plan who fronts and what support is needed.</p>
+      <header className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-heading font-bold">Calendar</h1>
+          <p className="text-muted-foreground mt-1">Upcoming appointments, events, and recurring needs. Plan who fronts and what support is needed.</p>
+        </div>
+        <CalendarEventForm alters={alters} onSubmit={createCalendarEvent} />
       </header>
 
       {calendarEvents.length === 0 ? (

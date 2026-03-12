@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, Users, ArrowRightLeft, BookOpen, MessageSquare, 
-  CheckSquare, CalendarDays, Shield, Settings, LogOut 
+  CheckSquare, CalendarDays, Shield, Settings, LogOut, Leaf 
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -21,6 +21,7 @@ const items = [
   { title: "Tasks", url: "/tasks", icon: CheckSquare },
   { title: "Calendar", url: "/calendar", icon: CalendarDays },
   { title: "Safety", url: "/safety", icon: Shield },
+  { title: "Grounding", url: "/grounding", icon: Leaf },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 

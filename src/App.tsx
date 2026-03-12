@@ -16,6 +16,7 @@ import MessagesPage from "./pages/MessagesPage";
 import TasksPage from "./pages/TasksPage";
 import CalendarPage from "./pages/CalendarPage";
 import SafetyPage from "./pages/SafetyPage";
+import GroundingPage from "./pages/GroundingPage";
 import SettingsPage from "./pages/SettingsPage";
 import LoginPage from "./pages/LoginPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
@@ -58,6 +59,7 @@ const App = () => (
                         <Route path="/tasks" element={<TasksPage />} />
                         <Route path="/calendar" element={<CalendarPage />} />
                         <Route path="/safety" element={<SafetyPage />} />
+                        <Route path="/grounding" element={<GroundingPage />} />
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
