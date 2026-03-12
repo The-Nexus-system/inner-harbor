@@ -5,8 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Pencil } from 'lucide-react';
-import type { SystemTask, Alter } from '@/types/system';
+import { Plus } from 'lucide-react';
+import type { SystemTask, Alter, RecurrencePattern } from '@/types/system';
 
 interface TaskFormProps {
   alters: Alter[];
@@ -27,6 +27,13 @@ const categories: { value: SystemTask['category']; label: string; emoji: string 
   { value: 'community', label: 'Community', emoji: '🤝' },
 ];
 
+const recurrenceOptions: { value: string; label: string }[] = [
+  { value: '__none__', label: 'Does not repeat' },
+  { value: 'daily', label: '🔄 Daily' },
+  { value: 'weekly', label: '🔄 Weekly' },
+  { value: 'monthly', label: '🔄 Monthly' },
+];
+
 export function TaskForm({ alters, onSubmit, editTask, open: controlledOpen, onOpenChange: controlledOnOpenChange }: TaskFormProps) {
   const isControlled = controlledOpen !== undefined;
   const [internalOpen, setInternalOpen] = useState(false);
@@ -36,7 +43,7 @@ export function TaskForm({ alters, onSubmit, editTask, open: controlledOpen, onO
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     title: '', description: '', category: 'general' as SystemTask['category'],
-    assignedTo: 'system', dueDate: '',
+    assignedTo: 'system', dueDate: '', recurrencePattern: '' as string,
   });
 
   const reset = () => setForm({
@@ -45,6 +52,7 @@ export function TaskForm({ alters, onSubmit, editTask, open: controlledOpen, onO
     category: editTask?.category || 'general',
     assignedTo: editTask?.assignedTo || 'system',
     dueDate: editTask?.dueDate || '',
+    recurrencePattern: editTask?.recurrencePattern || '',
   });
 
   useEffect(() => {
@@ -62,6 +70,7 @@ export function TaskForm({ alters, onSubmit, editTask, open: controlledOpen, onO
         category: form.category,
         assignedTo: form.assignedTo,
         dueDate: form.dueDate || undefined,
+        recurrencePattern: (form.recurrencePattern || undefined) as RecurrencePattern | undefined,
       });
       setOpen(false);
     } finally {
@@ -108,9 +117,20 @@ export function TaskForm({ alters, onSubmit, editTask, open: controlledOpen, onO
             </Select>
           </div>
         </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="task-due">Due date (optional)</Label>
-          <Input id="task-due" type="date" value={form.dueDate} onChange={e => setForm(p => ({ ...p, dueDate: e.target.value }))} />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="task-due">Due date (optional)</Label>
+            <Input id="task-due" type="date" value={form.dueDate} onChange={e => setForm(p => ({ ...p, dueDate: e.target.value }))} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="task-repeat">Repeat</Label>
+            <Select value={form.recurrencePattern || '__none__'} onValueChange={v => setForm(p => ({ ...p, recurrencePattern: v === '__none__' ? '' : v }))}>
+              <SelectTrigger id="task-repeat"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {recurrenceOptions.map(r => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>

@@ -529,6 +529,7 @@ export type Database = {
           id: string
           is_completed: boolean
           is_recurring: boolean
+          recurrence_pattern: string | null
           reminder_minutes: number | null
           title: string
           updated_at: string
@@ -544,6 +545,7 @@ export type Database = {
           id?: string
           is_completed?: boolean
           is_recurring?: boolean
+          recurrence_pattern?: string | null
           reminder_minutes?: number | null
           title: string
           updated_at?: string
@@ -559,6 +561,7 @@ export type Database = {
           id?: string
           is_completed?: boolean
           is_recurring?: boolean
+          recurrence_pattern?: string | null
           reminder_minutes?: number | null
           title?: string
           updated_at?: string

@@ -7,12 +7,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
 import { TaskForm } from "@/components/forms/TaskForm";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, RefreshCw } from "lucide-react";
 import type { SystemTask } from "@/types/system";
 
 const categoryEmoji: Record<string, string> = {
   general: '📋', medication: '💊', hygiene: '🪥', meals: '🍽️',
   hydration: '💧', therapy: '🧠', mobility: '🚶', community: '🤝',
+};
+
+const recurrenceLabel: Record<string, string> = {
+  daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly',
 };
 
 export default function TasksPage() {
@@ -49,6 +53,11 @@ export default function TasksPage() {
               {!isComplete && task.description && <p className="text-xs text-muted-foreground">{task.description}</p>}
             </div>
           </label>
+          {!isComplete && task.recurrencePattern && (
+            <Badge variant="secondary" className="text-xs flex-shrink-0 gap-1">
+              <RefreshCw className="h-3 w-3" /> {recurrenceLabel[task.recurrencePattern]}
+            </Badge>
+          )}
           {!isComplete && <Badge variant="outline" className="text-xs flex-shrink-0">{assignee}</Badge>}
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditingTask(task)} aria-label="Edit task">

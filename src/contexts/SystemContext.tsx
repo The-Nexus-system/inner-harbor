@@ -2,7 +2,7 @@ import React, { createContext, useContext, useCallback, useEffect, type ReactNod
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import type { Alter, FrontEvent, JournalEntry, InternalMessage, SystemTask, SafetyPlan, CalendarEvent, DailyCheckIn, AppSettings } from '@/types/system';
+import type { Alter, FrontEvent, JournalEntry, InternalMessage, SystemTask, SafetyPlan, CalendarEvent, DailyCheckIn, AppSettings, RecurrencePattern } from '@/types/system';
 import type { Database } from '@/integrations/supabase/types';
 
 type DbAlter = Database['public']['Tables']['alters']['Row'];
@@ -65,6 +65,7 @@ function mapTask(r: DbTask): SystemTask {
     id: r.id, title: r.title, description: r.description ?? undefined,
     assignedTo: r.assigned_to, isCompleted: r.is_completed,
     dueDate: r.due_date ?? undefined, isRecurring: r.is_recurring,
+    recurrencePattern: (r as any).recurrence_pattern as RecurrencePattern | undefined,
     category: r.category as SystemTask['category'], createdAt: r.created_at,
   };
 }
@@ -448,7 +449,9 @@ export function SystemProvider({ children }: { children: ReactNode }) {
       assigned_to: data.assignedTo || 'system',
       category: (data.category || 'general') as Database['public']['Enums']['task_category'],
       due_date: data.dueDate || null,
-    }]);
+      is_recurring: !!data.recurrencePattern,
+      recurrence_pattern: data.recurrencePattern || null,
+    } as any]);
     qc.invalidateQueries({ queryKey: ['tasks', userId] });
   }, [userId, qc]);
 
@@ -460,6 +463,10 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     if (data.assignedTo !== undefined) update.assigned_to = data.assignedTo;
     if (data.category !== undefined) update.category = data.category;
     if (data.dueDate !== undefined) update.due_date = data.dueDate || null;
+    if (data.recurrencePattern !== undefined) {
+      update.recurrence_pattern = data.recurrencePattern || null;
+      update.is_recurring = !!data.recurrencePattern;
+    }
     await supabase.from('tasks').update(update).eq('id', id).eq('user_id', userId);
     qc.invalidateQueries({ queryKey: ['tasks', userId] });
   }, [userId, qc]);

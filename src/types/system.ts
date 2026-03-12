@@ -78,6 +78,8 @@ export interface InternalMessage {
   createdAt: string;
 }
 
+export type RecurrencePattern = 'daily' | 'weekly' | 'monthly';
+
 export interface SystemTask {
   id: string;
   title: string;
@@ -86,6 +88,7 @@ export interface SystemTask {
   isCompleted: boolean;
   dueDate?: string;
   isRecurring: boolean;
+  recurrencePattern?: RecurrencePattern;
   category: 'general' | 'medication' | 'hygiene' | 'meals' | 'hydration' | 'therapy' | 'mobility' | 'community';
   createdAt: string;
 }
