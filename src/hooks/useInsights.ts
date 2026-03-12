@@ -144,6 +144,7 @@ export function useInsights() {
     insights,
     savedInsights,
     preferences,
+    checkIns,
     isLoading: prefsQ.isLoading || savedQ.isLoading || checkInsQ.isLoading,
     saveInsight,
     updateInsightStatus,

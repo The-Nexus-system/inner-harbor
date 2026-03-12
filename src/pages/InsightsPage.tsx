@@ -3,9 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Lightbulb, Bookmark, X, ThumbsUp, ThumbsDown, FileText } from 'lucide-react';
+import { Lightbulb, Bookmark, X, ThumbsUp, ThumbsDown, FileText, BarChart3 } from 'lucide-react';
 import { useInsights } from '@/hooks/useInsights';
 import { insightsToPlainText } from '@/lib/insights';
+import { InsightCharts } from '@/components/InsightCharts';
+import { useSystem } from '@/contexts/SystemContext';
 import { PageSkeleton } from '@/components/LoadingSkeleton';
 
 const categoryLabels: Record<string, string> = {
@@ -19,7 +21,8 @@ const categoryLabels: Record<string, string> = {
 };
 
 export default function InsightsPage() {
-  const { insights, savedInsights, preferences, isLoading, saveInsight, updateInsightStatus } = useInsights();
+  const { insights, savedInsights, preferences, isLoading, saveInsight, updateInsightStatus, checkIns } = useInsights();
+  const { frontEvents } = useSystem();
   const [tab, setTab] = useState('current');
 
   if (isLoading) return <PageSkeleton message="Loading insights..." />;
@@ -54,6 +57,7 @@ export default function InsightsPage() {
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
           <TabsTrigger value="current">Current ({insights.length})</TabsTrigger>
+          <TabsTrigger value="charts">Charts</TabsTrigger>
           <TabsTrigger value="saved">Saved ({savedOnly.length})</TabsTrigger>
           <TabsTrigger value="text">Plain text</TabsTrigger>
         </TabsList>
@@ -99,6 +103,11 @@ export default function InsightsPage() {
               </Card>
             ))
           )}
+        </TabsContent>
+
+
+        <TabsContent value="charts" className="mt-4">
+          <InsightCharts frontEvents={frontEvents} checkIns={checkIns} />
         </TabsContent>
 
         <TabsContent value="saved" className="space-y-4 mt-4">
