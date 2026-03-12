@@ -61,6 +61,7 @@ export function useInsights() {
         summariesEnabled: data.summaries_enabled,
         detailMode: data.detail_mode as 'brief' | 'detailed',
         excludedDataTypes: data.excluded_data_types ?? [],
+        suppressedCategories: (data as any).suppressed_categories ?? [],
         includeLocation: data.include_location,
         lowStimulation: data.low_stimulation,
       } as InsightPreferences;
@@ -99,7 +100,8 @@ export function useInsights() {
 
   const insights = useMemo(() => {
     const all = analyzePatterns(frontEvents, journalEntries, checkIns, tasks, calendarEvents, preferences);
-    return all.filter(i => !dismissedKeys.has(i.key));
+    const suppressed = new Set(preferences.suppressedCategories ?? []);
+    return all.filter(i => !dismissedKeys.has(i.key) && !suppressed.has(i.category));
   }, [frontEvents, journalEntries, checkIns, tasks, calendarEvents, preferences, dismissedKeys]);
 
   // Actions
@@ -130,6 +132,7 @@ export function useInsights() {
     if (updates.excludedDataTypes !== undefined) dbUpdate.excluded_data_types = updates.excludedDataTypes;
     if (updates.includeLocation !== undefined) dbUpdate.include_location = updates.includeLocation;
     if (updates.lowStimulation !== undefined) dbUpdate.low_stimulation = updates.lowStimulation;
+    if (updates.suppressedCategories !== undefined) dbUpdate.suppressed_categories = updates.suppressedCategories;
 
     const { data: existing } = await supabase.from('insight_preferences').select('user_id').eq('user_id', userId).maybeSingle();
     if (existing) {

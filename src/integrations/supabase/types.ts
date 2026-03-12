@@ -350,6 +350,7 @@ export type Database = {
           insights_enabled: boolean
           low_stimulation: boolean
           summaries_enabled: boolean
+          suppressed_categories: string[]
           updated_at: string
           user_id: string
         }
@@ -361,6 +362,7 @@ export type Database = {
           insights_enabled?: boolean
           low_stimulation?: boolean
           summaries_enabled?: boolean
+          suppressed_categories?: string[]
           updated_at?: string
           user_id: string
         }
@@ -372,6 +374,7 @@ export type Database = {
           insights_enabled?: boolean
           low_stimulation?: boolean
           summaries_enabled?: boolean
+          suppressed_categories?: string[]
           updated_at?: string
           user_id?: string
         }

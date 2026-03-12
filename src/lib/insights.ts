@@ -21,6 +21,7 @@ export interface InsightPreferences {
   summariesEnabled: boolean;
   detailMode: 'brief' | 'detailed';
   excludedDataTypes: string[];
+  suppressedCategories: string[];
   includeLocation: boolean;
   lowStimulation: boolean;
 }
@@ -30,6 +31,7 @@ export const defaultInsightPreferences: InsightPreferences = {
   summariesEnabled: true,
   detailMode: 'brief',
   excludedDataTypes: [],
+  suppressedCategories: [],
   includeLocation: false,
   lowStimulation: false,
 };
