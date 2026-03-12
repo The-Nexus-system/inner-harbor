@@ -135,10 +135,13 @@ interface SystemContextType {
   updateAlter: (id: string, data: Partial<Alter>) => Promise<void>;
   createJournalEntry: (data: Partial<JournalEntry>) => Promise<void>;
   createTask: (data: Partial<SystemTask>) => Promise<void>;
+  updateTask: (id: string, data: Partial<SystemTask>) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   createMessage: (data: Partial<InternalMessage>) => Promise<void>;
   createSafetyPlan: (data: Partial<SafetyPlan>) => Promise<void>;
   createCalendarEvent: (data: Partial<CalendarEvent>) => Promise<void>;
+  updateCalendarEvent: (id: string, data: Partial<CalendarEvent>) => Promise<void>;
+  deleteCalendarEvent: (id: string) => Promise<void>;
 }
 
 const defaultSettings: AppSettings = {
