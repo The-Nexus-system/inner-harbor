@@ -199,6 +199,40 @@ export default function SettingsPage() {
             <Label htmlFor="include-location">Include location data</Label>
             <Switch id="include-location" checked={insightPrefs.includeLocation} onCheckedChange={v => updatePreferences({ includeLocation: v })} />
           </div>
+
+          {/* Data type exclusions */}
+          <div className="space-y-3">
+            <Label>Exclude from analysis</Label>
+            <p className="text-xs text-muted-foreground">Uncheck data types you do not want included in pattern detection or summaries.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {[
+                { key: 'front_events', label: 'Front events' },
+                { key: 'journal_entries', label: 'Journal entries' },
+                { key: 'check_ins', label: 'Daily check-ins' },
+                { key: 'calendar_events', label: 'Calendar events' },
+                { key: 'tasks', label: 'Tasks' },
+                { key: 'messages', label: 'Internal messages' },
+              ].map(dt => {
+                const excluded = insightPrefs.excludedDataTypes ?? [];
+                const isExcluded = excluded.includes(dt.key);
+                return (
+                  <div key={dt.key} className="flex items-center gap-2 tap-target">
+                    <Checkbox
+                      id={`exclude-${dt.key}`}
+                      checked={!isExcluded}
+                      onCheckedChange={(checked) => {
+                        const next = checked
+                          ? excluded.filter(k => k !== dt.key)
+                          : [...excluded, dt.key];
+                        updatePreferences({ excludedDataTypes: next });
+                      }}
+                    />
+                    <Label htmlFor={`exclude-${dt.key}`} className="text-sm font-normal cursor-pointer">{dt.label}</Label>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </CardContent>
       </Card>
 
