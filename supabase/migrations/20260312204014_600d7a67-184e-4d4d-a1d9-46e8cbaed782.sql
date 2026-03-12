@@ -1,0 +1,1 @@
+ALTER TABLE public.insight_preferences ADD COLUMN suppressed_categories text[] NOT NULL DEFAULT '{}';
