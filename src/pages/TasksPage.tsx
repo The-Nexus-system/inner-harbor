@@ -2,6 +2,7 @@ import { useSystem } from "@/contexts/SystemContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { PageSkeleton } from "@/components/LoadingSkeleton";
 
 const categoryEmoji: Record<string, string> = {
   general: '📋', medication: '💊', hygiene: '🪥', meals: '🍽️',
@@ -9,7 +10,9 @@ const categoryEmoji: Record<string, string> = {
 };
 
 export default function TasksPage() {
-  const { tasks, toggleTask, getAlter } = useSystem();
+  const { tasks, toggleTask, getAlter, isLoading } = useSystem();
+
+  if (isLoading) return <PageSkeleton message="Loading tasks..." />;
 
   const incomplete = tasks.filter(t => !t.isCompleted);
   const completed = tasks.filter(t => t.isCompleted);
@@ -26,24 +29,28 @@ export default function TasksPage() {
           <CardTitle className="text-lg font-heading">To do</CardTitle>
         </CardHeader>
         <CardContent>
-          <ul className="space-y-1" role="list">
-            {incomplete.map(task => {
-              const assignee = task.assignedTo === 'system' ? 'Everyone' : task.assignedTo === 'next-fronter' ? 'Whoever fronts next' : getAlter(task.assignedTo)?.name || task.assignedTo;
-              return (
-                <li key={task.id}>
-                  <label className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted cursor-pointer tap-target">
-                    <Checkbox checked={false} onCheckedChange={() => toggleTask(task.id)} aria-label={`Complete: ${task.title}`} />
-                    <span className="text-lg" aria-hidden="true">{categoryEmoji[task.category] || '📋'}</span>
-                    <div className="flex-1 min-w-0">
-                      <span className="font-medium">{task.title}</span>
-                      {task.description && <p className="text-xs text-muted-foreground">{task.description}</p>}
-                    </div>
-                    <Badge variant="outline" className="text-xs flex-shrink-0">{assignee}</Badge>
-                  </label>
-                </li>
-              );
-            })}
-          </ul>
+          {incomplete.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No tasks right now. Nice work, or add some when ready.</p>
+          ) : (
+            <ul className="space-y-1" role="list">
+              {incomplete.map(task => {
+                const assignee = task.assignedTo === 'system' ? 'Everyone' : task.assignedTo === 'next-fronter' ? 'Whoever fronts next' : getAlter(task.assignedTo)?.name || task.assignedTo;
+                return (
+                  <li key={task.id}>
+                    <label className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted cursor-pointer tap-target">
+                      <Checkbox checked={false} onCheckedChange={() => toggleTask(task.id)} aria-label={`Complete: ${task.title}`} />
+                      <span className="text-lg" aria-hidden="true">{categoryEmoji[task.category] || '📋'}</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium">{task.title}</span>
+                        {task.description && <p className="text-xs text-muted-foreground">{task.description}</p>}
+                      </div>
+                      <Badge variant="outline" className="text-xs flex-shrink-0">{assignee}</Badge>
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </CardContent>
       </Card>
 
