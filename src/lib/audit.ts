@@ -35,13 +35,13 @@ export async function logAuditEvent(entry: AuditEntry): Promise<void> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const { error } = await supabase.from('audit_log').insert({
+    const { error } = await supabase.from('audit_log').insert([{
       user_id: user.id,
       action: entry.action,
       resource_type: entry.resource_type || null,
       resource_id: entry.resource_id || null,
-      metadata: entry.metadata || {},
-    });
+      metadata: (entry.metadata || {}) as Record<string, unknown>,
+    }]);
 
     if (error) {
       logger.error('Failed to write audit log', { error: error.message, entry });
