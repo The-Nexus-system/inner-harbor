@@ -6,9 +6,10 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Download, FileText, FileJson, Check, Bell, BellOff, Lightbulb } from "lucide-react";
+import { Download, FileText, FileJson, Check, Bell, BellOff, Lightbulb, RotateCcw } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useInsights } from "@/hooks/useInsights";
+import { defaultInsightPreferences } from "@/lib/insights";
 import {
   exportAsText, exportAsJson,
   formatJournalForExport, formatFrontHistoryForExport, formatSafetyPlanForExport,
@@ -267,6 +268,19 @@ export default function SettingsPage() {
                 );
               })}
             </div>
+          </div>
+
+          {/* Reset to defaults */}
+          <div className="pt-2 border-t border-border">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={() => updatePreferences(defaultInsightPreferences)}
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              Reset to defaults
+            </Button>
           </div>
         </CardContent>
       </Card>
