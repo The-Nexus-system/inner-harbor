@@ -18,6 +18,8 @@ import CalendarPage from "./pages/CalendarPage";
 import SafetyPage from "./pages/SafetyPage";
 import GroundingPage from "./pages/GroundingPage";
 import SettingsPage from "./pages/SettingsPage";
+import InsightsPage from "./pages/InsightsPage";
+import TimelinePage from "./pages/TimelinePage";
 import LoginPage from "./pages/LoginPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
