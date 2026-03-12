@@ -21,7 +21,8 @@ const categoryLabels: Record<string, string> = {
 };
 
 export default function InsightsPage() {
-  const { insights, savedInsights, preferences, isLoading, saveInsight, updateInsightStatus } = useInsights();
+  const { insights, savedInsights, preferences, isLoading, saveInsight, updateInsightStatus, checkIns } = useInsights();
+  const { frontEvents } = useSystem();
   const [tab, setTab] = useState('current');
 
   if (isLoading) return <PageSkeleton message="Loading insights..." />;
