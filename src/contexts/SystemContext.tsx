@@ -452,6 +452,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
       due_date: data.dueDate || null,
       is_recurring: !!data.recurrencePattern,
       recurrence_pattern: data.recurrencePattern || null,
+      reminder_minutes: data.reminderMinutes ?? null,
     } as any]);
     qc.invalidateQueries({ queryKey: ['tasks', userId] });
   }, [userId, qc]);
