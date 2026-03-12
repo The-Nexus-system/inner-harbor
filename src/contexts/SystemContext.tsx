@@ -1,6 +1,116 @@
-import React, { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import React, { createContext, useContext, useCallback, useEffect, type ReactNode } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import type { Alter, FrontEvent, JournalEntry, InternalMessage, SystemTask, SafetyPlan, CalendarEvent, DailyCheckIn, AppSettings } from '@/types/system';
-import { demoAlters, demoFrontEvents, demoJournalEntries, demoMessages, demoTasks, demoSafetyPlans, demoCalendarEvents, demoCheckIn } from '@/data/demo-data';
+import type { Database } from '@/integrations/supabase/types';
+
+type DbAlter = Database['public']['Tables']['alters']['Row'];
+type DbFrontEvent = Database['public']['Tables']['front_events']['Row'];
+type DbJournal = Database['public']['Tables']['journal_entries']['Row'];
+type DbMessage = Database['public']['Tables']['internal_messages']['Row'];
+type DbTask = Database['public']['Tables']['tasks']['Row'];
+type DbSafety = Database['public']['Tables']['safety_plans']['Row'];
+type DbCalendar = Database['public']['Tables']['calendar_events']['Row'];
+type DbCheckIn = Database['public']['Tables']['daily_check_ins']['Row'];
+type DbSettings = Database['public']['Tables']['app_settings']['Row'];
+
+// ============================================================
+// Row → App type mappers
+// ============================================================
+
+function mapAlter(r: DbAlter): Alter {
+  return {
+    id: r.id, name: r.name, nickname: r.nickname ?? undefined, pronouns: r.pronouns,
+    role: r.role ?? undefined, ageRange: r.age_range ?? undefined, species: r.species ?? undefined,
+    communicationStyle: r.communication_style ?? undefined, accessNeeds: r.access_needs ?? undefined,
+    triggersToAvoid: r.triggers_to_avoid ?? undefined, groundingPreferences: r.grounding_preferences ?? undefined,
+    safeFoods: r.safe_foods ?? undefined, musicPreferences: r.music_preferences ?? undefined,
+    frontingConfidence: (r.fronting_confidence as Alter['frontingConfidence']) ?? undefined,
+    color: r.color ?? undefined, emoji: r.emoji ?? undefined, notes: r.notes ?? undefined,
+    visibility: r.visibility as Alter['visibility'], privateFields: r.private_fields ?? undefined,
+    isActive: r.is_active, createdAt: r.created_at,
+  };
+}
+
+function mapFrontEvent(r: DbFrontEvent): FrontEvent {
+  return {
+    id: r.id, alterIds: r.alter_ids ?? [], status: r.status as FrontEvent['status'],
+    startTime: r.start_time, endTime: r.end_time ?? undefined,
+    memoryContinuity: r.memory_continuity as FrontEvent['memoryContinuity'],
+    trigger: r.trigger_info ?? undefined, symptoms: r.symptoms ?? undefined,
+    notes: r.notes ?? undefined, location: r.location ?? undefined,
+  };
+}
+
+function mapJournal(r: DbJournal): JournalEntry {
+  return {
+    id: r.id, alterId: r.alter_id ?? undefined, title: r.title ?? undefined,
+    content: r.content, mood: (r.mood as JournalEntry['mood']) ?? undefined,
+    type: r.type as JournalEntry['type'], tags: r.tags ?? [],
+    visibility: r.visibility as JournalEntry['visibility'], createdAt: r.created_at,
+  };
+}
+
+function mapMessage(r: DbMessage): InternalMessage {
+  return {
+    id: r.id, fromAlterId: r.from_alter_id ?? undefined, toAlterIds: r.to_alter_ids ?? [],
+    content: r.content, priority: r.priority as InternalMessage['priority'],
+    isPinned: r.is_pinned, isRead: r.is_read, createdAt: r.created_at,
+  };
+}
+
+function mapTask(r: DbTask): SystemTask {
+  return {
+    id: r.id, title: r.title, description: r.description ?? undefined,
+    assignedTo: r.assigned_to, isCompleted: r.is_completed,
+    dueDate: r.due_date ?? undefined, isRecurring: r.is_recurring,
+    category: r.category as SystemTask['category'], createdAt: r.created_at,
+  };
+}
+
+function mapSafety(r: DbSafety): SafetyPlan {
+  const contacts = (Array.isArray(r.trusted_contacts) ? r.trusted_contacts : []) as Array<{ name: string; phone?: string; relationship: string }>;
+  return {
+    id: r.id, type: r.type as SafetyPlan['type'], title: r.title,
+    steps: r.steps ?? [], trustedContacts: contacts,
+    notes: r.notes ?? undefined, updatedAt: r.updated_at,
+  };
+}
+
+function mapCalendar(r: DbCalendar): CalendarEvent {
+  return {
+    id: r.id, title: r.title, date: r.event_date, time: r.event_time ?? undefined,
+    preferredFronter: r.preferred_fronter ?? undefined,
+    supportNeeded: r.support_needed ?? undefined, sensoryPrep: r.sensory_prep ?? undefined,
+    recoveryTime: r.recovery_time ?? undefined, transportNotes: r.transport_notes ?? undefined,
+    notes: r.notes ?? undefined,
+  };
+}
+
+function mapCheckIn(r: DbCheckIn): DailyCheckIn {
+  return {
+    id: r.id, date: r.check_date, alterId: r.alter_id ?? undefined,
+    mood: r.mood as DailyCheckIn['mood'], stress: r.stress as DailyCheckIn['stress'],
+    pain: r.pain as DailyCheckIn['pain'], fatigue: r.fatigue as DailyCheckIn['fatigue'],
+    dissociation: r.dissociation as DailyCheckIn['dissociation'],
+    seizureRisk: (r.seizure_risk as DailyCheckIn['seizureRisk']) ?? undefined,
+    notes: r.notes ?? undefined,
+  };
+}
+
+function mapSettings(r: DbSettings): AppSettings {
+  return {
+    highContrast: r.high_contrast, darkMode: r.dark_mode,
+    fontSize: r.font_size as AppSettings['fontSize'], spacing: r.spacing as AppSettings['spacing'],
+    reducedMotion: r.reduced_motion, plainLanguage: r.plain_language,
+    soundOff: r.sound_off, screenReaderOptimized: r.screen_reader_optimized,
+  };
+}
+
+// ============================================================
+// Context
+// ============================================================
 
 interface SystemContextType {
   alters: Alter[];
@@ -13,6 +123,7 @@ interface SystemContextType {
   calendarEvents: CalendarEvent[];
   checkIn: DailyCheckIn | null;
   settings: AppSettings;
+  isLoading: boolean;
   getAlter: (id: string) => Alter | undefined;
   setCurrentFronter: (alterIds: string[], status: FrontEvent['status']) => void;
   addFrontEvent: (event: FrontEvent) => void;
@@ -22,84 +133,259 @@ interface SystemContextType {
   updateCheckIn: (c: Partial<DailyCheckIn>) => void;
 }
 
+const defaultSettings: AppSettings = {
+  highContrast: false, darkMode: false, fontSize: 'medium', spacing: 'normal',
+  reducedMotion: false, plainLanguage: false, soundOff: true, screenReaderOptimized: false,
+};
+
 const SystemContext = createContext<SystemContextType | null>(null);
 
 export function SystemProvider({ children }: { children: ReactNode }) {
-  const [alters] = useState<Alter[]>(demoAlters);
-  const [frontEvents, setFrontEvents] = useState<FrontEvent[]>(demoFrontEvents);
-  const [journalEntries] = useState<JournalEntry[]>(demoJournalEntries);
-  const [messages, setMessages] = useState<InternalMessage[]>(demoMessages);
-  const [tasks, setTasks] = useState<SystemTask[]>(demoTasks);
-  const [safetyPlans] = useState<SafetyPlan[]>(demoSafetyPlans);
-  const [calendarEvents] = useState<CalendarEvent[]>(demoCalendarEvents);
-  const [checkIn, setCheckIn] = useState<DailyCheckIn | null>(demoCheckIn);
-  const [settings, setSettings] = useState<AppSettings>({
-    highContrast: false,
-    darkMode: false,
-    fontSize: 'medium',
-    spacing: 'normal',
-    reducedMotion: false,
-    plainLanguage: false,
-    soundOff: true,
-    screenReaderOptimized: false,
+  const { user } = useAuth();
+  const userId = user?.id;
+  const qc = useQueryClient();
+
+  // Queries
+  const altersQ = useQuery({
+    queryKey: ['alters', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('alters').select('*').eq('user_id', userId!).is('archived_at', null).order('created_at');
+      if (error) throw error;
+      return (data ?? []).map(mapAlter);
+    },
+    enabled: !!userId,
   });
+
+  const frontQ = useQuery({
+    queryKey: ['front_events', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('front_events').select('*').eq('user_id', userId!).order('start_time', { ascending: false }).limit(100);
+      if (error) throw error;
+      return (data ?? []).map(mapFrontEvent);
+    },
+    enabled: !!userId,
+  });
+
+  const journalQ = useQuery({
+    queryKey: ['journal_entries', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('journal_entries').select('*').eq('user_id', userId!).is('archived_at', null).order('created_at', { ascending: false });
+      if (error) throw error;
+      return (data ?? []).map(mapJournal);
+    },
+    enabled: !!userId,
+  });
+
+  const messagesQ = useQuery({
+    queryKey: ['internal_messages', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('internal_messages').select('*').eq('user_id', userId!).order('created_at', { ascending: false });
+      if (error) throw error;
+      return (data ?? []).map(mapMessage);
+    },
+    enabled: !!userId,
+  });
+
+  const tasksQ = useQuery({
+    queryKey: ['tasks', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('tasks').select('*').eq('user_id', userId!).is('archived_at', null).order('created_at');
+      if (error) throw error;
+      return (data ?? []).map(mapTask);
+    },
+    enabled: !!userId,
+  });
+
+  const safetyQ = useQuery({
+    queryKey: ['safety_plans', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('safety_plans').select('*').eq('user_id', userId!).order('created_at');
+      if (error) throw error;
+      return (data ?? []).map(mapSafety);
+    },
+    enabled: !!userId,
+  });
+
+  const calendarQ = useQuery({
+    queryKey: ['calendar_events', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('calendar_events').select('*').eq('user_id', userId!).order('event_date');
+      if (error) throw error;
+      return (data ?? []).map(mapCalendar);
+    },
+    enabled: !!userId,
+  });
+
+  const today = new Date().toISOString().split('T')[0];
+  const checkInQ = useQuery({
+    queryKey: ['daily_check_ins', userId, today],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('daily_check_ins').select('*').eq('user_id', userId!).eq('check_date', today).maybeSingle();
+      if (error) throw error;
+      return data ? mapCheckIn(data) : null;
+    },
+    enabled: !!userId,
+  });
+
+  const settingsQ = useQuery({
+    queryKey: ['app_settings', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('app_settings').select('*').eq('user_id', userId!).maybeSingle();
+      if (error) throw error;
+      return data ? mapSettings(data) : null;
+    },
+    enabled: !!userId,
+  });
+
+  // Derived data
+  const alters = altersQ.data ?? [];
+  const frontEvents = frontQ.data ?? [];
+  const journalEntries = journalQ.data ?? [];
+  const messages = messagesQ.data ?? [];
+  const tasks = tasksQ.data ?? [];
+  const safetyPlans = safetyQ.data ?? [];
+  const calendarEvents = calendarQ.data ?? [];
+  const checkIn = checkInQ.data ?? null;
+  const settings = settingsQ.data ?? defaultSettings;
+  const currentFront = frontEvents.find(e => !e.endTime) || null;
+  const isLoading = altersQ.isLoading || frontQ.isLoading || tasksQ.isLoading;
 
   const getAlter = useCallback((id: string) => alters.find(a => a.id === id), [alters]);
 
-  const currentFront = frontEvents.find(e => !e.endTime) || null;
+  // Apply settings to DOM
+  useEffect(() => {
+    if (settings.darkMode) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+    if (settings.highContrast) document.documentElement.classList.add('high-contrast');
+    else document.documentElement.classList.remove('high-contrast');
+    if (settings.reducedMotion) document.documentElement.classList.add('reduce-motion');
+    else document.documentElement.classList.remove('reduce-motion');
+    document.documentElement.style.fontSize = { small: '14px', medium: '16px', large: '18px', xlarge: '20px' }[settings.fontSize];
+  }, [settings]);
 
-  const setCurrentFronter = useCallback((alterIds: string[], status: FrontEvent['status']) => {
-    setFrontEvents(prev => {
-      const updated = prev.map(e => e.endTime ? e : { ...e, endTime: new Date().toISOString() });
-      const newEvent: FrontEvent = {
-        id: `front-${Date.now()}`,
-        alterIds,
-        status,
-        startTime: new Date().toISOString(),
-        memoryContinuity: 'unknown',
-      };
-      return [...updated, newEvent];
-    });
-  }, []);
+  // ============================================================
+  // Mutations
+  // ============================================================
 
-  const addFrontEvent = useCallback((event: FrontEvent) => {
-    setFrontEvents(prev => [...prev, event]);
-  }, []);
+  const setCurrentFronter = useCallback(async (alterIds: string[], status: FrontEvent['status']) => {
+    if (!userId) return;
+    // End current fronts
+    const { data: openEvents } = await supabase.from('front_events').select('id').eq('user_id', userId).is('end_time', null);
+    if (openEvents?.length) {
+      await supabase.from('front_events').update({ end_time: new Date().toISOString() }).in('id', openEvents.map(e => e.id));
+    }
+    // Create new
+    await supabase.from('front_events').insert([{
+      user_id: userId,
+      alter_ids: alterIds,
+      status: status as Database['public']['Enums']['front_status'],
+      start_time: new Date().toISOString(),
+      memory_continuity: 'unknown' as Database['public']['Enums']['memory_continuity'],
+    }]);
+    qc.invalidateQueries({ queryKey: ['front_events', userId] });
+  }, [userId, qc]);
 
-  const updateSettings = useCallback((s: Partial<AppSettings>) => {
-    setSettings(prev => {
-      const next = { ...prev, ...s };
-      // Apply dark mode
-      if (next.darkMode) document.documentElement.classList.add('dark');
-      else document.documentElement.classList.remove('dark');
-      // Apply high contrast
-      if (next.highContrast) document.documentElement.classList.add('high-contrast');
-      else document.documentElement.classList.remove('high-contrast');
-      // Apply reduced motion
-      if (next.reducedMotion) document.documentElement.classList.add('reduce-motion');
-      else document.documentElement.classList.remove('reduce-motion');
-      // Font size
-      document.documentElement.style.fontSize = { small: '14px', medium: '16px', large: '18px', xlarge: '20px' }[next.fontSize];
-      return next;
-    });
-  }, []);
+  const addFrontEvent = useCallback(async (event: FrontEvent) => {
+    if (!userId) return;
+    await supabase.from('front_events').insert([{
+      user_id: userId,
+      alter_ids: event.alterIds,
+      status: event.status as Database['public']['Enums']['front_status'],
+      start_time: event.startTime,
+      end_time: event.endTime || null,
+      memory_continuity: event.memoryContinuity as Database['public']['Enums']['memory_continuity'],
+      trigger_info: event.trigger || null,
+      symptoms: event.symptoms || null,
+      notes: event.notes || null,
+      location: event.location || null,
+    }]);
+    qc.invalidateQueries({ queryKey: ['front_events', userId] });
+  }, [userId, qc]);
 
-  const toggleTask = useCallback((id: string) => {
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, isCompleted: !t.isCompleted } : t));
-  }, []);
+  const toggleTask = useCallback(async (id: string) => {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+    await supabase.from('tasks').update({ is_completed: !task.isCompleted }).eq('id', id);
+    qc.invalidateQueries({ queryKey: ['tasks', userId] });
+  }, [tasks, userId, qc]);
 
-  const markMessageRead = useCallback((id: string) => {
-    setMessages(prev => prev.map(m => m.id === id ? { ...m, isRead: true } : m));
-  }, []);
+  const markMessageRead = useCallback(async (id: string) => {
+    await supabase.from('internal_messages').update({ is_read: true }).eq('id', id);
+    qc.invalidateQueries({ queryKey: ['internal_messages', userId] });
+  }, [userId, qc]);
 
+  // Debounced check-in autosave
+  const checkInTimerRef = React.useRef<ReturnType<typeof setTimeout>>();
   const updateCheckIn = useCallback((c: Partial<DailyCheckIn>) => {
-    setCheckIn(prev => prev ? { ...prev, ...c } : null);
-  }, []);
+    if (!userId) return;
+    // Optimistic update in cache
+    qc.setQueryData(['daily_check_ins', userId, today], (old: DailyCheckIn | null) => {
+      if (old) return { ...old, ...c };
+      return null;
+    });
+
+    clearTimeout(checkInTimerRef.current);
+    checkInTimerRef.current = setTimeout(async () => {
+      const current = qc.getQueryData<DailyCheckIn | null>(['daily_check_ins', userId, today]);
+      if (!current) {
+        // Create new check-in
+        await supabase.from('daily_check_ins').insert([{
+          user_id: userId,
+          check_date: today,
+          mood: c.mood ?? 3,
+          stress: c.stress ?? 3,
+          pain: c.pain ?? 1,
+          fatigue: c.fatigue ?? 3,
+          dissociation: c.dissociation ?? 1,
+          notes: c.notes || null,
+        }]);
+      } else {
+        // Update existing
+        const updateData: Record<string, unknown> = {};
+        if (c.mood !== undefined) updateData.mood = c.mood;
+        if (c.stress !== undefined) updateData.stress = c.stress;
+        if (c.pain !== undefined) updateData.pain = c.pain;
+        if (c.fatigue !== undefined) updateData.fatigue = c.fatigue;
+        if (c.dissociation !== undefined) updateData.dissociation = c.dissociation;
+        if (c.notes !== undefined) updateData.notes = c.notes;
+        await supabase.from('daily_check_ins').update(updateData).eq('id', current.id);
+      }
+      qc.invalidateQueries({ queryKey: ['daily_check_ins', userId, today] });
+    }, 800); // 800ms debounce for autosave
+  }, [userId, today, qc]);
+
+  const updateSettings = useCallback(async (s: Partial<AppSettings>) => {
+    if (!userId) return;
+    const next = { ...settings, ...s };
+    // Optimistic update
+    qc.setQueryData(['app_settings', userId], next);
+
+    const dbUpdate: Record<string, unknown> = {};
+    if (s.highContrast !== undefined) dbUpdate.high_contrast = s.highContrast;
+    if (s.darkMode !== undefined) dbUpdate.dark_mode = s.darkMode;
+    if (s.fontSize !== undefined) dbUpdate.font_size = s.fontSize;
+    if (s.spacing !== undefined) dbUpdate.spacing = s.spacing;
+    if (s.reducedMotion !== undefined) dbUpdate.reduced_motion = s.reducedMotion;
+    if (s.plainLanguage !== undefined) dbUpdate.plain_language = s.plainLanguage;
+    if (s.soundOff !== undefined) dbUpdate.sound_off = s.soundOff;
+    if (s.screenReaderOptimized !== undefined) dbUpdate.screen_reader_optimized = s.screenReaderOptimized;
+
+    // Upsert settings
+    const { data: existing } = await supabase.from('app_settings').select('user_id').eq('user_id', userId).maybeSingle();
+    if (existing) {
+      await supabase.from('app_settings').update(dbUpdate).eq('user_id', userId);
+    } else {
+      await supabase.from('app_settings').insert([{ user_id: userId, ...dbUpdate }]);
+    }
+    qc.invalidateQueries({ queryKey: ['app_settings', userId] });
+  }, [userId, settings, qc]);
 
   return (
     <SystemContext.Provider value={{
-      alters, frontEvents, currentFront, journalEntries, messages, tasks, safetyPlans, calendarEvents, checkIn, settings,
-      getAlter, setCurrentFronter, addFrontEvent, updateSettings, toggleTask, markMessageRead, updateCheckIn,
+      alters, frontEvents, currentFront, journalEntries, messages, tasks,
+      safetyPlans, calendarEvents, checkIn, settings, isLoading,
+      getAlter, setCurrentFronter, addFrontEvent, updateSettings,
+      toggleTask, markMessageRead, updateCheckIn,
     }}>
       {children}
     </SystemContext.Provider>
