@@ -269,6 +269,19 @@ export default function SettingsPage() {
               })}
             </div>
           </div>
+
+          {/* Reset to defaults */}
+          <div className="pt-2 border-t border-border">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={() => updatePreferences(defaultInsightPreferences)}
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              Reset to defaults
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
