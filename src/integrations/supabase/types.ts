@@ -176,6 +176,7 @@ export type Database = {
           notes: string | null
           preferred_fronter: string | null
           recovery_time: string | null
+          reminder_minutes: number | null
           sensory_prep: string | null
           support_needed: string | null
           title: string
@@ -191,6 +192,7 @@ export type Database = {
           notes?: string | null
           preferred_fronter?: string | null
           recovery_time?: string | null
+          reminder_minutes?: number | null
           sensory_prep?: string | null
           support_needed?: string | null
           title: string
@@ -206,6 +208,7 @@ export type Database = {
           notes?: string | null
           preferred_fronter?: string | null
           recovery_time?: string | null
+          reminder_minutes?: number | null
           sensory_prep?: string | null
           support_needed?: string | null
           title?: string
@@ -398,6 +401,33 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -499,6 +529,7 @@ export type Database = {
           id: string
           is_completed: boolean
           is_recurring: boolean
+          reminder_minutes: number | null
           title: string
           updated_at: string
           user_id: string
@@ -513,6 +544,7 @@ export type Database = {
           id?: string
           is_completed?: boolean
           is_recurring?: boolean
+          reminder_minutes?: number | null
           title: string
           updated_at?: string
           user_id: string
@@ -527,6 +559,7 @@ export type Database = {
           id?: string
           is_completed?: boolean
           is_recurring?: boolean
+          reminder_minutes?: number | null
           title?: string
           updated_at?: string
           user_id?: string
