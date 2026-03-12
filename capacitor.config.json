@@ -1,0 +1,9 @@
+{
+  "appId": "app.lovable.19f737d8d8ba4684999161ab387e7f7c",
+  "appName": "Mosaic",
+  "webDir": "dist",
+  "server": {
+    "url": "https://19f737d8-d8ba-4684-9991-61ab387e7f7c.lovableproject.com?forceHideBadge=true",
+    "cleartext": true
+  }
+}
