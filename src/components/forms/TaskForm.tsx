@@ -44,6 +44,7 @@ export function TaskForm({ alters, onSubmit, editTask, open: controlledOpen, onO
   const [form, setForm] = useState({
     title: '', description: '', category: 'general' as SystemTask['category'],
     assignedTo: 'system', dueDate: '', recurrencePattern: '' as string,
+    reminderMinutes: '' as string,
   });
 
   const reset = () => setForm({
@@ -53,6 +54,7 @@ export function TaskForm({ alters, onSubmit, editTask, open: controlledOpen, onO
     assignedTo: editTask?.assignedTo || 'system',
     dueDate: editTask?.dueDate || '',
     recurrencePattern: editTask?.recurrencePattern || '',
+    reminderMinutes: editTask?.reminderMinutes?.toString() || '',
   });
 
   useEffect(() => {
