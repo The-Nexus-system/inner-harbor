@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, Users, ArrowRightLeft, BookOpen, MessageSquare, 
-  CheckSquare, CalendarDays, Shield, Settings 
+  CheckSquare, CalendarDays, Shield, Settings, LogOut 
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -9,6 +9,8 @@ import {
   SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar,
 } from "@/components/ui/sidebar";
 import { useSystem } from "@/contexts/SystemContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
@@ -27,6 +29,7 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { currentFront, getAlter } = useSystem();
+  const { signOut } = useAuth();
 
   const currentAlter = currentFront?.alterIds?.[0] ? getAlter(currentFront.alterIds[0]) : null;
 
@@ -83,6 +86,19 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* Sign out */}
+        <div className="mt-auto p-3 border-t border-sidebar-border">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={signOut}
+            className="w-full justify-start tap-target text-muted-foreground hover:text-foreground"
+          >
+            <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
+            {!collapsed && <span>Sign out</span>}
+          </Button>
+        </div>
       </SidebarContent>
     </Sidebar>
   );
