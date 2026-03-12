@@ -452,6 +452,18 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     qc.invalidateQueries({ queryKey: ['tasks', userId] });
   }, [userId, qc]);
 
+  const updateTask = useCallback(async (id: string, data: Partial<SystemTask>) => {
+    if (!userId) return;
+    const update: Record<string, unknown> = {};
+    if (data.title !== undefined) update.title = data.title;
+    if (data.description !== undefined) update.description = data.description || null;
+    if (data.assignedTo !== undefined) update.assigned_to = data.assignedTo;
+    if (data.category !== undefined) update.category = data.category;
+    if (data.dueDate !== undefined) update.due_date = data.dueDate || null;
+    await supabase.from('tasks').update(update).eq('id', id).eq('user_id', userId);
+    qc.invalidateQueries({ queryKey: ['tasks', userId] });
+  }, [userId, qc]);
+
   const deleteTask = useCallback(async (id: string) => {
     if (!userId) return;
     await supabase.from('tasks').update({ archived_at: new Date().toISOString() }).eq('id', id).eq('user_id', userId);
