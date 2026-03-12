@@ -1,3 +1,4 @@
+import ProfileSettings from "@/components/settings/ProfileSettings";
 import AppearanceSettings from "@/components/settings/AppearanceSettings";
 import NotificationSettings from "@/components/settings/NotificationSettings";
 import InsightSettings from "@/components/settings/InsightSettings";
@@ -12,6 +13,7 @@ export default function SettingsPage() {
         <p className="text-muted-foreground mt-1">Customize how the app looks, feels, and behaves. Your comfort matters.</p>
       </header>
 
+      <ProfileSettings />
       <AppearanceSettings />
       <NotificationSettings />
       <InsightSettings />
