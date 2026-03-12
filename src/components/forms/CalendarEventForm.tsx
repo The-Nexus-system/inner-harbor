@@ -31,7 +31,7 @@ export function CalendarEventForm({ alters, onSubmit, editEvent, open: controlle
   const [form, setForm] = useState({
     title: '', time: '', preferredFronter: '',
     supportNeeded: '', sensoryPrep: '', recoveryTime: '',
-    transportNotes: '', notes: '',
+    transportNotes: '', notes: '', reminderMinutes: '',
   });
 
   const reset = () => {
@@ -45,10 +45,11 @@ export function CalendarEventForm({ alters, onSubmit, editEvent, open: controlle
         recoveryTime: editEvent.recoveryTime || '',
         transportNotes: editEvent.transportNotes || '',
         notes: editEvent.notes || '',
+        reminderMinutes: editEvent.reminderMinutes?.toString() || '',
       });
     } else {
       setDate(undefined);
-      setForm({ title: '', time: '', preferredFronter: '', supportNeeded: '', sensoryPrep: '', recoveryTime: '', transportNotes: '', notes: '' });
+      setForm({ title: '', time: '', preferredFronter: '', supportNeeded: '', sensoryPrep: '', recoveryTime: '', transportNotes: '', notes: '', reminderMinutes: '' });
     }
   };
 
