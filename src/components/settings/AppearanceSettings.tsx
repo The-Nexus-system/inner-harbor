@@ -5,9 +5,19 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
 import { Check, Palette } from "lucide-react";
 import type { ThemeColor } from "@/types/system";
 import { cn } from "@/lib/utils";
+
+function tryParseHslString(input: string): [number, number, number] | null {
+  // Accepts: "200 40% 40%", "hsl(200, 40%, 40%)", "200, 40, 40", etc.
+  const nums = input.replace(/hsl\(|\)|°|%|,/g, ' ').trim().split(/\s+/).map(Number);
+  if (nums.length < 3 || nums.some(isNaN)) return null;
+  const [h, s, l] = nums;
+  if (h < 0 || h > 360 || s < 0 || s > 100 || l < 0 || l > 100) return null;
+  return [Math.round(h), Math.round(Math.max(10, Math.min(80, s))), Math.round(Math.max(20, Math.min(60, l)))];
+}
 
 const THEME_COLORS: { key: ThemeColor; label: string; swatch: string }[] = [
   { key: 'sage', label: 'Sage', swatch: 'hsl(160, 30%, 40%)' },
@@ -143,11 +153,28 @@ export default function AppearanceSettings() {
                 aria-hidden
               />
               <div className="space-y-3">
-                <div className="space-y-1.5">
-                  <div className="flex justify-between">
-                    <Label className="text-xs text-muted-foreground">Hue</Label>
-                    <span className="text-xs text-muted-foreground tabular-nums">{hsl[0]}°</span>
-                  </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="hsl-input" className="text-xs text-muted-foreground">HSL value</Label>
+                <Input
+                  id="hsl-input"
+                  placeholder="e.g. 200 40% 40% or hsl(200, 40%, 40%)"
+                  value={`${hsl[0]} ${hsl[1]}% ${hsl[2]}%`}
+                  onChange={(e) => {
+                    const parsed = tryParseHslString(e.target.value);
+                    if (parsed) {
+                      setHsl(parsed);
+                      saveCustomHsl(parsed[0], parsed[1], parsed[2]);
+                    }
+                  }}
+                  className="font-mono text-sm"
+                  aria-label="HSL color value"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <div className="flex justify-between">
+                  <Label className="text-xs text-muted-foreground">Hue</Label>
+                  <span className="text-xs text-muted-foreground tabular-nums">{hsl[0]}°</span>
+                </div>
                   <Slider
                     min={0}
                     max={360}
