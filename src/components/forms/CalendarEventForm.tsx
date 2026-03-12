@@ -72,6 +72,7 @@ export function CalendarEventForm({ alters, onSubmit, editEvent, open: controlle
         recoveryTime: form.recoveryTime || undefined,
         transportNotes: form.transportNotes || undefined,
         notes: form.notes || undefined,
+        reminderMinutes: form.reminderMinutes ? parseInt(form.reminderMinutes) : undefined,
       });
       setOpen(false);
     } finally {
