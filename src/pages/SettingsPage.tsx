@@ -30,6 +30,7 @@ type ExportKey = 'journal' | 'front' | 'tasks' | 'safety';
 export default function SettingsPage() {
   const { settings, updateSettings, journalEntries, frontEvents, tasks, safetyPlans, alters, getAlter } = useSystem();
   const { isSupported, permission, isSubscribed, isLoading: notifLoading, enableNotifications, disableNotifications } = useNotifications();
+  const { preferences: insightPrefs, updatePreferences } = useInsights();
   const [exported, setExported] = useState<Record<string, boolean>>({});
 
   const flash = (key: string) => {
