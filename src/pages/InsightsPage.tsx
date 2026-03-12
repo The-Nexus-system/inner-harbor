@@ -3,9 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Lightbulb, Bookmark, X, ThumbsUp, ThumbsDown, FileText } from 'lucide-react';
+import { Lightbulb, Bookmark, X, ThumbsUp, ThumbsDown, FileText, BarChart3 } from 'lucide-react';
 import { useInsights } from '@/hooks/useInsights';
 import { insightsToPlainText } from '@/lib/insights';
+import { InsightCharts } from '@/components/InsightCharts';
+import { useSystem } from '@/contexts/SystemContext';
 import { PageSkeleton } from '@/components/LoadingSkeleton';
 
 const categoryLabels: Record<string, string> = {
