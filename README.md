@@ -1,73 +1,62 @@
-# Welcome to your Lovable project
+# Mosaic
 
-## Project info
+A private, accessible system management app for plural and dissociative systems. Built with care for privacy, accessibility, and trauma-informed design.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## What is Mosaic?
 
-## How can I edit this code?
+Mosaic helps plural systems track fronting, communicate internally, journal, manage tasks, and maintain safety plans — all in one calm, private space.
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, shadcn/ui
+- **Backend**: Supabase (PostgreSQL, Auth, Storage) via Lovable Cloud
+- **Charts**: Recharts
+- **Accessibility**: Atkinson Hyperlegible font, WCAG 2.1 AA target, semantic HTML
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Features
 
-Changes made via Lovable will be committed automatically to this repo.
+- 🧠 **Front tracking** — Log who is fronting, co-fronting, or blurry
+- 📓 **Journal** — Write entries with mood, type, and tags
+- 💬 **Internal messages** — Leave notes between alters
+- ✅ **Tasks** — Medication, hygiene, therapy, and daily tasks
+- 📅 **Calendar** — Events with sensory prep and fronter preferences
+- 🛡️ **Safety plans** — Grounding, crisis, and medical plans
+- 📊 **Daily check-in** — Mood, stress, pain, fatigue, dissociation tracking
+- ♿ **Accessibility** — High contrast, large text, reduced motion, screen reader support
+- 🔒 **Privacy** — Row-level security, audit logging, no public access
 
-**Use your preferred IDE**
+## Getting Started
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd mosaic
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+# Install dependencies
+npm install
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Environment Variables
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Copy `.env.example` to `.env` and fill in your values. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for details.
 
-**Use GitHub Codespaces**
+## Documentation
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- [Deployment Guide](docs/DEPLOYMENT.md) — Self-hosting on DigitalOcean
+- [Security Architecture](docs/SECURITY.md) — Privacy model, encryption, audit logging
+- [Accessibility Notes](docs/ACCESSIBILITY.md) — Design decisions and assistive tech support
 
-## What technologies are used for this project?
+## Privacy
 
-This project is built with:
+- All data is per-user with Row-Level Security
+- No public sharing unless explicitly enabled
+- Sensitive fields marked for future field-level encryption
+- Append-only audit log for accountability
+- Three visibility levels: private, shared, emergency-only
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## License
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Private. Not for redistribution.
