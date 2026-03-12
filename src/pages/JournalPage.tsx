@@ -2,6 +2,7 @@ import { useSystem } from "@/contexts/SystemContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
+import { JournalForm } from "@/components/forms/JournalForm";
 
 const typeLabels: Record<string, string> = {
   text: 'Entry', mood: 'Mood', sensory: 'Sensory', flashback: 'Flashback',
@@ -9,21 +10,25 @@ const typeLabels: Record<string, string> = {
 };
 
 export default function JournalPage() {
-  const { journalEntries, getAlter, isLoading } = useSystem();
+  const { journalEntries, alters, getAlter, isLoading, createJournalEntry } = useSystem();
 
   if (isLoading) return <PageSkeleton message="Loading journal..." />;
 
   return (
     <div className="space-y-6 max-w-3xl mx-auto animate-fade-in">
-      <header>
-        <h1 className="text-2xl md:text-3xl font-heading font-bold">Journal</h1>
-        <p className="text-muted-foreground mt-1">A space for everyone in the system to write, reflect, and record.</p>
+      <header className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-heading font-bold">Journal</h1>
+          <p className="text-muted-foreground mt-1">A space for everyone in the system to write, reflect, and record.</p>
+        </div>
+        <JournalForm alters={alters} onSubmit={createJournalEntry} />
       </header>
 
       {journalEntries.length === 0 ? (
         <Card>
-          <CardContent className="py-8 text-center">
+          <CardContent className="py-8 text-center space-y-3">
             <p className="text-muted-foreground">No journal entries yet. This space is ready when you are.</p>
+            <JournalForm alters={alters} onSubmit={createJournalEntry} />
           </CardContent>
         </Card>
       ) : (

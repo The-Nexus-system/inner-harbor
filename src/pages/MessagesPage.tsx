@@ -3,9 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Pin } from "lucide-react";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
+import { MessageForm } from "@/components/forms/MessageForm";
 
 export default function MessagesPage() {
-  const { messages, getAlter, markMessageRead, isLoading } = useSystem();
+  const { messages, alters, getAlter, markMessageRead, isLoading, createMessage } = useSystem();
 
   if (isLoading) return <PageSkeleton message="Loading messages..." />;
 
@@ -16,15 +17,19 @@ export default function MessagesPage() {
 
   return (
     <div className="space-y-6 max-w-3xl mx-auto animate-fade-in">
-      <header>
-        <h1 className="text-2xl md:text-3xl font-heading font-bold">Messages</h1>
-        <p className="text-muted-foreground mt-1">Internal message board. Leave notes, reminders, and support for each other.</p>
+      <header className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-heading font-bold">Messages</h1>
+          <p className="text-muted-foreground mt-1">Internal message board. Leave notes, reminders, and support for each other.</p>
+        </div>
+        <MessageForm alters={alters} onSubmit={createMessage} />
       </header>
 
       {sorted.length === 0 ? (
         <Card>
-          <CardContent className="py-8 text-center">
+          <CardContent className="py-8 text-center space-y-3">
             <p className="text-muted-foreground">No messages yet. Leave a note for someone in the system.</p>
+            <MessageForm alters={alters} onSubmit={createMessage} />
           </CardContent>
         </Card>
       ) : (
