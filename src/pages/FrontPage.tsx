@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
+import { HandoffNoteForm } from "@/components/HandoffNoteForm";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { HandHeart, ChevronDown } from "lucide-react";
 import type { FrontStatus } from "@/types/system";
 
 const statusLabels: Record<FrontStatus, string> = {
@@ -22,9 +25,11 @@ const statusLabels: Record<FrontStatus, string> = {
 };
 
 export default function FrontPage() {
-  const { alters, frontEvents, currentFront, getAlter, setCurrentFronter, isLoading } = useSystem();
+  const { alters, frontEvents, currentFront, getAlter, setCurrentFronter, handoffNotes, isLoading } = useSystem();
   const [selectedAlters, setSelectedAlters] = useState<string[]>(currentFront?.alterIds || []);
   const [status, setStatus] = useState<FrontStatus>(currentFront?.status || 'fronting');
+  const [handoffOpen, setHandoffOpen] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
 
   if (isLoading) return <PageSkeleton message="Loading front tracking..." />;
 
@@ -114,7 +119,13 @@ export default function FrontPage() {
             )}
           </fieldset>
 
-          <Button onClick={handleSwitch} className="tap-target" size="lg">Update front</Button>
+          <div className="flex gap-2 flex-wrap">
+            <Button onClick={handleSwitch} className="tap-target" size="lg">Update front</Button>
+            <Button variant="outline" onClick={() => setHandoffOpen(true)} className="tap-target" size="lg">
+              <HandHeart className="h-4 w-4 mr-1.5" aria-hidden="true" />
+              Leave a handoff note
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
@@ -187,6 +198,40 @@ export default function FrontPage() {
           )}
         </CardContent>
       </Card>
+      {/* Handoff Notes History */}
+      {handoffNotes.length > 0 && (
+        <Collapsible open={notesOpen} onOpenChange={setNotesOpen}>
+          <Card>
+            <CollapsibleTrigger asChild>
+              <CardHeader className="pb-3 cursor-pointer hover:bg-muted/30 transition-colors">
+                <CardTitle className="text-lg font-heading flex items-center gap-2">
+                  <HandHeart className="h-5 w-5" aria-hidden="true" />
+                  Recent handoff notes
+                  <ChevronDown className={`h-4 w-4 ml-auto transition-transform ${notesOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+                </CardTitle>
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="space-y-3 pt-0">
+                {handoffNotes.slice(0, 5).map(note => (
+                  <div key={note.id} className="p-3 rounded-lg border border-border/50 bg-muted/20 space-y-1.5">
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(note.createdAt).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}{' '}
+                      {new Date(note.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                    {note.currentActivity && <p className="text-sm"><span className="text-muted-foreground text-xs">Activity:</span> {note.currentActivity}</p>}
+                    {note.emotionalState && <p className="text-sm"><span className="text-muted-foreground text-xs">Feeling:</span> {note.emotionalState}</p>}
+                    {note.importantReminders && <p className="text-sm"><span className="text-muted-foreground text-xs">Reminders:</span> {note.importantReminders}</p>}
+                    {note.warnings && <p className="text-sm text-destructive">⚠ {note.warnings}</p>}
+                  </div>
+                ))}
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
+      )}
+
+      <HandoffNoteForm open={handoffOpen} onOpenChange={setHandoffOpen} />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { 
   LayoutDashboard, Users, ArrowRightLeft, BookOpen, MessageSquare, 
-  CheckSquare, CalendarDays, Shield, Settings, LogOut, Leaf, Lightbulb, Clock, Zap
+  CheckSquare, CalendarDays, Shield, Settings, LogOut, Leaf, Lightbulb, Clock, Zap, Camera
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -28,6 +28,7 @@ const items = [
   { title: "Insights", url: "/insights", icon: Lightbulb },
   { title: "Timeline", url: "/timeline", icon: Clock },
   { title: "Quick Actions", url: "/quick-actions", icon: Zap },
+  { title: "Snapshots", url: "/snapshots", icon: Camera },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 

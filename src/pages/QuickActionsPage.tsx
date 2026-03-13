@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  Activity, ArrowRightLeft, CalendarPlus, ShieldAlert, TreePalm, BookOpen, Zap
+  Activity, ArrowRightLeft, CalendarPlus, ShieldAlert, TreePalm, BookOpen, Zap, Camera, HandHeart
 } from "lucide-react";
+import { ContextSnapshotButton } from "@/components/ContextSnapshotButton";
+import { HandoffNoteForm } from "@/components/HandoffNoteForm";
 
 const quickActions = [
   { label: "Start check-in", description: "Log how you're feeling right now", icon: Activity, path: "/?action=checkin" },
@@ -15,6 +18,7 @@ const quickActions = [
 ] as const;
 
 export default function QuickActionsPage() {
+  const [handoffOpen, setHandoffOpen] = useState(false);
   const navigate = useNavigate();
 
   return (
@@ -52,6 +56,49 @@ export default function QuickActionsPage() {
           </Card>
         ))}
       </div>
+
+      {/* Continuity quick actions */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Card
+          className="cursor-pointer hover:border-primary/50 transition-colors group"
+          role="button"
+          tabIndex={0}
+          aria-label="Take a context snapshot"
+          onClick={() => {}}
+        >
+          <CardContent className="flex items-center gap-4 p-4">
+            <div className="rounded-lg bg-primary/10 p-2.5 group-hover:bg-primary/20 transition-colors">
+              <Camera className="h-5 w-5 text-primary" aria-hidden="true" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-sm">Take snapshot</p>
+              <p className="text-xs text-muted-foreground">Capture current context for later reorientation</p>
+            </div>
+            <ContextSnapshotButton variant="ghost" size="sm" showLabel={false} />
+          </CardContent>
+        </Card>
+
+        <Card
+          className="cursor-pointer hover:border-primary/50 transition-colors group"
+          role="button"
+          tabIndex={0}
+          aria-label="Leave a handoff note"
+          onClick={() => setHandoffOpen(true)}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setHandoffOpen(true); } }}
+        >
+          <CardContent className="flex items-center gap-4 p-4">
+            <div className="rounded-lg bg-primary/10 p-2.5 group-hover:bg-primary/20 transition-colors">
+              <HandHeart className="h-5 w-5 text-primary" aria-hidden="true" />
+            </div>
+            <div>
+              <p className="font-medium text-sm">Leave handoff note</p>
+              <p className="text-xs text-muted-foreground">Share what the next person should know</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <HandoffNoteForm open={handoffOpen} onOpenChange={setHandoffOpen} />
 
       <Card className="border-dashed opacity-75">
         <CardHeader className="pb-2">

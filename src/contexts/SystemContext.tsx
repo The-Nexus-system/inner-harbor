@@ -2,7 +2,7 @@ import React, { createContext, useContext, useCallback, useEffect, type ReactNod
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import type { Alter, FrontEvent, JournalEntry, InternalMessage, SystemTask, SafetyPlan, CalendarEvent, DailyCheckIn, AppSettings, RecurrencePattern } from '@/types/system';
+import type { Alter, FrontEvent, JournalEntry, InternalMessage, SystemTask, SafetyPlan, CalendarEvent, DailyCheckIn, AppSettings, RecurrencePattern, HandoffNote, ContextSnapshot } from '@/types/system';
 import type { Database } from '@/integrations/supabase/types';
 
 type DbAlter = Database['public']['Tables']['alters']['Row'];
@@ -127,6 +127,8 @@ interface SystemContextType {
   calendarEvents: CalendarEvent[];
   checkIn: DailyCheckIn | null;
   settings: AppSettings;
+  handoffNotes: HandoffNote[];
+  contextSnapshots: ContextSnapshot[];
   isLoading: boolean;
   getAlter: (id: string) => Alter | undefined;
   setCurrentFronter: (alterIds: string[], status: FrontEvent['status']) => void;
@@ -146,6 +148,9 @@ interface SystemContextType {
   createCalendarEvent: (data: Partial<CalendarEvent>) => Promise<void>;
   updateCalendarEvent: (id: string, data: Partial<CalendarEvent>) => Promise<void>;
   deleteCalendarEvent: (id: string) => Promise<void>;
+  createHandoffNote: (data: Partial<HandoffNote>) => Promise<void>;
+  createContextSnapshot: (notes?: string) => Promise<void>;
+  deleteContextSnapshot: (id: string) => Promise<void>;
 }
 
 const defaultSettings: AppSettings = {
@@ -253,6 +258,37 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     enabled: !!userId,
   });
 
+  const handoffQ = useQuery({
+    queryKey: ['handoff_notes', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('handoff_notes' as any).select('*').eq('user_id', userId!).order('created_at', { ascending: false }).limit(50);
+      if (error) throw error;
+      return (data ?? []).map((r: any): HandoffNote => ({
+        id: r.id, frontEventId: r.front_event_id ?? undefined,
+        currentActivity: r.current_activity ?? undefined, unfinishedTasks: r.unfinished_tasks ?? undefined,
+        emotionalState: r.emotional_state ?? undefined, importantReminders: r.important_reminders ?? undefined,
+        warnings: r.warnings ?? undefined, createdAt: r.created_at,
+      }));
+    },
+    enabled: !!userId,
+  });
+
+  const snapshotQ = useQuery({
+    queryKey: ['context_snapshots', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('context_snapshots' as any).select('*').eq('user_id', userId!).order('snapshot_time', { ascending: false }).limit(50);
+      if (error) throw error;
+      return (data ?? []).map((r: any): ContextSnapshot => ({
+        id: r.id, snapshotTime: r.snapshot_time, frontAlterIds: r.front_alter_ids ?? [],
+        frontStatus: r.front_status ?? undefined, activeTasks: r.active_tasks ?? [],
+        calendarContext: r.calendar_context ?? [], mood: r.mood ?? undefined,
+        stress: r.stress ?? undefined, energy: r.energy ?? undefined,
+        notes: r.notes ?? undefined, location: r.location ?? undefined, createdAt: r.created_at,
+      }));
+    },
+    enabled: !!userId,
+  });
+
   // Derived data
   const alters = altersQ.data ?? [];
   const frontEvents = frontQ.data ?? [];
@@ -263,6 +299,8 @@ export function SystemProvider({ children }: { children: ReactNode }) {
   const calendarEvents = calendarQ.data ?? [];
   const checkIn = checkInQ.data ?? null;
   const settings = settingsQ.data ?? defaultSettings;
+  const handoffNotes = handoffQ.data ?? [];
+  const contextSnapshots = snapshotQ.data ?? [];
   const currentFront = frontEvents.find(e => !e.endTime) || null;
   const isLoading = altersQ.isLoading || frontQ.isLoading || tasksQ.isLoading;
 
@@ -567,14 +605,54 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     qc.invalidateQueries({ queryKey: ['calendar_events', userId] });
   }, [userId, qc]);
 
+  const createHandoffNote = useCallback(async (data: Partial<HandoffNote>) => {
+    if (!userId) return;
+    await supabase.from('handoff_notes' as any).insert([{
+      user_id: userId,
+      front_event_id: data.frontEventId || null,
+      current_activity: data.currentActivity || null,
+      unfinished_tasks: data.unfinishedTasks || null,
+      emotional_state: data.emotionalState || null,
+      important_reminders: data.importantReminders || null,
+      warnings: data.warnings || null,
+    }]);
+    qc.invalidateQueries({ queryKey: ['handoff_notes', userId] });
+  }, [userId, qc]);
+
+  const createContextSnapshot = useCallback(async (snapshotNotes?: string) => {
+    if (!userId) return;
+    const incompleteTasks = tasks.filter(t => !t.isCompleted).slice(0, 10).map(t => ({ id: t.id, title: t.title }));
+    const upcoming = calendarEvents.slice(0, 5).map(e => ({ id: e.id, title: e.title, time: e.time }));
+    await supabase.from('context_snapshots' as any).insert([{
+      user_id: userId,
+      snapshot_time: new Date().toISOString(),
+      front_alter_ids: currentFront?.alterIds ?? [],
+      front_status: currentFront?.status ?? null,
+      active_tasks: incompleteTasks,
+      calendar_context: upcoming,
+      mood: checkIn?.mood ?? null,
+      stress: checkIn?.stress ?? null,
+      energy: null,
+      notes: snapshotNotes || null,
+    }]);
+    qc.invalidateQueries({ queryKey: ['context_snapshots', userId] });
+  }, [userId, qc, tasks, calendarEvents, currentFront, checkIn]);
+
+  const deleteContextSnapshot = useCallback(async (id: string) => {
+    if (!userId) return;
+    await supabase.from('context_snapshots' as any).delete().eq('id', id).eq('user_id', userId);
+    qc.invalidateQueries({ queryKey: ['context_snapshots', userId] });
+  }, [userId, qc]);
+
   return (
     <SystemContext.Provider value={{
       alters, frontEvents, currentFront, journalEntries, messages, tasks,
-      safetyPlans, calendarEvents, checkIn, settings, isLoading,
+      safetyPlans, calendarEvents, checkIn, settings, handoffNotes, contextSnapshots, isLoading,
       getAlter, setCurrentFronter, addFrontEvent, updateSettings,
       toggleTask, markMessageRead, updateCheckIn,
       createAlter, updateAlter, createJournalEntry, createTask, updateTask, deleteTask, createMessage,
       createSafetyPlan, createCalendarEvent, updateCalendarEvent, deleteCalendarEvent,
+      createHandoffNote, createContextSnapshot, deleteContextSnapshot,
     }}>
       {children}
     </SystemContext.Provider>

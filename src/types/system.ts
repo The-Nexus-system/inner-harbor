@@ -131,6 +131,32 @@ export interface DailyCheckIn {
   notes?: string;
 }
 
+export interface HandoffNote {
+  id: string;
+  frontEventId?: string;
+  currentActivity?: string;
+  unfinishedTasks?: string;
+  emotionalState?: string;
+  importantReminders?: string;
+  warnings?: string;
+  createdAt: string;
+}
+
+export interface ContextSnapshot {
+  id: string;
+  snapshotTime: string;
+  frontAlterIds: string[];
+  frontStatus?: string;
+  activeTasks: Array<{ id: string; title: string }>;
+  calendarContext: Array<{ id: string; title: string; time?: string }>;
+  mood?: number;
+  stress?: number;
+  energy?: number;
+  notes?: string;
+  location?: string;
+  createdAt: string;
+}
+
 export type ThemeColor = 'sage' | 'ocean' | 'lavender' | 'rose' | 'amber' | 'forest' | 'custom';
 
 export interface AppSettings {

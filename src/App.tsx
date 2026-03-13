@@ -21,6 +21,7 @@ import SettingsPage from "./pages/SettingsPage";
 import InsightsPage from "./pages/InsightsPage";
 import TimelinePage from "./pages/TimelinePage";
 import QuickActionsPage from "./pages/QuickActionsPage";
+import SnapshotsPage from "./pages/SnapshotsPage";
 import LoginPage from "./pages/LoginPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
@@ -67,6 +68,7 @@ const App = () => (
                         <Route path="/insights" element={<InsightsPage />} />
                         <Route path="/timeline" element={<TimelinePage />} />
                         <Route path="/quick-actions" element={<QuickActionsPage />} />
+                        <Route path="/snapshots" element={<SnapshotsPage />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </AppLayout>

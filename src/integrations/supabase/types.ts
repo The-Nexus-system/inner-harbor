@@ -266,6 +266,54 @@ export type Database = {
         }
         Relationships: []
       }
+      context_snapshots: {
+        Row: {
+          active_tasks: Json
+          calendar_context: Json
+          created_at: string
+          energy: number | null
+          front_alter_ids: string[]
+          front_status: string | null
+          id: string
+          location: string | null
+          mood: number | null
+          notes: string | null
+          snapshot_time: string
+          stress: number | null
+          user_id: string
+        }
+        Insert: {
+          active_tasks?: Json
+          calendar_context?: Json
+          created_at?: string
+          energy?: number | null
+          front_alter_ids?: string[]
+          front_status?: string | null
+          id?: string
+          location?: string | null
+          mood?: number | null
+          notes?: string | null
+          snapshot_time?: string
+          stress?: number | null
+          user_id: string
+        }
+        Update: {
+          active_tasks?: Json
+          calendar_context?: Json
+          created_at?: string
+          energy?: number | null
+          front_alter_ids?: string[]
+          front_status?: string | null
+          id?: string
+          location?: string | null
+          mood?: number | null
+          notes?: string | null
+          snapshot_time?: string
+          stress?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_check_ins: {
         Row: {
           alter_id: string | null
@@ -482,6 +530,50 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      handoff_notes: {
+        Row: {
+          created_at: string
+          current_activity: string | null
+          emotional_state: string | null
+          front_event_id: string | null
+          id: string
+          important_reminders: string | null
+          unfinished_tasks: string | null
+          user_id: string
+          warnings: string | null
+        }
+        Insert: {
+          created_at?: string
+          current_activity?: string | null
+          emotional_state?: string | null
+          front_event_id?: string | null
+          id?: string
+          important_reminders?: string | null
+          unfinished_tasks?: string | null
+          user_id: string
+          warnings?: string | null
+        }
+        Update: {
+          created_at?: string
+          current_activity?: string | null
+          emotional_state?: string | null
+          front_event_id?: string | null
+          id?: string
+          important_reminders?: string | null
+          unfinished_tasks?: string | null
+          user_id?: string
+          warnings?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "handoff_notes_front_event_id_fkey"
+            columns: ["front_event_id"]
+            isOneToOne: false
+            referencedRelation: "front_events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       insight_preferences: {
         Row: {
