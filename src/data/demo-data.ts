@@ -57,6 +57,7 @@ export const demoAlters: Alter[] = [
     emoji: '☁️',
     visibility: 'shared',
     isActive: true,
+    interfaceMode: 'simplified',
     createdAt: '2024-02-01',
   },
   {
