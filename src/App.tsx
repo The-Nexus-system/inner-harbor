@@ -27,6 +27,7 @@ import SupportPortalPage from "./pages/SupportPortalPage";
 import SensoryProfilePage from "./pages/SensoryProfilePage";
 import CommunicationBoardPage from "./pages/CommunicationBoardPage";
 import SecurityDashboardPage from "./pages/SecurityDashboardPage";
+import ExportPage from "./pages/ExportPage";
 import LoginPage from "./pages/LoginPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
@@ -79,6 +80,7 @@ const App = () => (
                         <Route path="/sensory" element={<SensoryProfilePage />} />
                         <Route path="/communication" element={<CommunicationBoardPage />} />
                         <Route path="/security" element={<SecurityDashboardPage />} />
+                        <Route path="/export" element={<ExportPage />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </AppLayout>
