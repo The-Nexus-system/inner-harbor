@@ -339,10 +339,11 @@ export function SystemProvider({ children }: { children: ReactNode }) {
       const { data, error } = await supabase.from('capacity_budgets' as any).select('*').eq('user_id', userId!).eq('budget_date', today).maybeSingle();
       if (error) throw error;
       if (!data) return null;
+      const r = data as any;
       return {
-        id: data.id, budgetDate: data.budget_date, totalSpoons: data.total_spoons,
-        entries: (data.entries ?? []) as CapacityEntry[],
-        notes: data.notes ?? undefined, createdAt: data.created_at,
+        id: r.id, budgetDate: r.budget_date, totalSpoons: r.total_spoons,
+        entries: (r.entries ?? []) as CapacityEntry[],
+        notes: r.notes ?? undefined, createdAt: r.created_at,
       } as CapacityBudget;
     },
     enabled: !!userId,
