@@ -18,6 +18,7 @@ const quickActions = [
 ] as const;
 
 export default function QuickActionsPage() {
+  const [handoffOpen, setHandoffOpen] = useState(false);
   const navigate = useNavigate();
 
   return (
