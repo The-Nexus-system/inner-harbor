@@ -19,7 +19,7 @@ const defaultValues: Partial<Alter> = {
   nickname: '', role: '', ageRange: '', species: '',
   communicationStyle: '', accessNeeds: '', triggersToAvoid: '',
   groundingPreferences: '', safeFoods: '', musicPreferences: '',
-  color: '#7c3aed', emoji: '🌟', notes: '',
+  color: '#7c3aed', emoji: '🌟', notes: '', interfaceMode: 'standard',
 };
 
 export function AlterForm({ alter, onSubmit, trigger }: AlterFormProps) {
