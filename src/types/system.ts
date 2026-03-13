@@ -176,6 +176,21 @@ export interface ContextSnapshot {
   createdAt: string;
 }
 
+export type DashboardSection =
+  | 'front' | 'tasks' | 'messages' | 'journal' | 'calendar'
+  | 'safety' | 'checkin' | 'notes' | 'insights' | 'summary' | 'trends' | 'handoff';
+
+export interface EnvironmentPreset {
+  id: string;
+  name: string;
+  icon: string;
+  color?: string;
+  visibleSections: DashboardSection[];
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+}
+
 export type ThemeColor = 'sage' | 'ocean' | 'lavender' | 'rose' | 'amber' | 'forest' | 'custom';
 
 export interface AppSettings {
