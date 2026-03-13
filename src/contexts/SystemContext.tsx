@@ -722,17 +722,61 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     return perm.granted;
   }, [alterPermissions]);
 
+  // Environment preset mutations
+  const activatePreset = useCallback(async (presetId: string | null) => {
+    if (!userId) return;
+    // Deactivate all
+    await supabase.from('environment_presets' as any).update({ is_active: false }).eq('user_id', userId);
+    // Activate selected
+    if (presetId) {
+      await supabase.from('environment_presets' as any).update({ is_active: true }).eq('id', presetId).eq('user_id', userId);
+    }
+    qc.invalidateQueries({ queryKey: ['environment_presets', userId] });
+  }, [userId, qc]);
+
+  const createPreset = useCallback(async (data: Partial<EnvironmentPreset>) => {
+    if (!userId) return;
+    await supabase.from('environment_presets' as any).insert([{
+      user_id: userId,
+      name: data.name || 'New Preset',
+      icon: data.icon || '🏠',
+      color: data.color || null,
+      visible_sections: data.visibleSections || ['front','tasks','messages','journal','calendar','safety','checkin','notes','insights','summary','trends','handoff'],
+      sort_order: data.sortOrder ?? environmentPresets.length,
+    }]);
+    qc.invalidateQueries({ queryKey: ['environment_presets', userId] });
+  }, [userId, qc, environmentPresets.length]);
+
+  const updatePreset = useCallback(async (id: string, data: Partial<EnvironmentPreset>) => {
+    if (!userId) return;
+    const update: Record<string, any> = {};
+    if (data.name !== undefined) update.name = data.name;
+    if (data.icon !== undefined) update.icon = data.icon;
+    if (data.color !== undefined) update.color = data.color;
+    if (data.visibleSections !== undefined) update.visible_sections = data.visibleSections;
+    if (data.sortOrder !== undefined) update.sort_order = data.sortOrder;
+    await supabase.from('environment_presets' as any).update(update).eq('id', id).eq('user_id', userId);
+    qc.invalidateQueries({ queryKey: ['environment_presets', userId] });
+  }, [userId, qc]);
+
+  const deletePreset = useCallback(async (id: string) => {
+    if (!userId) return;
+    await supabase.from('environment_presets' as any).delete().eq('id', id).eq('user_id', userId);
+    qc.invalidateQueries({ queryKey: ['environment_presets', userId] });
+  }, [userId, qc]);
+
   return (
     <SystemContext.Provider value={{
       alters, frontEvents, currentFront, journalEntries, messages, tasks,
       safetyPlans, calendarEvents, checkIn, settings, handoffNotes, contextSnapshots,
-      alterPermissions, activeInterfaceMode, isLoading,
-      getAlter, setCurrentFronter, addFrontEvent, updateSettings,
+      alterPermissions, environmentPresets, activePreset, activeInterfaceMode, isLoading,
+      getAlter, isSectionVisible, setCurrentFronter, addFrontEvent, updateSettings,
       toggleTask, markMessageRead, updateCheckIn,
       createAlter, updateAlter, createJournalEntry, createTask, updateTask, deleteTask, createMessage,
       createSafetyPlan, createCalendarEvent, updateCalendarEvent, deleteCalendarEvent,
       createHandoffNote, createContextSnapshot, deleteContextSnapshot,
       setAlterPermission, hasPermission,
+      activatePreset, createPreset, updatePreset, deletePreset,
     }}>
       {children}
     </SystemContext.Provider>
