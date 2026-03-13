@@ -24,6 +24,8 @@ import QuickActionsPage from "./pages/QuickActionsPage";
 import SnapshotsPage from "./pages/SnapshotsPage";
 import MedicationsPage from "./pages/MedicationsPage";
 import SupportPortalPage from "./pages/SupportPortalPage";
+import SensoryProfilePage from "./pages/SensoryProfilePage";
+import CommunicationBoardPage from "./pages/CommunicationBoardPage";
 import LoginPage from "./pages/LoginPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
