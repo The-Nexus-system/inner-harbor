@@ -258,6 +258,37 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     enabled: !!userId,
   });
 
+  const handoffQ = useQuery({
+    queryKey: ['handoff_notes', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('handoff_notes' as any).select('*').eq('user_id', userId!).order('created_at', { ascending: false }).limit(50);
+      if (error) throw error;
+      return (data ?? []).map((r: any): HandoffNote => ({
+        id: r.id, frontEventId: r.front_event_id ?? undefined,
+        currentActivity: r.current_activity ?? undefined, unfinishedTasks: r.unfinished_tasks ?? undefined,
+        emotionalState: r.emotional_state ?? undefined, importantReminders: r.important_reminders ?? undefined,
+        warnings: r.warnings ?? undefined, createdAt: r.created_at,
+      }));
+    },
+    enabled: !!userId,
+  });
+
+  const snapshotQ = useQuery({
+    queryKey: ['context_snapshots', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('context_snapshots' as any).select('*').eq('user_id', userId!).order('snapshot_time', { ascending: false }).limit(50);
+      if (error) throw error;
+      return (data ?? []).map((r: any): ContextSnapshot => ({
+        id: r.id, snapshotTime: r.snapshot_time, frontAlterIds: r.front_alter_ids ?? [],
+        frontStatus: r.front_status ?? undefined, activeTasks: r.active_tasks ?? [],
+        calendarContext: r.calendar_context ?? [], mood: r.mood ?? undefined,
+        stress: r.stress ?? undefined, energy: r.energy ?? undefined,
+        notes: r.notes ?? undefined, location: r.location ?? undefined, createdAt: r.created_at,
+      }));
+    },
+    enabled: !!userId,
+  });
+
   // Derived data
   const alters = altersQ.data ?? [];
   const frontEvents = frontQ.data ?? [];
@@ -268,6 +299,8 @@ export function SystemProvider({ children }: { children: ReactNode }) {
   const calendarEvents = calendarQ.data ?? [];
   const checkIn = checkInQ.data ?? null;
   const settings = settingsQ.data ?? defaultSettings;
+  const handoffNotes = handoffQ.data ?? [];
+  const contextSnapshots = snapshotQ.data ?? [];
   const currentFront = frontEvents.find(e => !e.endTime) || null;
   const isLoading = altersQ.isLoading || frontQ.isLoading || tasksQ.isLoading;
 
