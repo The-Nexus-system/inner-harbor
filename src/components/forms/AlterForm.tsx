@@ -151,6 +151,18 @@ export function AlterForm({ alter, onSubmit, trigger }: AlterFormProps) {
           </div>
 
           <div className="space-y-1.5">
+            <Label htmlFor="alter-interface-mode">Interface mode</Label>
+            <Select value={form.interfaceMode || 'standard'} onValueChange={v => setForm(prev => ({ ...prev, interfaceMode: v as InterfaceMode }))}>
+              <SelectTrigger id="alter-interface-mode"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="standard">Standard — full features</SelectItem>
+                <SelectItem value="simplified">Simplified — reduced complexity, larger buttons</SelectItem>
+                <SelectItem value="minimal">Minimal — essential tools only</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">Choose a simpler interface for younger alters or those who prefer fewer options</p>
+          </div>
+          <div className="space-y-1.5">
             <Label htmlFor="alter-notes">Notes</Label>
             <Textarea id="alter-notes" value={form.notes || ''} onChange={e => set('notes', e.target.value)} placeholder="Anything else" rows={2} maxLength={1000} />
           </div>
