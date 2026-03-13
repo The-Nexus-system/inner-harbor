@@ -144,7 +144,7 @@ export default function IntegrationSettings() {
           {googleStatus === "connected" ? (
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="gap-1 text-emerald-600 border-emerald-300 bg-emerald-50 dark:bg-emerald-950 dark:border-emerald-800 dark:text-emerald-400">
+                <Badge variant="outline" className="gap-1 border-primary/30 bg-primary/10 text-primary">
                   <Check className="h-3 w-3" /> Connected
                 </Badge>
                 {googleEmail && <span className="text-sm text-muted-foreground">{googleEmail}</span>}
