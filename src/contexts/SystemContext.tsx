@@ -134,6 +134,7 @@ interface SystemContextType {
   alterPermissions: AlterPermission[];
   environmentPresets: EnvironmentPreset[];
   activePreset: EnvironmentPreset | null;
+  capacityBudget: CapacityBudget | null;
   activeInterfaceMode: InterfaceMode;
   isLoading: boolean;
   getAlter: (id: string) => Alter | undefined;
