@@ -80,6 +80,7 @@ const App = () => (
                         <Route path="/sensory" element={<SensoryProfilePage />} />
                         <Route path="/communication" element={<CommunicationBoardPage />} />
                         <Route path="/security" element={<SecurityDashboardPage />} />
+                        <Route path="/export" element={<ExportPage />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </AppLayout>
