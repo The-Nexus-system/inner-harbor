@@ -75,6 +75,8 @@ const App = () => (
                         <Route path="/snapshots" element={<SnapshotsPage />} />
                         <Route path="/medications" element={<MedicationsPage />} />
                         <Route path="/support" element={<SupportPortalPage />} />
+                        <Route path="/sensory" element={<SensoryProfilePage />} />
+                        <Route path="/communication" element={<CommunicationBoardPage />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </AppLayout>
