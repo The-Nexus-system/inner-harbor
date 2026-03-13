@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { 
   LayoutDashboard, Users, ArrowRightLeft, BookOpen, MessageSquare, 
-  CheckSquare, CalendarDays, Shield, Settings, LogOut, Leaf, Lightbulb, Clock, Zap
+  CheckSquare, CalendarDays, Shield, Settings, LogOut, Leaf, Lightbulb, Clock, Zap, Camera
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
