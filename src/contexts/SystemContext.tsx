@@ -295,6 +295,18 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     enabled: !!userId,
   });
 
+  const permissionsQ = useQuery({
+    queryKey: ['alter_permissions', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('alter_permissions' as any).select('*').eq('user_id', userId!);
+      if (error) throw error;
+      return (data ?? []).map((r: any): AlterPermission => ({
+        id: r.id, alterId: r.alter_id, scope: r.scope as PermissionScope, granted: r.granted,
+      }));
+    },
+    enabled: !!userId,
+  });
+
   // Derived data
   const alters = altersQ.data ?? [];
   const frontEvents = frontQ.data ?? [];
@@ -307,8 +319,21 @@ export function SystemProvider({ children }: { children: ReactNode }) {
   const settings = settingsQ.data ?? defaultSettings;
   const handoffNotes = handoffQ.data ?? [];
   const contextSnapshots = snapshotQ.data ?? [];
+  const alterPermissions = permissionsQ.data ?? [];
   const currentFront = frontEvents.find(e => !e.endTime) || null;
   const isLoading = altersQ.isLoading || frontQ.isLoading || tasksQ.isLoading;
+
+  // Compute active interface mode from current fronter
+  const activeInterfaceMode: InterfaceMode = (() => {
+    if (!settings.autoSwitchInterface || !currentFront) return 'standard';
+    const frontAlters = currentFront.alterIds.map(id => alters.find(a => a.id === id)).filter(Boolean);
+    if (frontAlters.length === 0) return 'standard';
+    // Use the most simplified mode among current fronters
+    const modes = frontAlters.map(a => a!.interfaceMode);
+    if (modes.includes('minimal')) return 'minimal';
+    if (modes.includes('simplified')) return 'simplified';
+    return 'standard';
+  })();
 
   const getAlter = useCallback((id: string) => alters.find(a => a.id === id), [alters]);
 
