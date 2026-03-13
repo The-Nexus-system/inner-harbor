@@ -132,9 +132,12 @@ interface SystemContextType {
   handoffNotes: HandoffNote[];
   contextSnapshots: ContextSnapshot[];
   alterPermissions: AlterPermission[];
+  environmentPresets: EnvironmentPreset[];
+  activePreset: EnvironmentPreset | null;
   activeInterfaceMode: InterfaceMode;
   isLoading: boolean;
   getAlter: (id: string) => Alter | undefined;
+  isSectionVisible: (section: DashboardSection) => boolean;
   setCurrentFronter: (alterIds: string[], status: FrontEvent['status']) => void;
   addFrontEvent: (event: FrontEvent) => void;
   updateSettings: (s: Partial<AppSettings>) => void;
@@ -157,6 +160,10 @@ interface SystemContextType {
   deleteContextSnapshot: (id: string) => Promise<void>;
   setAlterPermission: (alterId: string, scope: PermissionScope, granted: boolean) => Promise<void>;
   hasPermission: (alterId: string | undefined, scope: PermissionScope) => boolean;
+  activatePreset: (presetId: string | null) => Promise<void>;
+  createPreset: (data: Partial<EnvironmentPreset>) => Promise<void>;
+  updatePreset: (id: string, data: Partial<EnvironmentPreset>) => Promise<void>;
+  deletePreset: (id: string) => Promise<void>;
 }
 
 const defaultSettings: AppSettings = {
