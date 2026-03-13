@@ -17,7 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const moodLabels = ['', 'Very low', 'Low', 'Moderate', 'Good', 'Great'];
 
 export default function Dashboard() {
-  const { currentFront, getAlter, alters, tasks, messages, journalEntries, calendarEvents, safetyPlans, isLoading } = useSystem();
+  const { currentFront, getAlter, alters, tasks, messages, journalEntries, calendarEvents, safetyPlans, handoffNotes, isLoading } = useSystem();
   const { user } = useAuth();
   const [displayName, setDisplayName] = useState<string | null>(null);
 
