@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Eye, EarOff, Hand, Wind, Utensils, RotateCcw, Move } from "lucide-react";
+import { SensoryRadarChart } from "@/components/SensoryRadarChart";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSystem } from "@/contexts/SystemContext";
@@ -246,13 +247,21 @@ export default function SensoryProfilePage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="flex flex-wrap gap-2">
-                {SENSES.map(s => (
-                  <Badge key={s.key} variant="outline" className={sensitivityColor(p[s.key as keyof SensoryProfile] as number)}>
-                    <s.icon className="h-3 w-3 mr-1" />
-                    {s.label}: {sensitivityLabel(p[s.key as keyof SensoryProfile] as number)}
-                  </Badge>
-                ))}
+              <div className="flex flex-col sm:flex-row gap-4 items-center">
+                <SensoryRadarChart
+                  values={SENSES.map(s => ({
+                    label: s.label.slice(0, 3),
+                    value: p[s.key as keyof SensoryProfile] as number,
+                  }))}
+                />
+                <div className="flex flex-wrap gap-2 flex-1">
+                  {SENSES.map(s => (
+                    <Badge key={s.key} variant="outline" className={sensitivityColor(p[s.key as keyof SensoryProfile] as number)}>
+                      <s.icon className="h-3 w-3 mr-1" />
+                      {s.label}: {sensitivityLabel(p[s.key as keyof SensoryProfile] as number)}
+                    </Badge>
+                  ))}
+                </div>
               </div>
               {p.sensoryTriggers && (
                 <div><span className="text-xs font-medium text-muted-foreground">Triggers:</span> <span className="text-sm">{p.sensoryTriggers}</span></div>
