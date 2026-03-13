@@ -859,6 +859,39 @@ export type Database = {
         }
         Relationships: []
       }
+      login_history: {
+        Row: {
+          device_label: string | null
+          id: string
+          ip_address: string | null
+          login_at: string
+          logout_at: string | null
+          success: boolean
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          device_label?: string | null
+          id?: string
+          ip_address?: string | null
+          login_at?: string
+          logout_at?: string | null
+          success?: boolean
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          device_label?: string | null
+          id?: string
+          ip_address?: string | null
+          login_at?: string
+          logout_at?: string | null
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       medication_logs: {
         Row: {
           created_at: string
@@ -1176,10 +1209,50 @@ export type Database = {
         }
         Relationships: []
       }
+      share_access_log: {
+        Row: {
+          accessed_at: string
+          contact_id: string
+          id: string
+          ip_address: string | null
+          sections_viewed: string[]
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          accessed_at?: string
+          contact_id: string
+          id?: string
+          ip_address?: string | null
+          sections_viewed?: string[]
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          accessed_at?: string
+          contact_id?: string
+          id?: string
+          ip_address?: string | null
+          sections_viewed?: string[]
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "share_access_log_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "support_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_contacts: {
         Row: {
+          access_count: number
           created_at: string
           email: string | null
+          expires_at: string | null
           id: string
           is_active: boolean
           last_accessed_at: string | null
@@ -1193,8 +1266,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          access_count?: number
           created_at?: string
           email?: string | null
+          expires_at?: string | null
           id?: string
           is_active?: boolean
           last_accessed_at?: string | null
@@ -1208,8 +1283,10 @@ export type Database = {
           user_id: string
         }
         Update: {
+          access_count?: number
           created_at?: string
           email?: string | null
+          expires_at?: string | null
           id?: string
           is_active?: boolean
           last_accessed_at?: string | null
