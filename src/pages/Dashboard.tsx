@@ -45,10 +45,33 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto animate-fade-in">
-      <header>
-        <h1 className="text-2xl md:text-3xl font-heading font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">{greeting}. Here is what is happening today.</p>
+      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-heading font-bold text-foreground">Dashboard</h1>
+          <p className="text-muted-foreground mt-1">{greeting}. Here is what is happening today.</p>
+        </div>
+        <ContextSnapshotButton />
       </header>
+
+      {/* Latest handoff note */}
+      {handoffNotes.length > 0 && (
+        <Card className="border-l-4 border-l-primary/40" aria-label="Latest handoff note">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-2">
+              <HandHeart className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" aria-hidden="true" />
+              <div className="space-y-1 min-w-0">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Handoff note · {new Date(handoffNotes[0].createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </p>
+                {handoffNotes[0].currentActivity && <p className="text-sm">{handoffNotes[0].currentActivity}</p>}
+                {handoffNotes[0].emotionalState && <p className="text-sm text-muted-foreground">{handoffNotes[0].emotionalState}</p>}
+                {handoffNotes[0].importantReminders && <p className="text-sm font-medium">{handoffNotes[0].importantReminders}</p>}
+                {handoffNotes[0].warnings && <p className="text-sm text-destructive">⚠ {handoffNotes[0].warnings}</p>}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Current Front */}
       <Card aria-label="Current fronter information">

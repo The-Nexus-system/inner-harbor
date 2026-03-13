@@ -28,6 +28,7 @@ const items = [
   { title: "Insights", url: "/insights", icon: Lightbulb },
   { title: "Timeline", url: "/timeline", icon: Clock },
   { title: "Quick Actions", url: "/quick-actions", icon: Zap },
+  { title: "Snapshots", url: "/snapshots", icon: Camera },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
