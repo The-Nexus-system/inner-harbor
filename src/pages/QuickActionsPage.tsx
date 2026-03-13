@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  Activity, ArrowRightLeft, CalendarPlus, ShieldAlert, TreePalm, BookOpen, Zap
+  Activity, ArrowRightLeft, CalendarPlus, ShieldAlert, TreePalm, BookOpen, Zap, Camera, HandHeart
 } from "lucide-react";
+import { ContextSnapshotButton } from "@/components/ContextSnapshotButton";
+import { HandoffNoteForm } from "@/components/HandoffNoteForm";
 
 const quickActions = [
   { label: "Start check-in", description: "Log how you're feeling right now", icon: Activity, path: "/?action=checkin" },
