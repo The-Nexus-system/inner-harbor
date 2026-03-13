@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { 
   LayoutDashboard, Users, ArrowRightLeft, BookOpen, MessageSquare, 
-  CheckSquare, CalendarDays, Shield, Settings, LogOut, Leaf, Lightbulb, Clock, Zap, Camera, Pill, UserCheck
+  CheckSquare, CalendarDays, Shield, Settings, LogOut, Leaf, Lightbulb, Clock, Zap, Camera, Pill, UserCheck, Eye, MessageCircle
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -32,6 +32,8 @@ const items = [
   { title: "Quick Actions", url: "/quick-actions", icon: Zap },
   { title: "Snapshots", url: "/snapshots", icon: Camera },
   { title: "Support", url: "/support", icon: UserCheck },
+  { title: "Sensory", url: "/sensory", icon: Eye },
+  { title: "Communicate", url: "/communication", icon: MessageCircle },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 

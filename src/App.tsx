@@ -24,6 +24,8 @@ import QuickActionsPage from "./pages/QuickActionsPage";
 import SnapshotsPage from "./pages/SnapshotsPage";
 import MedicationsPage from "./pages/MedicationsPage";
 import SupportPortalPage from "./pages/SupportPortalPage";
+import SensoryProfilePage from "./pages/SensoryProfilePage";
+import CommunicationBoardPage from "./pages/CommunicationBoardPage";
 import LoginPage from "./pages/LoginPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
@@ -73,6 +75,8 @@ const App = () => (
                         <Route path="/snapshots" element={<SnapshotsPage />} />
                         <Route path="/medications" element={<MedicationsPage />} />
                         <Route path="/support" element={<SupportPortalPage />} />
+                        <Route path="/sensory" element={<SensoryProfilePage />} />
+                        <Route path="/communication" element={<CommunicationBoardPage />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </AppLayout>
