@@ -29,7 +29,8 @@ function mapAlter(r: DbAlter): Alter {
     frontingConfidence: (r.fronting_confidence as Alter['frontingConfidence']) ?? undefined,
     color: r.color ?? undefined, emoji: r.emoji ?? undefined, notes: r.notes ?? undefined,
     visibility: r.visibility as Alter['visibility'], privateFields: r.private_fields ?? undefined,
-    isActive: r.is_active, createdAt: r.created_at,
+    isActive: r.is_active, interfaceMode: ((r as any).interface_mode as Alter['interfaceMode']) ?? 'standard',
+    createdAt: r.created_at,
   };
 }
 
