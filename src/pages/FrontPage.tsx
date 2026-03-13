@@ -119,7 +119,13 @@ export default function FrontPage() {
             )}
           </fieldset>
 
-          <Button onClick={handleSwitch} className="tap-target" size="lg">Update front</Button>
+          <div className="flex gap-2 flex-wrap">
+            <Button onClick={handleSwitch} className="tap-target" size="lg">Update front</Button>
+            <Button variant="outline" onClick={() => setHandoffOpen(true)} className="tap-target" size="lg">
+              <HandHeart className="h-4 w-4 mr-1.5" aria-hidden="true" />
+              Leave a handoff note
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
