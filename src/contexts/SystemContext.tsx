@@ -472,7 +472,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     if (s.screenReaderOptimized !== undefined) dbUpdate.screen_reader_optimized = s.screenReaderOptimized;
     if (s.themeColor !== undefined) dbUpdate.theme_color = s.themeColor;
     if (s.customThemeHsl !== undefined) dbUpdate.custom_theme_hsl = s.customThemeHsl;
-
+    if (s.autoSwitchInterface !== undefined) (dbUpdate as any).auto_switch_interface = s.autoSwitchInterface;
     const { data: existing } = await supabase.from('app_settings').select('user_id').eq('user_id', userId).maybeSingle();
     if (existing) {
       await supabase.from('app_settings').update(dbUpdate).eq('user_id', userId);
