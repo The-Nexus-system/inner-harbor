@@ -2,7 +2,7 @@ import React, { createContext, useContext, useCallback, useEffect, type ReactNod
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import type { Alter, FrontEvent, JournalEntry, InternalMessage, SystemTask, SafetyPlan, CalendarEvent, DailyCheckIn, AppSettings, RecurrencePattern, HandoffNote, ContextSnapshot } from '@/types/system';
+import type { Alter, FrontEvent, JournalEntry, InternalMessage, SystemTask, SafetyPlan, CalendarEvent, DailyCheckIn, AppSettings, RecurrencePattern, HandoffNote, ContextSnapshot, AlterPermission, PermissionScope, InterfaceMode } from '@/types/system';
 import type { Database } from '@/integrations/supabase/types';
 
 type DbAlter = Database['public']['Tables']['alters']['Row'];
