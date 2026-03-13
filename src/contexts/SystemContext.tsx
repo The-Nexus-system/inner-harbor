@@ -517,6 +517,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     if (data.emoji !== undefined) update.emoji = data.emoji || null;
     if (data.notes !== undefined) update.notes = data.notes || null;
     if (data.visibility !== undefined) update.visibility = data.visibility;
+    if (data.interfaceMode !== undefined) (update as any).interface_mode = data.interfaceMode;
     await supabase.from('alters').update(update).eq('id', id).eq('user_id', userId);
     qc.invalidateQueries({ queryKey: ['alters', userId] });
   }, [userId, qc]);
