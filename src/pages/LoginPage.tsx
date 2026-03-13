@@ -1,24 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useInviteCode } from '@/hooks/useInviteCode';
 import { Navigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Key } from 'lucide-react';
 
 export default function LoginPage() {
   const { user, loading, signIn, signUp, resetPassword } = useAuth();
+  const { validateCode, redeemCode, checkInviteOnly, validating } = useInviteCode();
   const [tab, setTab] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
+  const [isInviteOnly, setIsInviteOnly] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [showReset, setShowReset] = useState(false);
+
+  useEffect(() => {
+    checkInviteOnly().then(setIsInviteOnly);
+  }, [checkInviteOnly]);
 
   if (loading) {
     return (
@@ -48,9 +56,27 @@ export default function LoginPage() {
       const result = await signIn(email, password);
       if (result.error) setError(result.error);
     } else {
+      // Validate invite code if invite-only
+      if (isInviteOnly) {
+        const validation = await validateCode(inviteCode);
+        if (!validation.valid) {
+          setError(validation.error || 'Invalid invite code.');
+          setSubmitting(false);
+          return;
+        }
+      }
       const result = await signUp(email, password, displayName);
-      if (result.error) setError(result.error);
-      else setMessage('Account created. Please check your email to confirm, then sign in.');
+      if (result.error) {
+        setError(result.error);
+      } else {
+        // Redeem code after successful signup
+        if (isInviteOnly && inviteCode) {
+          // We don't have user id yet since email isn't confirmed,
+          // but we increment use_count
+          await redeemCode(inviteCode, '');
+        }
+        setMessage('Account created. Please check your email to confirm, then sign in.');
+      }
     }
     setSubmitting(false);
   };
@@ -113,6 +139,25 @@ export default function LoginPage() {
                       />
                     </div>
                   </TabsContent>
+
+                  {tab === 'signup' && isInviteOnly && (
+                    <div className="space-y-2">
+                      <Label htmlFor="invite-code" className="flex items-center gap-1.5">
+                        <Key className="h-3.5 w-3.5" /> Invite code
+                      </Label>
+                      <Input
+                        id="invite-code"
+                        value={inviteCode}
+                        onChange={e => setInviteCode(e.target.value.toUpperCase())}
+                        placeholder="XXXX-XXXX"
+                        required
+                        className="tap-target font-mono tracking-wider"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Registration requires an invite code. Ask an existing user for one.
+                      </p>
+                    </div>
+                  )}
 
                   <div className="space-y-2">
                     <Label htmlFor="email">Email address</Label>

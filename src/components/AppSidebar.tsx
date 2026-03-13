@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { 
   LayoutDashboard, Users, ArrowRightLeft, BookOpen, MessageSquare, 
-  CheckSquare, CalendarDays, Shield, Settings, LogOut, Leaf, Lightbulb, Clock, Zap, Camera, Pill, UserCheck, Eye, MessageCircle, Download
+  CheckSquare, CalendarDays, Shield, Settings, LogOut, Leaf, Lightbulb, Clock, Zap, Camera, Pill, UserCheck, Eye, MessageCircle, Download, Rocket
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -36,6 +36,7 @@ const items = [
   { title: "Communicate", url: "/communication", icon: MessageCircle },
   { title: "Security", url: "/security", icon: Shield },
   { title: "Export", url: "/export", icon: Download },
+  { title: "Deployment", url: "/deployment", icon: Rocket },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 

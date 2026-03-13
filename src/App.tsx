@@ -29,6 +29,7 @@ import SensoryProfilePage from "./pages/SensoryProfilePage";
 import CommunicationBoardPage from "./pages/CommunicationBoardPage";
 import SecurityDashboardPage from "./pages/SecurityDashboardPage";
 import ExportPage from "./pages/ExportPage";
+import DeploymentPage from "./pages/DeploymentPage";
 import LoginPage from "./pages/LoginPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
@@ -83,6 +84,7 @@ const App = () => (
                         <Route path="/communication" element={<CommunicationBoardPage />} />
                         <Route path="/security" element={<SecurityDashboardPage />} />
                         <Route path="/export" element={<ExportPage />} />
+                        <Route path="/deployment" element={<DeploymentPage />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </AppLayout>

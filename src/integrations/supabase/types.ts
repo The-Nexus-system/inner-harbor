@@ -136,6 +136,27 @@ export type Database = {
         }
         Relationships: []
       }
+      app_config: {
+        Row: {
+          demo_mode: boolean
+          invite_only: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          demo_mode?: boolean
+          invite_only?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          demo_mode?: boolean
+          invite_only?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           auto_switch_interface: boolean
@@ -808,6 +829,48 @@ export type Database = {
           to_alter_ids?: string[]
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      invite_codes: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_uses: number
+          notes: string | null
+          use_count: number
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number
+          notes?: string | null
+          use_count?: number
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number
+          notes?: string | null
+          use_count?: number
+          used_at?: string | null
+          used_by?: string | null
         }
         Relationships: []
       }
