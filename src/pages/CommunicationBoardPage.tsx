@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,7 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Pencil, Trash2, MessageCircle, Volume2 } from "lucide-react";
+import { Plus, Pencil, Trash2, MessageCircle, Volume2, ArrowUpDown, Check } from "lucide-react";
+import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
+import { SortableContext, rectSortingStrategy, arrayMove } from "@dnd-kit/sortable";
+import { SortableCommCard } from "@/components/SortableCommCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -65,12 +68,18 @@ export default function CommunicationBoardPage() {
   const [editing, setEditing] = useState<CommCard | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [lastTapped, setLastTapped] = useState<string | null>(null);
+  const [reorderMode, setReorderMode] = useState(false);
 
   // Form
   const [fLabel, setFLabel] = useState('');
   const [fEmoji, setFEmoji] = useState('');
   const [fCategory, setFCategory] = useState('general');
   const [fIsPhrase, setFIsPhrase] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
+  );
 
   const fetchCards = useCallback(async () => {
     if (!user) return;
@@ -127,7 +136,6 @@ export default function CommunicationBoardPage() {
 
   const handleTap = (card: CommCard) => {
     setLastTapped(card.id);
-    // Speak aloud if supported
     if ('speechSynthesis' in window) {
       const u = new SpeechSynthesisUtterance(card.label);
       u.rate = 0.9;
@@ -136,11 +144,44 @@ export default function CommunicationBoardPage() {
     setTimeout(() => setLastTapped(null), 1200);
   };
 
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const currentCards = selectedCategory
+      ? cards.filter(c => c.category === selectedCategory)
+      : cards;
+
+    const oldIndex = currentCards.findIndex(c => c.id === active.id);
+    const newIndex = currentCards.findIndex(c => c.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reordered = arrayMove(currentCards, oldIndex, newIndex);
+
+    // Optimistic update
+    if (selectedCategory) {
+      const otherCards = cards.filter(c => c.category !== selectedCategory);
+      setCards([...otherCards, ...reordered.map((c, i) => ({ ...c, sortOrder: i }))]);
+    } else {
+      setCards(reordered.map((c, i) => ({ ...c, sortOrder: i })));
+    }
+
+    // Persist new sort orders
+    const updates = reordered.map((c, i) =>
+      supabase.from('communication_cards' as any).update({ sort_order: i }).eq('id', c.id)
+    );
+    await Promise.all(updates);
+  };
+
   const filtered = selectedCategory ? cards.filter(c => c.category === selectedCategory) : cards;
-  const grouped = CATEGORIES.map(cat => ({
-    ...cat,
-    cards: filtered.filter(c => c.category === cat.key),
-  })).filter(g => g.cards.length > 0);
+
+  // In reorder mode, show a flat list; in normal mode, group by category
+  const grouped = reorderMode
+    ? [{ key: 'all', label: 'All cards', cards: filtered }].filter(g => g.cards.length > 0)
+    : CATEGORIES.map(cat => ({
+        ...cat,
+        cards: filtered.filter(c => c.category === cat.key),
+      })).filter(g => g.cards.length > 0);
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto animate-fade-in">
@@ -150,6 +191,15 @@ export default function CommunicationBoardPage() {
           <p className="text-muted-foreground mt-1">Tap cards to communicate when words are hard. Cards will be spoken aloud.</p>
         </div>
         <div className="flex gap-2">
+          {cards.length > 1 && (
+            <Button
+              variant={reorderMode ? "default" : "outline"}
+              size="sm"
+              onClick={() => setReorderMode(!reorderMode)}
+            >
+              {reorderMode ? <><Check className="mr-2 h-4 w-4" /> Done</> : <><ArrowUpDown className="mr-2 h-4 w-4" /> Reorder</>}
+            </Button>
+          )}
           <Dialog open={formOpen} onOpenChange={(o) => { setFormOpen(o); if (!o) resetForm(); }}>
             <DialogTrigger asChild>
               <Button variant="outline"><Plus className="mr-2 h-4 w-4" /> Add card</Button>
@@ -193,6 +243,13 @@ export default function CommunicationBoardPage() {
         </div>
       </header>
 
+      {/* Reorder mode banner */}
+      {reorderMode && (
+        <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 text-sm text-center text-primary font-medium">
+          Drag cards to reorder them. Tap "Done" when finished.
+        </div>
+      )}
+
       {/* Category filter */}
       <div className="flex flex-wrap gap-2">
         <Badge
@@ -223,42 +280,28 @@ export default function CommunicationBoardPage() {
       )}
 
       {/* Board */}
-      {grouped.map(group => (
-        <div key={group.key}>
-          <h2 className="text-sm font-medium text-muted-foreground mb-2">{group.label}</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-            {group.cards.map(card => (
-              <button
-                key={card.id}
-                onClick={() => handleTap(card)}
-                className={cn(
-                  "relative group rounded-xl border-2 p-4 text-center transition-all duration-150",
-                  "hover:shadow-md active:scale-95 tap-target",
-                  "bg-card text-card-foreground border-border",
-                  card.isPhrase && "col-span-2",
-                  lastTapped === card.id && "ring-2 ring-primary border-primary bg-primary/10 scale-105"
-                )}
-                aria-label={`Say: ${card.label}`}
-              >
-                {card.emoji && <span className="text-3xl block mb-1">{card.emoji}</span>}
-                <span className={cn("font-medium", card.isPhrase ? "text-base" : "text-sm")}>{card.label}</span>
-                {lastTapped === card.id && (
-                  <Volume2 className="absolute top-2 right-2 h-4 w-4 text-primary animate-pulse" />
-                )}
-                {/* Edit/delete on hover */}
-                <div className="absolute top-1 left-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5">
-                  <button onClick={(e) => { e.stopPropagation(); openEdit(card); }} className="p-1 rounded hover:bg-muted" aria-label="Edit card">
-                    <Pencil className="h-3 w-3 text-muted-foreground" />
-                  </button>
-                  <button onClick={(e) => { e.stopPropagation(); handleDelete(card.id); }} className="p-1 rounded hover:bg-muted" aria-label="Delete card">
-                    <Trash2 className="h-3 w-3 text-destructive" />
-                  </button>
-                </div>
-              </button>
-            ))}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        {grouped.map(group => (
+          <div key={group.key}>
+            <h2 className="text-sm font-medium text-muted-foreground mb-2">{group.label}</h2>
+            <SortableContext items={group.cards.map(c => c.id)} strategy={rectSortingStrategy}>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                {group.cards.map(card => (
+                  <SortableCommCard
+                    key={card.id}
+                    card={card}
+                    lastTapped={lastTapped}
+                    onTap={handleTap}
+                    onEdit={openEdit}
+                    onDelete={handleDelete}
+                    reorderMode={reorderMode}
+                  />
+                ))}
+              </div>
+            </SortableContext>
           </div>
-        </div>
-      ))}
+        ))}
+      </DndContext>
     </div>
   );
 }
