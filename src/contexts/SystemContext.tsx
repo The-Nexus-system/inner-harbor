@@ -158,7 +158,7 @@ interface SystemContextType {
 const defaultSettings: AppSettings = {
   highContrast: false, darkMode: false, fontSize: 'medium', spacing: 'normal',
   reducedMotion: false, plainLanguage: false, soundOff: true, screenReaderOptimized: false,
-  themeColor: 'sage',
+  themeColor: 'sage', autoSwitchInterface: false,
 };
 
 const SystemContext = createContext<SystemContextType | null>(null);
