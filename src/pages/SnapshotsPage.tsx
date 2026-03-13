@@ -164,7 +164,6 @@ export default function SnapshotsPage() {
         title="Delete this snapshot?"
         description="This will permanently remove this context snapshot."
         confirmLabel="Delete"
-        variant="destructive"
         onConfirm={() => {
           if (deleteId) deleteContextSnapshot(deleteId);
           setDeleteId(null);
