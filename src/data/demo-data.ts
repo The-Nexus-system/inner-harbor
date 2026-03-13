@@ -20,7 +20,9 @@ export const demoAlters: Alter[] = [
     isActive: true,
     interfaceMode: 'standard',
     createdAt: '2024-01-15',
-    name: 'Sparks',
+  },
+  {
+    id: 'alter-2',
     pronouns: 'he/they',
     role: 'Protector',
     ageRange: '19–22',
