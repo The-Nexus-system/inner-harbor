@@ -11,15 +11,22 @@ import { Eye, EyeOff, Key } from 'lucide-react';
 
 export default function LoginPage() {
   const { user, loading, signIn, signUp, resetPassword } = useAuth();
+  const { validateCode, redeemCode, checkInviteOnly, validating } = useInviteCode();
   const [tab, setTab] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
+  const [isInviteOnly, setIsInviteOnly] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [showReset, setShowReset] = useState(false);
+
+  useEffect(() => {
+    checkInviteOnly().then(setIsInviteOnly);
+  }, [checkInviteOnly]);
 
   if (loading) {
     return (
