@@ -360,6 +360,11 @@ export function SystemProvider({ children }: { children: ReactNode }) {
 
   const getAlter = useCallback((id: string) => alters.find(a => a.id === id), [alters]);
 
+  const isSectionVisible = useCallback((section: DashboardSection): boolean => {
+    if (!activePreset) return true; // No preset = show everything
+    return activePreset.visibleSections.includes(section);
+  }, [activePreset]);
+
   // Apply settings to DOM
   useEffect(() => {
     const el = document.documentElement;
