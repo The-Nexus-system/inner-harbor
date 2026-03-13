@@ -18,10 +18,8 @@ export const demoAlters: Alter[] = [
     emoji: '🌊',
     visibility: 'shared',
     isActive: true,
+    interfaceMode: 'standard',
     createdAt: '2024-01-15',
-  },
-  {
-    id: 'alter-2',
     name: 'Sparks',
     pronouns: 'he/they',
     role: 'Protector',
