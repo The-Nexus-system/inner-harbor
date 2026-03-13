@@ -75,6 +75,7 @@ export const demoAlters: Alter[] = [
     notes: 'Rarely fronts. Manages internal scheduling and system communication.',
     visibility: 'shared',
     isActive: true,
+    interfaceMode: 'standard',
     createdAt: '2024-02-10',
   },
   {
