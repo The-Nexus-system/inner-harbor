@@ -7,6 +7,7 @@ import {
   exportAsText, exportAsJson,
   formatJournalForExport, formatFrontHistoryForExport, formatSafetyPlanForExport,
 } from "@/lib/export";
+import { logAuditEvent } from "@/lib/audit";
 
 function formatTasksForExport(tasks: Array<{ title: string; description?: string; category: string; assignedTo: string; isCompleted: boolean; dueDate?: string; createdAt: string }>) {
   const lines = ['MOSAIC — Tasks Export', `Exported: ${new Date().toLocaleDateString()}`, '', '---', ''];
