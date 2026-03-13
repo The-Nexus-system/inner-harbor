@@ -86,9 +86,28 @@ export default function ExportPage() {
   const { user } = useAuth();
   const {
     alters, frontEvents, journalEntries, messages, tasks,
-    calendarEvents, safetyPlans, checkIns, handoffNotes,
+    calendarEvents, safetyPlans, handoffNotes,
     contextSnapshots, medications, getAlter,
   } = useSystem();
+
+  // Check-ins need a separate query since context only has today's
+  const [allCheckIns, setAllCheckIns] = useState<Array<{
+    date: string; mood: number; stress: number; pain: number;
+    fatigue: number; dissociation: number; notes?: string;
+  }>>([]);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from('daily_check_ins').select('*').eq('user_id', user.id)
+      .order('check_date', { ascending: false }).limit(365)
+      .then(({ data }) => {
+        if (data) setAllCheckIns(data.map(r => ({
+          date: r.check_date, mood: r.mood, stress: r.stress,
+          pain: r.pain, fatigue: r.fatigue, dissociation: r.dissociation,
+          notes: r.notes ?? undefined,
+        })));
+      });
+  }, [user]);
 
   // ─── State ──────────────────────────────────────────────
   const [selectedTypes, setSelectedTypes] = useState<RecordType[]>(['journal', 'front', 'tasks']);
