@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
+import { HandoffNoteForm } from "@/components/HandoffNoteForm";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { HandHeart, ChevronDown } from "lucide-react";
 import type { FrontStatus } from "@/types/system";
 
 const statusLabels: Record<FrontStatus, string> = {
