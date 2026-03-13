@@ -2,7 +2,7 @@ import React, { createContext, useContext, useCallback, useEffect, type ReactNod
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import type { Alter, FrontEvent, JournalEntry, InternalMessage, SystemTask, SafetyPlan, CalendarEvent, DailyCheckIn, AppSettings, RecurrencePattern, HandoffNote, ContextSnapshot, AlterPermission, PermissionScope, InterfaceMode, EnvironmentPreset, DashboardSection, CapacityBudget, CapacityEntry } from '@/types/system';
+import type { Alter, FrontEvent, JournalEntry, InternalMessage, SystemTask, SafetyPlan, CalendarEvent, DailyCheckIn, AppSettings, RecurrencePattern, HandoffNote, ContextSnapshot, AlterPermission, PermissionScope, InterfaceMode, EnvironmentPreset, DashboardSection, CapacityBudget, CapacityEntry, SupportContact, SharedSection, Medication, MedicationLog, MedicationLogStatus } from '@/types/system';
 import type { Database } from '@/integrations/supabase/types';
 
 type DbAlter = Database['public']['Tables']['alters']['Row'];
@@ -135,6 +135,9 @@ interface SystemContextType {
   environmentPresets: EnvironmentPreset[];
   activePreset: EnvironmentPreset | null;
   capacityBudget: CapacityBudget | null;
+  supportContacts: SupportContact[];
+  medications: Medication[];
+  medicationLogs: MedicationLog[];
   activeInterfaceMode: InterfaceMode;
   isLoading: boolean;
   getAlter: (id: string) => Alter | undefined;
@@ -168,6 +171,13 @@ interface SystemContextType {
   updateCapacityBudget: (totalSpoons: number) => Promise<void>;
   addCapacityEntry: (label: string, cost: number) => Promise<void>;
   removeCapacityEntry: (entryId: string) => Promise<void>;
+  createSupportContact: (data: Partial<SupportContact>) => Promise<void>;
+  updateSupportContact: (id: string, data: Partial<SupportContact>) => Promise<void>;
+  deleteSupportContact: (id: string) => Promise<void>;
+  createMedication: (data: Partial<Medication>) => Promise<void>;
+  updateMedication: (id: string, data: Partial<Medication>) => Promise<void>;
+  deleteMedication: (id: string) => Promise<void>;
+  logMedication: (medicationId: string, status: MedicationLogStatus, scheduledTime?: string) => Promise<void>;
 }
 
 const defaultSettings: AppSettings = {
@@ -349,6 +359,57 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     enabled: !!userId,
   });
 
+  // Support contacts query
+  const supportContactsQ = useQuery({
+    queryKey: ['support_contacts', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('support_contacts' as any).select('*').eq('user_id', userId!).order('created_at');
+      if (error) throw error;
+      return (data ?? []).map((r: any): SupportContact => ({
+        id: r.id, name: r.name, role: r.role, email: r.email ?? undefined,
+        phone: r.phone ?? undefined, notes: r.notes ?? undefined,
+        shareToken: r.share_token, sharedSections: (r.shared_sections ?? []) as SharedSection[],
+        isActive: r.is_active, lastAccessedAt: r.last_accessed_at ?? undefined,
+        createdAt: r.created_at,
+      }));
+    },
+    enabled: !!userId,
+  });
+
+  // Medications query
+  const medicationsQ = useQuery({
+    queryKey: ['medications', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('medications' as any).select('*').eq('user_id', userId!).order('created_at');
+      if (error) throw error;
+      return (data ?? []).map((r: any): Medication => ({
+        id: r.id, name: r.name, dosage: r.dosage ?? undefined,
+        frequency: r.frequency, scheduleTimes: r.schedule_times ?? [],
+        prescriber: r.prescriber ?? undefined, pharmacy: r.pharmacy ?? undefined,
+        purpose: r.purpose ?? undefined, sideEffects: r.side_effects ?? undefined,
+        notes: r.notes ?? undefined, isActive: r.is_active,
+        startDate: r.start_date ?? undefined, endDate: r.end_date ?? undefined,
+        createdAt: r.created_at,
+      }));
+    },
+    enabled: !!userId,
+  });
+
+  // Medication logs query (today only for performance)
+  const medicationLogsQ = useQuery({
+    queryKey: ['medication_logs', userId, today],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('medication_logs' as any).select('*').eq('user_id', userId!).gte('taken_at', `${today}T00:00:00`).order('taken_at', { ascending: false });
+      if (error) throw error;
+      return (data ?? []).map((r: any): MedicationLog => ({
+        id: r.id, medicationId: r.medication_id, status: r.status,
+        scheduledTime: r.scheduled_time ?? undefined, takenAt: r.taken_at,
+        notes: r.notes ?? undefined, createdAt: r.created_at,
+      }));
+    },
+    enabled: !!userId,
+  });
+
   // Derived data
   const alters = altersQ.data ?? [];
   const frontEvents = frontQ.data ?? [];
@@ -365,6 +426,9 @@ export function SystemProvider({ children }: { children: ReactNode }) {
   const environmentPresets = presetsQ.data ?? [];
   const activePreset = environmentPresets.find(p => p.isActive) ?? null;
   const capacityBudget = capacityQ.data ?? null;
+  const supportContacts = supportContactsQ.data ?? [];
+  const medications = medicationsQ.data ?? [];
+  const medicationLogs = medicationLogsQ.data ?? [];
   const currentFront = frontEvents.find(e => !e.endTime) || null;
   const isLoading = altersQ.isLoading || frontQ.isLoading || tasksQ.isLoading;
 
@@ -373,7 +437,6 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     if (!settings.autoSwitchInterface || !currentFront) return 'standard';
     const frontAlters = currentFront.alterIds.map(id => alters.find(a => a.id === id)).filter(Boolean);
     if (frontAlters.length === 0) return 'standard';
-    // Use the most simplified mode among current fronters
     const modes = frontAlters.map(a => a!.interfaceMode);
     if (modes.includes('minimal')) return 'minimal';
     if (modes.includes('simplified')) return 'simplified';
@@ -383,7 +446,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
   const getAlter = useCallback((id: string) => alters.find(a => a.id === id), [alters]);
 
   const isSectionVisible = useCallback((section: DashboardSection): boolean => {
-    if (!activePreset) return true; // No preset = show everything
+    if (!activePreset) return true;
     return activePreset.visibleSections.includes(section);
   }, [activePreset]);
 
@@ -400,7 +463,6 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     // Theme color
     const themes = ['sage', 'ocean', 'lavender', 'rose', 'amber', 'forest'];
     themes.forEach(t => el.classList.remove(`theme-${t}`));
-    // Remove custom inline properties
     el.style.removeProperty('--primary');
     el.style.removeProperty('--ring');
     el.style.removeProperty('--sidebar-primary');
@@ -421,12 +483,10 @@ export function SystemProvider({ children }: { children: ReactNode }) {
 
   const setCurrentFronter = useCallback(async (alterIds: string[], status: FrontEvent['status']) => {
     if (!userId) return;
-    // End current fronts
     const { data: openEvents } = await supabase.from('front_events').select('id').eq('user_id', userId).is('end_time', null);
     if (openEvents?.length) {
       await supabase.from('front_events').update({ end_time: new Date().toISOString() }).in('id', openEvents.map(e => e.id));
     }
-    // Create new
     await supabase.from('front_events').insert([{
       user_id: userId,
       alter_ids: alterIds,
@@ -466,11 +526,9 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     qc.invalidateQueries({ queryKey: ['internal_messages', userId] });
   }, [userId, qc]);
 
-  // Debounced check-in autosave
   const checkInTimerRef = React.useRef<ReturnType<typeof setTimeout>>();
   const updateCheckIn = useCallback((c: Partial<DailyCheckIn>) => {
     if (!userId) return;
-    // Optimistic update in cache
     qc.setQueryData(['daily_check_ins', userId, today], (old: DailyCheckIn | null) => {
       if (old) return { ...old, ...c };
       return null;
@@ -480,19 +538,12 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     checkInTimerRef.current = setTimeout(async () => {
       const current = qc.getQueryData<DailyCheckIn | null>(['daily_check_ins', userId, today]);
       if (!current) {
-        // Create new check-in
         await supabase.from('daily_check_ins').insert([{
-          user_id: userId,
-          check_date: today,
-          mood: c.mood ?? 3,
-          stress: c.stress ?? 3,
-          pain: c.pain ?? 1,
-          fatigue: c.fatigue ?? 3,
-          dissociation: c.dissociation ?? 1,
-          notes: c.notes || null,
+          user_id: userId, check_date: today,
+          mood: c.mood ?? 3, stress: c.stress ?? 3, pain: c.pain ?? 1,
+          fatigue: c.fatigue ?? 3, dissociation: c.dissociation ?? 1, notes: c.notes || null,
         }]);
       } else {
-        // Update existing
         const updateData: Record<string, unknown> = {};
         if (c.mood !== undefined) updateData.mood = c.mood;
         if (c.stress !== undefined) updateData.stress = c.stress;
@@ -503,14 +554,13 @@ export function SystemProvider({ children }: { children: ReactNode }) {
         await supabase.from('daily_check_ins').update(updateData).eq('id', current.id);
       }
       qc.invalidateQueries({ queryKey: ['daily_check_ins', userId, today] });
-    }, 800); // 800ms debounce for autosave
+    }, 800);
   }, [userId, today, qc]);
 
   const updateSettings = useCallback(async (s: Partial<AppSettings>) => {
     if (!userId) return;
     const next = { ...settings, ...s };
     qc.setQueryData(['app_settings', userId], next);
-
     const dbUpdate: Record<string, unknown> = {};
     if (s.highContrast !== undefined) dbUpdate.high_contrast = s.highContrast;
     if (s.darkMode !== undefined) dbUpdate.dark_mode = s.darkMode;
@@ -532,7 +582,6 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     qc.invalidateQueries({ queryKey: ['app_settings', userId] });
   }, [userId, settings, qc]);
 
-  // CRUD mutations
   const createAlter = useCallback(async (data: Partial<Alter>) => {
     if (!userId) return;
     await supabase.from('alters').insert([{
@@ -636,8 +685,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
   const createSafetyPlan = useCallback(async (data: Partial<SafetyPlan>) => {
     if (!userId) return;
     await supabase.from('safety_plans').insert([{
-      user_id: userId,
-      title: data.title!,
+      user_id: userId, title: data.title!,
       type: data.type as Database['public']['Enums']['safety_plan_type'],
       steps: data.steps || [],
       trusted_contacts: JSON.parse(JSON.stringify(data.trustedContacts || [])),
@@ -649,17 +697,11 @@ export function SystemProvider({ children }: { children: ReactNode }) {
   const createCalendarEvent = useCallback(async (data: Partial<CalendarEvent>) => {
     if (!userId) return;
     await supabase.from('calendar_events').insert([{
-      user_id: userId,
-      title: data.title!,
-      event_date: data.date!,
-      event_time: data.time || null,
-      preferred_fronter: data.preferredFronter || null,
-      support_needed: data.supportNeeded || null,
-      sensory_prep: data.sensoryPrep || null,
-      recovery_time: data.recoveryTime || null,
-      transport_notes: data.transportNotes || null,
-      notes: data.notes || null,
-      reminder_minutes: data.reminderMinutes ?? null,
+      user_id: userId, title: data.title!, event_date: data.date!,
+      event_time: data.time || null, preferred_fronter: data.preferredFronter || null,
+      support_needed: data.supportNeeded || null, sensory_prep: data.sensoryPrep || null,
+      recovery_time: data.recoveryTime || null, transport_notes: data.transportNotes || null,
+      notes: data.notes || null, reminder_minutes: data.reminderMinutes ?? null,
     }]);
     qc.invalidateQueries({ queryKey: ['calendar_events', userId] });
   }, [userId, qc]);
@@ -690,12 +732,9 @@ export function SystemProvider({ children }: { children: ReactNode }) {
   const createHandoffNote = useCallback(async (data: Partial<HandoffNote>) => {
     if (!userId) return;
     await supabase.from('handoff_notes' as any).insert([{
-      user_id: userId,
-      front_event_id: data.frontEventId || null,
-      current_activity: data.currentActivity || null,
-      unfinished_tasks: data.unfinishedTasks || null,
-      emotional_state: data.emotionalState || null,
-      important_reminders: data.importantReminders || null,
+      user_id: userId, front_event_id: data.frontEventId || null,
+      current_activity: data.currentActivity || null, unfinished_tasks: data.unfinishedTasks || null,
+      emotional_state: data.emotionalState || null, important_reminders: data.importantReminders || null,
       warnings: data.warnings || null,
     }]);
     qc.invalidateQueries({ queryKey: ['handoff_notes', userId] });
@@ -706,16 +745,11 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     const incompleteTasks = tasks.filter(t => !t.isCompleted).slice(0, 10).map(t => ({ id: t.id, title: t.title }));
     const upcoming = calendarEvents.slice(0, 5).map(e => ({ id: e.id, title: e.title, time: e.time }));
     await supabase.from('context_snapshots' as any).insert([{
-      user_id: userId,
-      snapshot_time: new Date().toISOString(),
-      front_alter_ids: currentFront?.alterIds ?? [],
-      front_status: currentFront?.status ?? null,
-      active_tasks: incompleteTasks,
-      calendar_context: upcoming,
-      mood: checkIn?.mood ?? null,
-      stress: checkIn?.stress ?? null,
-      energy: null,
-      notes: snapshotNotes || null,
+      user_id: userId, snapshot_time: new Date().toISOString(),
+      front_alter_ids: currentFront?.alterIds ?? [], front_status: currentFront?.status ?? null,
+      active_tasks: incompleteTasks, calendar_context: upcoming,
+      mood: checkIn?.mood ?? null, stress: checkIn?.stress ?? null,
+      energy: null, notes: snapshotNotes || null,
     }]);
     qc.invalidateQueries({ queryKey: ['context_snapshots', userId] });
   }, [userId, qc, tasks, calendarEvents, currentFront, checkIn]);
@@ -728,28 +762,21 @@ export function SystemProvider({ children }: { children: ReactNode }) {
 
   const setAlterPermission = useCallback(async (alterId: string, scope: PermissionScope, granted: boolean) => {
     if (!userId) return;
-    // Upsert: delete existing then insert
     await supabase.from('alter_permissions' as any).delete().eq('alter_id', alterId).eq('scope', scope).eq('user_id', userId);
-    await supabase.from('alter_permissions' as any).insert([{
-      user_id: userId, alter_id: alterId, scope, granted,
-    }]);
+    await supabase.from('alter_permissions' as any).insert([{ user_id: userId, alter_id: alterId, scope, granted }]);
     qc.invalidateQueries({ queryKey: ['alter_permissions', userId] });
   }, [userId, qc]);
 
-  // Permission check: if no permission row exists for the alter+scope, default to granted (opt-in restrictions)
   const hasPermission = useCallback((alterId: string | undefined, scope: PermissionScope): boolean => {
-    if (!alterId) return true; // Unknown fronter = full access (emergency override principle)
+    if (!alterId) return true;
     const perm = alterPermissions.find(p => p.alterId === alterId && p.scope === scope);
-    if (!perm) return true; // No restriction set = allowed
+    if (!perm) return true;
     return perm.granted;
   }, [alterPermissions]);
 
-  // Environment preset mutations
   const activatePreset = useCallback(async (presetId: string | null) => {
     if (!userId) return;
-    // Deactivate all
     await supabase.from('environment_presets' as any).update({ is_active: false }).eq('user_id', userId);
-    // Activate selected
     if (presetId) {
       await supabase.from('environment_presets' as any).update({ is_active: true }).eq('id', presetId).eq('user_id', userId);
     }
@@ -759,9 +786,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
   const createPreset = useCallback(async (data: Partial<EnvironmentPreset>) => {
     if (!userId) return;
     await supabase.from('environment_presets' as any).insert([{
-      user_id: userId,
-      name: data.name || 'New Preset',
-      icon: data.icon || '🏠',
+      user_id: userId, name: data.name || 'New Preset', icon: data.icon || '🏠',
       color: data.color || null,
       visible_sections: data.visibleSections || ['front','tasks','messages','journal','calendar','safety','checkin','notes','insights','summary','trends','handoff'],
       sort_order: data.sortOrder ?? environmentPresets.length,
@@ -787,7 +812,6 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     qc.invalidateQueries({ queryKey: ['environment_presets', userId] });
   }, [userId, qc]);
 
-  // Capacity budget mutations
   const updateCapacityBudget = useCallback(async (totalSpoons: number) => {
     if (!userId) return;
     const today = new Date().toISOString().split('T')[0];
@@ -819,11 +843,91 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     qc.invalidateQueries({ queryKey: ['capacity_budget', userId] });
   }, [userId, qc, capacityBudget]);
 
+  // Support contact mutations
+  const createSupportContact = useCallback(async (data: Partial<SupportContact>) => {
+    if (!userId) return;
+    await supabase.from('support_contacts' as any).insert([{
+      user_id: userId, name: data.name!, role: data.role || 'caregiver',
+      email: data.email || null, phone: data.phone || null, notes: data.notes || null,
+      shared_sections: data.sharedSections || ['safety', 'calendar', 'tasks'],
+    }]);
+    qc.invalidateQueries({ queryKey: ['support_contacts', userId] });
+  }, [userId, qc]);
+
+  const updateSupportContact = useCallback(async (id: string, data: Partial<SupportContact>) => {
+    if (!userId) return;
+    const update: Record<string, any> = {};
+    if (data.name !== undefined) update.name = data.name;
+    if (data.role !== undefined) update.role = data.role;
+    if (data.email !== undefined) update.email = data.email || null;
+    if (data.phone !== undefined) update.phone = data.phone || null;
+    if (data.notes !== undefined) update.notes = data.notes || null;
+    if (data.sharedSections !== undefined) update.shared_sections = data.sharedSections;
+    if (data.isActive !== undefined) update.is_active = data.isActive;
+    await supabase.from('support_contacts' as any).update(update).eq('id', id).eq('user_id', userId);
+    qc.invalidateQueries({ queryKey: ['support_contacts', userId] });
+  }, [userId, qc]);
+
+  const deleteSupportContact = useCallback(async (id: string) => {
+    if (!userId) return;
+    await supabase.from('support_contacts' as any).delete().eq('id', id).eq('user_id', userId);
+    qc.invalidateQueries({ queryKey: ['support_contacts', userId] });
+  }, [userId, qc]);
+
+  // Medication mutations
+  const createMedication = useCallback(async (data: Partial<Medication>) => {
+    if (!userId) return;
+    await supabase.from('medications' as any).insert([{
+      user_id: userId, name: data.name!, dosage: data.dosage || null,
+      frequency: data.frequency || 'daily', schedule_times: data.scheduleTimes || [],
+      prescriber: data.prescriber || null, pharmacy: data.pharmacy || null,
+      purpose: data.purpose || null, side_effects: data.sideEffects || null,
+      notes: data.notes || null,
+    }]);
+    qc.invalidateQueries({ queryKey: ['medications', userId] });
+  }, [userId, qc]);
+
+  const updateMedication = useCallback(async (id: string, data: Partial<Medication>) => {
+    if (!userId) return;
+    const update: Record<string, any> = {};
+    if (data.name !== undefined) update.name = data.name;
+    if (data.dosage !== undefined) update.dosage = data.dosage || null;
+    if (data.frequency !== undefined) update.frequency = data.frequency;
+    if (data.scheduleTimes !== undefined) update.schedule_times = data.scheduleTimes;
+    if (data.prescriber !== undefined) update.prescriber = data.prescriber || null;
+    if (data.pharmacy !== undefined) update.pharmacy = data.pharmacy || null;
+    if (data.purpose !== undefined) update.purpose = data.purpose || null;
+    if (data.sideEffects !== undefined) update.side_effects = data.sideEffects || null;
+    if (data.notes !== undefined) update.notes = data.notes || null;
+    if (data.isActive !== undefined) update.is_active = data.isActive;
+    if (data.startDate !== undefined) update.start_date = data.startDate || null;
+    if (data.endDate !== undefined) update.end_date = data.endDate || null;
+    await supabase.from('medications' as any).update(update).eq('id', id).eq('user_id', userId);
+    qc.invalidateQueries({ queryKey: ['medications', userId] });
+  }, [userId, qc]);
+
+  const deleteMedication = useCallback(async (id: string) => {
+    if (!userId) return;
+    await supabase.from('medications' as any).delete().eq('id', id).eq('user_id', userId);
+    qc.invalidateQueries({ queryKey: ['medications', userId] });
+  }, [userId, qc]);
+
+  const logMedication = useCallback(async (medicationId: string, status: MedicationLogStatus, scheduledTime?: string) => {
+    if (!userId) return;
+    await supabase.from('medication_logs' as any).insert([{
+      user_id: userId, medication_id: medicationId, status,
+      scheduled_time: scheduledTime || null, taken_at: new Date().toISOString(),
+    }]);
+    qc.invalidateQueries({ queryKey: ['medication_logs', userId, today] });
+  }, [userId, qc, today]);
+
   return (
     <SystemContext.Provider value={{
       alters, frontEvents, currentFront, journalEntries, messages, tasks,
       safetyPlans, calendarEvents, checkIn, settings, handoffNotes, contextSnapshots,
-      alterPermissions, environmentPresets, activePreset, capacityBudget, activeInterfaceMode, isLoading,
+      alterPermissions, environmentPresets, activePreset, capacityBudget,
+      supportContacts, medications, medicationLogs,
+      activeInterfaceMode, isLoading,
       getAlter, isSectionVisible, setCurrentFronter, addFrontEvent, updateSettings,
       toggleTask, markMessageRead, updateCheckIn,
       createAlter, updateAlter, createJournalEntry, createTask, updateTask, deleteTask, createMessage,
@@ -832,6 +936,8 @@ export function SystemProvider({ children }: { children: ReactNode }) {
       setAlterPermission, hasPermission,
       activatePreset, createPreset, updatePreset, deletePreset,
       updateCapacityBudget, addCapacityEntry, removeCapacityEntry,
+      createSupportContact, updateSupportContact, deleteSupportContact,
+      createMedication, updateMedication, deleteMedication, logMedication,
     }}>
       {children}
     </SystemContext.Provider>

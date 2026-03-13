@@ -280,6 +280,41 @@ export default function Dashboard() {
         )}
       </div>
 
+      {/* Medications quick view */}
+      {isSectionVisible('medications') && medications.filter(m => m.isActive).length > 0 && (
+        <Card aria-label="Today's medications">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg font-heading flex items-center gap-2">
+              <Pill className="h-5 w-5" aria-hidden="true" /> Medications
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {medications.filter(m => m.isActive).slice(0, 5).map(med => {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const taken = medicationLogs.some(l => l.medicationId === med.id && l.takenAt.startsWith(todayStr));
+                return (
+                  <div key={med.id} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="font-medium truncate">{med.name}</span>
+                      {med.dosage && <span className="text-muted-foreground text-xs">{med.dosage}</span>}
+                    </div>
+                    {taken ? (
+                      <Badge variant="default" className="flex-shrink-0 text-xs"><Check className="h-3 w-3 mr-0.5" /> Done</Badge>
+                    ) : (
+                      <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => logMedication(med.id, 'taken')}>
+                        <Check className="h-3 w-3 mr-1" /> Take
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <Link to="/medications" className="text-sm text-primary underline mt-3 inline-block tap-target">View all medications</Link>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Check-in trends - full width */}
       {isSectionVisible('trends') && <CheckInTrends />}
     </div>
