@@ -15,6 +15,7 @@ const ALL_SECTIONS: { key: DashboardSection; label: string }[] = [
   { key: 'handoff', label: 'Handoff notes' },
   { key: 'checkin', label: 'Daily check-in' },
   { key: 'capacity', label: 'Energy budget' },
+  { key: 'medications', label: 'Medications' },
   { key: 'notes', label: 'Quick notes' },
   { key: 'tasks', label: 'Tasks' },
   { key: 'messages', label: 'Messages' },

@@ -817,6 +817,104 @@ export type Database = {
         }
         Relationships: []
       }
+      medication_logs: {
+        Row: {
+          created_at: string
+          id: string
+          medication_id: string
+          notes: string | null
+          scheduled_time: string | null
+          status: string
+          taken_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          medication_id: string
+          notes?: string | null
+          scheduled_time?: string | null
+          status?: string
+          taken_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          medication_id?: string
+          notes?: string | null
+          scheduled_time?: string | null
+          status?: string
+          taken_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medication_logs_medication_id_fkey"
+            columns: ["medication_id"]
+            isOneToOne: false
+            referencedRelation: "medications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medications: {
+        Row: {
+          created_at: string
+          dosage: string | null
+          end_date: string | null
+          frequency: string
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          pharmacy: string | null
+          prescriber: string | null
+          purpose: string | null
+          schedule_times: string[]
+          side_effects: string | null
+          start_date: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dosage?: string | null
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          pharmacy?: string | null
+          prescriber?: string | null
+          purpose?: string | null
+          schedule_times?: string[]
+          side_effects?: string | null
+          start_date?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dosage?: string | null
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          pharmacy?: string | null
+          prescriber?: string | null
+          purpose?: string | null
+          schedule_times?: string[]
+          side_effects?: string | null
+          start_date?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notification_subscriptions: {
         Row: {
           auth: string
@@ -969,6 +1067,54 @@ export type Database = {
           insight_key?: string
           status?: string
           title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      support_contacts: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          is_active: boolean
+          last_accessed_at: string | null
+          name: string
+          notes: string | null
+          phone: string | null
+          role: string
+          share_token: string | null
+          shared_sections: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          last_accessed_at?: string | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          role?: string
+          share_token?: string | null
+          shared_sections?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          last_accessed_at?: string | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          role?: string
+          share_token?: string | null
+          shared_sections?: Json
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

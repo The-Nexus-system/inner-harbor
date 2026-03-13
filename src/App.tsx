@@ -22,6 +22,8 @@ import InsightsPage from "./pages/InsightsPage";
 import TimelinePage from "./pages/TimelinePage";
 import QuickActionsPage from "./pages/QuickActionsPage";
 import SnapshotsPage from "./pages/SnapshotsPage";
+import MedicationsPage from "./pages/MedicationsPage";
+import SupportPortalPage from "./pages/SupportPortalPage";
 import LoginPage from "./pages/LoginPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
@@ -29,7 +31,7 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
+      staleTime: 1000 * 60 * 5,
       retry: 2,
       refetchOnWindowFocus: false,
     },
@@ -69,6 +71,8 @@ const App = () => (
                         <Route path="/timeline" element={<TimelinePage />} />
                         <Route path="/quick-actions" element={<QuickActionsPage />} />
                         <Route path="/snapshots" element={<SnapshotsPage />} />
+                        <Route path="/medications" element={<MedicationsPage />} />
+                        <Route path="/support" element={<SupportPortalPage />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </AppLayout>

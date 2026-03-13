@@ -76,7 +76,7 @@ export interface FrontEvent {
 
 export interface JournalEntry {
   id: string;
-  alterId?: string; // undefined = unknown fronter
+  alterId?: string;
   title?: string;
   content: string;
   mood?: MoodLevel;
@@ -89,7 +89,7 @@ export interface JournalEntry {
 export interface InternalMessage {
   id: string;
   fromAlterId?: string;
-  toAlterIds: string[]; // empty = system-wide
+  toAlterIds: string[];
   content: string;
   priority: 'low' | 'normal' | 'high' | 'urgent';
   isPinned: boolean;
@@ -178,7 +178,7 @@ export interface ContextSnapshot {
 
 export type DashboardSection =
   | 'front' | 'tasks' | 'messages' | 'journal' | 'calendar'
-  | 'safety' | 'checkin' | 'notes' | 'insights' | 'summary' | 'trends' | 'handoff' | 'capacity';
+  | 'safety' | 'checkin' | 'notes' | 'insights' | 'summary' | 'trends' | 'handoff' | 'capacity' | 'medications';
 
 export interface CapacityEntry {
   id: string;
@@ -221,4 +221,53 @@ export interface AppSettings {
   themeColor: ThemeColor;
   customThemeHsl?: string;
   autoSwitchInterface: boolean;
+}
+
+// Feature Group F: Support Portal
+export type SupportContactRole = 'caregiver' | 'therapist' | 'doctor' | 'family' | 'friend' | 'other';
+export type SharedSection = 'safety' | 'calendar' | 'tasks' | 'medications' | 'checkin';
+
+export interface SupportContact {
+  id: string;
+  name: string;
+  role: SupportContactRole;
+  email?: string;
+  phone?: string;
+  notes?: string;
+  shareToken: string;
+  sharedSections: SharedSection[];
+  isActive: boolean;
+  lastAccessedAt?: string;
+  createdAt: string;
+}
+
+// Feature Group G: Medication Tracking
+export type MedicationFrequency = 'daily' | 'twice-daily' | 'weekly' | 'as-needed' | 'custom';
+export type MedicationLogStatus = 'taken' | 'skipped' | 'late' | 'missed';
+
+export interface Medication {
+  id: string;
+  name: string;
+  dosage?: string;
+  frequency: MedicationFrequency;
+  scheduleTimes: string[];
+  prescriber?: string;
+  pharmacy?: string;
+  purpose?: string;
+  sideEffects?: string;
+  notes?: string;
+  isActive: boolean;
+  startDate?: string;
+  endDate?: string;
+  createdAt: string;
+}
+
+export interface MedicationLog {
+  id: string;
+  medicationId: string;
+  status: MedicationLogStatus;
+  scheduledTime?: string;
+  takenAt: string;
+  notes?: string;
+  createdAt: string;
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { 
   LayoutDashboard, Users, ArrowRightLeft, BookOpen, MessageSquare, 
-  CheckSquare, CalendarDays, Shield, Settings, LogOut, Leaf, Lightbulb, Clock, Zap, Camera
+  CheckSquare, CalendarDays, Shield, Settings, LogOut, Leaf, Lightbulb, Clock, Zap, Camera, Pill, UserCheck
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -15,6 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
+
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "System", url: "/system", icon: Users },
@@ -22,6 +23,7 @@ const items = [
   { title: "Journal", url: "/journal", icon: BookOpen },
   { title: "Messages", url: "/messages", icon: MessageSquare },
   { title: "Tasks", url: "/tasks", icon: CheckSquare },
+  { title: "Medications", url: "/medications", icon: Pill },
   { title: "Calendar", url: "/calendar", icon: CalendarDays },
   { title: "Safety", url: "/safety", icon: Shield },
   { title: "Grounding", url: "/grounding", icon: Leaf },
@@ -29,6 +31,7 @@ const items = [
   { title: "Timeline", url: "/timeline", icon: Clock },
   { title: "Quick Actions", url: "/quick-actions", icon: Zap },
   { title: "Snapshots", url: "/snapshots", icon: Camera },
+  { title: "Support", url: "/support", icon: UserCheck },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
