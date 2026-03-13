@@ -1,13 +1,19 @@
+import { useState } from "react";
 import { useSystem } from "@/contexts/SystemContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Pencil } from "lucide-react";
+import { Pencil, ShieldCheck } from "lucide-react";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
 import { AlterForm } from "@/components/forms/AlterForm";
+import { AlterPermissionsCard } from "@/components/AlterPermissionsCard";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
+const modeLabels = { standard: 'Standard', simplified: 'Simplified', minimal: 'Minimal' };
 
 export default function SystemPage() {
   const { alters, isLoading, createAlter, updateAlter } = useSystem();
+  const [permAlterId, setPermAlterId] = useState<string | null>(null);
 
   if (isLoading) return <PageSkeleton message="Loading system profiles..." />;
 
@@ -40,11 +46,22 @@ export default function SystemPage() {
                     <span>{alter.name}</span>
                     {alter.nickname && <span className="text-sm text-muted-foreground font-normal">({alter.nickname})</span>}
                   </CardTitle>
-                  <AlterForm
-                    alter={alter}
-                    onSubmit={data => updateAlter(alter.id, data)}
-                    trigger={<Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Edit ${alter.name}`}><Pencil className="h-3.5 w-3.5" /></Button>}
-                  />
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      aria-label={`Permissions for ${alter.name}`}
+                      onClick={() => setPermAlterId(permAlterId === alter.id ? null : alter.id)}
+                    >
+                      <ShieldCheck className="h-3.5 w-3.5" />
+                    </Button>
+                    <AlterForm
+                      alter={alter}
+                      onSubmit={data => updateAlter(alter.id, data)}
+                      trigger={<Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Edit ${alter.name}`}><Pencil className="h-3.5 w-3.5" /></Button>}
+                    />
+                  </div>
                 </div>
                 <p className="text-sm text-muted-foreground">{alter.pronouns}</p>
               </CardHeader>
@@ -61,10 +78,20 @@ export default function SystemPage() {
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   <Badge variant="outline" className="text-xs">{alter.visibility}</Badge>
                   {alter.frontingConfidence && <Badge variant="secondary" className="text-xs">Fronting confidence: {alter.frontingConfidence}</Badge>}
+                  {alter.interfaceMode !== 'standard' && (
+                    <Badge variant="secondary" className="text-xs">Mode: {modeLabels[alter.interfaceMode]}</Badge>
+                  )}
                 </div>
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+
+      {/* Permissions panel */}
+      {permAlterId && (
+        <div className="animate-fade-in">
+          <AlterPermissionsCard alterId={permAlterId} />
         </div>
       )}
     </div>
