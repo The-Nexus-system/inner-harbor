@@ -786,11 +786,43 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     qc.invalidateQueries({ queryKey: ['environment_presets', userId] });
   }, [userId, qc]);
 
+  // Capacity budget mutations
+  const updateCapacityBudget = useCallback(async (totalSpoons: number) => {
+    if (!userId) return;
+    const today = new Date().toISOString().split('T')[0];
+    if (capacityBudget) {
+      await supabase.from('capacity_budgets' as any).update({ total_spoons: totalSpoons }).eq('id', capacityBudget.id);
+    } else {
+      await supabase.from('capacity_budgets' as any).insert([{ user_id: userId, budget_date: today, total_spoons: totalSpoons }]);
+    }
+    qc.invalidateQueries({ queryKey: ['capacity_budget', userId] });
+  }, [userId, qc, capacityBudget]);
+
+  const addCapacityEntry = useCallback(async (label: string, cost: number) => {
+    if (!userId) return;
+    const today = new Date().toISOString().split('T')[0];
+    const newEntry: CapacityEntry = { id: crypto.randomUUID(), label, cost, time: new Date().toISOString() };
+    if (capacityBudget) {
+      const updated = [...capacityBudget.entries, newEntry];
+      await supabase.from('capacity_budgets' as any).update({ entries: updated }).eq('id', capacityBudget.id);
+    } else {
+      await supabase.from('capacity_budgets' as any).insert([{ user_id: userId, budget_date: today, entries: [newEntry] }]);
+    }
+    qc.invalidateQueries({ queryKey: ['capacity_budget', userId] });
+  }, [userId, qc, capacityBudget]);
+
+  const removeCapacityEntry = useCallback(async (entryId: string) => {
+    if (!userId || !capacityBudget) return;
+    const updated = capacityBudget.entries.filter(e => e.id !== entryId);
+    await supabase.from('capacity_budgets' as any).update({ entries: updated }).eq('id', capacityBudget.id);
+    qc.invalidateQueries({ queryKey: ['capacity_budget', userId] });
+  }, [userId, qc, capacityBudget]);
+
   return (
     <SystemContext.Provider value={{
       alters, frontEvents, currentFront, journalEntries, messages, tasks,
       safetyPlans, calendarEvents, checkIn, settings, handoffNotes, contextSnapshots,
-      alterPermissions, environmentPresets, activePreset, activeInterfaceMode, isLoading,
+      alterPermissions, environmentPresets, activePreset, capacityBudget, activeInterfaceMode, isLoading,
       getAlter, isSectionVisible, setCurrentFronter, addFrontEvent, updateSettings,
       toggleTask, markMessageRead, updateCheckIn,
       createAlter, updateAlter, createJournalEntry, createTask, updateTask, deleteTask, createMessage,
@@ -798,6 +830,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
       createHandoffNote, createContextSnapshot, deleteContextSnapshot,
       setAlterPermission, hasPermission,
       activatePreset, createPreset, updatePreset, deletePreset,
+      updateCapacityBudget, addCapacityEntry, removeCapacityEntry,
     }}>
       {children}
     </SystemContext.Provider>

@@ -131,6 +131,7 @@ export default function Dashboard() {
       {/* Grid of widgets */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {isSectionVisible('checkin') && <DailyCheckInWidget />}
+        {isSectionVisible('capacity') && <CapacityBudgetWidget />}
         {isSectionVisible('notes') && <QuickNotesWidget />}
 
         {isSectionVisible('tasks') && (
