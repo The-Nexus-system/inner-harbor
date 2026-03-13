@@ -30,6 +30,7 @@ export default function Dashboard() {
   const { currentFront, getAlter, alters, tasks, messages, journalEntries, calendarEvents, safetyPlans, handoffNotes, activePreset, isSectionVisible, medications, medicationLogs, logMedication, isLoading } = useSystem();
   const { user } = useAuth();
   const [displayName, setDisplayName] = useState<string | null>(null);
+  const [sensoryProfiles, setSensoryProfiles] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -41,6 +42,16 @@ export default function Dashboard() {
       .then(({ data }) => {
         setDisplayName(data?.display_name || data?.system_name || null);
       });
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("sensory_profiles" as any)
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at")
+      .then(({ data }) => setSensoryProfiles(data ?? []));
   }, [user]);
 
   if (isLoading) return <PageSkeleton message="Loading your dashboard..." />;
