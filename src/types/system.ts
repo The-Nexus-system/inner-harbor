@@ -188,5 +188,6 @@ export interface AppSettings {
   soundOff: boolean;
   screenReaderOptimized: boolean;
   themeColor: ThemeColor;
-  customThemeHsl?: string; // e.g. "200 40% 40%"
+  customThemeHsl?: string;
+  autoSwitchInterface: boolean;
 }
