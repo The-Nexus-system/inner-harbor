@@ -310,6 +310,39 @@ export type Database = {
         }
         Relationships: []
       }
+      capacity_budgets: {
+        Row: {
+          budget_date: string
+          created_at: string
+          entries: Json
+          id: string
+          notes: string | null
+          total_spoons: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          budget_date?: string
+          created_at?: string
+          entries?: Json
+          id?: string
+          notes?: string | null
+          total_spoons?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          budget_date?: string
+          created_at?: string
+          entries?: Json
+          id?: string
+          notes?: string | null
+          total_spoons?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       context_snapshots: {
         Row: {
           active_tasks: Json
