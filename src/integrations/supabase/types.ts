@@ -433,6 +433,45 @@ export type Database = {
         }
         Relationships: []
       }
+      environment_presets: {
+        Row: {
+          color: string | null
+          created_at: string
+          icon: string
+          id: string
+          is_active: boolean
+          name: string
+          sort_order: number
+          updated_at: string
+          user_id: string
+          visible_sections: Json
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          sort_order?: number
+          updated_at?: string
+          user_id: string
+          visible_sections?: Json
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+          updated_at?: string
+          user_id?: string
+          visible_sections?: Json
+        }
+        Relationships: []
+      }
       external_calendars: {
         Row: {
           calendar_account_id: string
