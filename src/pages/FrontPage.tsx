@@ -25,9 +25,11 @@ const statusLabels: Record<FrontStatus, string> = {
 };
 
 export default function FrontPage() {
-  const { alters, frontEvents, currentFront, getAlter, setCurrentFronter, isLoading } = useSystem();
+  const { alters, frontEvents, currentFront, getAlter, setCurrentFronter, handoffNotes, isLoading } = useSystem();
   const [selectedAlters, setSelectedAlters] = useState<string[]>(currentFront?.alterIds || []);
   const [status, setStatus] = useState<FrontStatus>(currentFront?.status || 'fronting');
+  const [handoffOpen, setHandoffOpen] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
 
   if (isLoading) return <PageSkeleton message="Loading front tracking..." />;
 
