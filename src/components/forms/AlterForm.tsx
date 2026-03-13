@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Pencil } from 'lucide-react';
-import type { Alter } from '@/types/system';
+import type { Alter, InterfaceMode } from '@/types/system';
 
 interface AlterFormProps {
   alter?: Alter;
