@@ -605,14 +605,54 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     qc.invalidateQueries({ queryKey: ['calendar_events', userId] });
   }, [userId, qc]);
 
+  const createHandoffNote = useCallback(async (data: Partial<HandoffNote>) => {
+    if (!userId) return;
+    await supabase.from('handoff_notes' as any).insert([{
+      user_id: userId,
+      front_event_id: data.frontEventId || null,
+      current_activity: data.currentActivity || null,
+      unfinished_tasks: data.unfinishedTasks || null,
+      emotional_state: data.emotionalState || null,
+      important_reminders: data.importantReminders || null,
+      warnings: data.warnings || null,
+    }]);
+    qc.invalidateQueries({ queryKey: ['handoff_notes', userId] });
+  }, [userId, qc]);
+
+  const createContextSnapshot = useCallback(async (snapshotNotes?: string) => {
+    if (!userId) return;
+    const incompleteTasks = tasks.filter(t => !t.isCompleted).slice(0, 10).map(t => ({ id: t.id, title: t.title }));
+    const upcoming = calendarEvents.slice(0, 5).map(e => ({ id: e.id, title: e.title, time: e.time }));
+    await supabase.from('context_snapshots' as any).insert([{
+      user_id: userId,
+      snapshot_time: new Date().toISOString(),
+      front_alter_ids: currentFront?.alterIds ?? [],
+      front_status: currentFront?.status ?? null,
+      active_tasks: incompleteTasks,
+      calendar_context: upcoming,
+      mood: checkIn?.mood ?? null,
+      stress: checkIn?.stress ?? null,
+      energy: null,
+      notes: snapshotNotes || null,
+    }]);
+    qc.invalidateQueries({ queryKey: ['context_snapshots', userId] });
+  }, [userId, qc, tasks, calendarEvents, currentFront, checkIn]);
+
+  const deleteContextSnapshot = useCallback(async (id: string) => {
+    if (!userId) return;
+    await supabase.from('context_snapshots' as any).delete().eq('id', id).eq('user_id', userId);
+    qc.invalidateQueries({ queryKey: ['context_snapshots', userId] });
+  }, [userId, qc]);
+
   return (
     <SystemContext.Provider value={{
       alters, frontEvents, currentFront, journalEntries, messages, tasks,
-      safetyPlans, calendarEvents, checkIn, settings, isLoading,
+      safetyPlans, calendarEvents, checkIn, settings, handoffNotes, contextSnapshots, isLoading,
       getAlter, setCurrentFronter, addFrontEvent, updateSettings,
       toggleTask, markMessageRead, updateCheckIn,
       createAlter, updateAlter, createJournalEntry, createTask, updateTask, deleteTask, createMessage,
       createSafetyPlan, createCalendarEvent, updateCalendarEvent, deleteCalendarEvent,
+      createHandoffNote, createContextSnapshot, deleteContextSnapshot,
     }}>
       {children}
     </SystemContext.Provider>
