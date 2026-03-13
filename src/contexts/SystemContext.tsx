@@ -314,6 +314,20 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     enabled: !!userId,
   });
 
+  const presetsQ = useQuery({
+    queryKey: ['environment_presets', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('environment_presets' as any).select('*').eq('user_id', userId!).order('sort_order');
+      if (error) throw error;
+      return (data ?? []).map((r: any): EnvironmentPreset => ({
+        id: r.id, name: r.name, icon: r.icon, color: r.color ?? undefined,
+        visibleSections: (r.visible_sections ?? []) as DashboardSection[],
+        isActive: r.is_active, sortOrder: r.sort_order, createdAt: r.created_at,
+      }));
+    },
+    enabled: !!userId,
+  });
+
   // Derived data
   const alters = altersQ.data ?? [];
   const frontEvents = frontQ.data ?? [];
@@ -327,6 +341,8 @@ export function SystemProvider({ children }: { children: ReactNode }) {
   const handoffNotes = handoffQ.data ?? [];
   const contextSnapshots = snapshotQ.data ?? [];
   const alterPermissions = permissionsQ.data ?? [];
+  const environmentPresets = presetsQ.data ?? [];
+  const activePreset = environmentPresets.find(p => p.isActive) ?? null;
   const currentFront = frontEvents.find(e => !e.endTime) || null;
   const isLoading = altersQ.isLoading || frontQ.isLoading || tasksQ.isLoading;
 
