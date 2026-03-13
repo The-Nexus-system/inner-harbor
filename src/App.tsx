@@ -26,6 +26,7 @@ import MedicationsPage from "./pages/MedicationsPage";
 import SupportPortalPage from "./pages/SupportPortalPage";
 import SensoryProfilePage from "./pages/SensoryProfilePage";
 import CommunicationBoardPage from "./pages/CommunicationBoardPage";
+import SecurityDashboardPage from "./pages/SecurityDashboardPage";
 import LoginPage from "./pages/LoginPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
