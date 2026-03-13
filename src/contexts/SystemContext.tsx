@@ -127,6 +127,8 @@ interface SystemContextType {
   calendarEvents: CalendarEvent[];
   checkIn: DailyCheckIn | null;
   settings: AppSettings;
+  handoffNotes: HandoffNote[];
+  contextSnapshots: ContextSnapshot[];
   isLoading: boolean;
   getAlter: (id: string) => Alter | undefined;
   setCurrentFronter: (alterIds: string[], status: FrontEvent['status']) => void;
@@ -146,6 +148,9 @@ interface SystemContextType {
   createCalendarEvent: (data: Partial<CalendarEvent>) => Promise<void>;
   updateCalendarEvent: (id: string, data: Partial<CalendarEvent>) => Promise<void>;
   deleteCalendarEvent: (id: string) => Promise<void>;
+  createHandoffNote: (data: Partial<HandoffNote>) => Promise<void>;
+  createContextSnapshot: (notes?: string) => Promise<void>;
+  deleteContextSnapshot: (id: string) => Promise<void>;
 }
 
 const defaultSettings: AppSettings = {
