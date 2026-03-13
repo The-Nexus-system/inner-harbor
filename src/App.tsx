@@ -21,6 +21,7 @@ import SettingsPage from "./pages/SettingsPage";
 import InsightsPage from "./pages/InsightsPage";
 import TimelinePage from "./pages/TimelinePage";
 import QuickActionsPage from "./pages/QuickActionsPage";
+import SnapshotsPage from "./pages/SnapshotsPage";
 import LoginPage from "./pages/LoginPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
