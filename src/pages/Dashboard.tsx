@@ -357,20 +357,29 @@ export default function Dashboard() {
                         <span className="text-sm font-medium">{p.label}</span>
                         {alterName && <Badge variant="outline" className="text-xs">{alterName}</Badge>}
                       </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {senses.map(s => (
-                          <Badge
-                            key={s.label}
-                            variant="outline"
-                            className={
-                              s.val >= 5 ? 'bg-destructive/15 text-destructive border-destructive/30' :
-                              s.val >= 4 ? 'bg-primary/15 text-primary border-primary/30' :
-                              s.val <= 1 ? 'bg-muted text-muted-foreground' : ''
-                            }
-                          >
-                            <s.icon className="h-3 w-3 mr-0.5" />{s.label}: {s.val}
-                          </Badge>
-                        ))}
+                      <div className="flex items-center gap-3">
+                        <SensoryRadarChart
+                          values={senses.map(s => ({ label: s.label, value: s.val }))}
+                          size={120}
+                        />
+                        <div className="flex flex-wrap gap-1.5 flex-1">
+                          {senses.filter(s => s.val >= 4 || s.val <= 1).map(s => (
+                            <Badge
+                              key={s.label}
+                              variant="outline"
+                              className={
+                                s.val >= 5 ? 'bg-destructive/15 text-destructive border-destructive/30' :
+                                s.val >= 4 ? 'bg-primary/15 text-primary border-primary/30' :
+                                'bg-muted text-muted-foreground'
+                              }
+                            >
+                              <s.icon className="h-3 w-3 mr-0.5" />{s.label}: {s.val}
+                            </Badge>
+                          ))}
+                          {senses.every(s => s.val > 1 && s.val < 4) && (
+                            <span className="text-xs text-muted-foreground">All moderate</span>
+                          )}
+                        </div>
                       </div>
                       {highSenses.length > 0 && p.coping_strategies && (
                         <p className="text-xs text-muted-foreground">💡 {p.coping_strategies.slice(0, 80)}{p.coping_strategies.length > 80 ? '…' : ''}</p>
