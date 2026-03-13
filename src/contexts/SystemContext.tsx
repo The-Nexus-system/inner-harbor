@@ -2,7 +2,7 @@ import React, { createContext, useContext, useCallback, useEffect, type ReactNod
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import type { Alter, FrontEvent, JournalEntry, InternalMessage, SystemTask, SafetyPlan, CalendarEvent, DailyCheckIn, AppSettings, RecurrencePattern, HandoffNote, ContextSnapshot, AlterPermission, PermissionScope, InterfaceMode, EnvironmentPreset, DashboardSection } from '@/types/system';
+import type { Alter, FrontEvent, JournalEntry, InternalMessage, SystemTask, SafetyPlan, CalendarEvent, DailyCheckIn, AppSettings, RecurrencePattern, HandoffNote, ContextSnapshot, AlterPermission, PermissionScope, InterfaceMode, EnvironmentPreset, DashboardSection, CapacityBudget, CapacityEntry } from '@/types/system';
 import type { Database } from '@/integrations/supabase/types';
 
 type DbAlter = Database['public']['Tables']['alters']['Row'];
@@ -134,6 +134,7 @@ interface SystemContextType {
   alterPermissions: AlterPermission[];
   environmentPresets: EnvironmentPreset[];
   activePreset: EnvironmentPreset | null;
+  capacityBudget: CapacityBudget | null;
   activeInterfaceMode: InterfaceMode;
   isLoading: boolean;
   getAlter: (id: string) => Alter | undefined;
@@ -164,6 +165,9 @@ interface SystemContextType {
   createPreset: (data: Partial<EnvironmentPreset>) => Promise<void>;
   updatePreset: (id: string, data: Partial<EnvironmentPreset>) => Promise<void>;
   deletePreset: (id: string) => Promise<void>;
+  updateCapacityBudget: (totalSpoons: number) => Promise<void>;
+  addCapacityEntry: (label: string, cost: number) => Promise<void>;
+  removeCapacityEntry: (entryId: string) => Promise<void>;
 }
 
 const defaultSettings: AppSettings = {
@@ -328,6 +332,23 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     enabled: !!userId,
   });
 
+  const capacityQ = useQuery({
+    queryKey: ['capacity_budget', userId],
+    queryFn: async () => {
+      const today = new Date().toISOString().split('T')[0];
+      const { data, error } = await supabase.from('capacity_budgets' as any).select('*').eq('user_id', userId!).eq('budget_date', today).maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      const r = data as any;
+      return {
+        id: r.id, budgetDate: r.budget_date, totalSpoons: r.total_spoons,
+        entries: (r.entries ?? []) as CapacityEntry[],
+        notes: r.notes ?? undefined, createdAt: r.created_at,
+      } as CapacityBudget;
+    },
+    enabled: !!userId,
+  });
+
   // Derived data
   const alters = altersQ.data ?? [];
   const frontEvents = frontQ.data ?? [];
@@ -343,6 +364,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
   const alterPermissions = permissionsQ.data ?? [];
   const environmentPresets = presetsQ.data ?? [];
   const activePreset = environmentPresets.find(p => p.isActive) ?? null;
+  const capacityBudget = capacityQ.data ?? null;
   const currentFront = frontEvents.find(e => !e.endTime) || null;
   const isLoading = altersQ.isLoading || frontQ.isLoading || tasksQ.isLoading;
 
@@ -765,11 +787,43 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     qc.invalidateQueries({ queryKey: ['environment_presets', userId] });
   }, [userId, qc]);
 
+  // Capacity budget mutations
+  const updateCapacityBudget = useCallback(async (totalSpoons: number) => {
+    if (!userId) return;
+    const today = new Date().toISOString().split('T')[0];
+    if (capacityBudget) {
+      await supabase.from('capacity_budgets' as any).update({ total_spoons: totalSpoons }).eq('id', capacityBudget.id);
+    } else {
+      await supabase.from('capacity_budgets' as any).insert([{ user_id: userId, budget_date: today, total_spoons: totalSpoons }]);
+    }
+    qc.invalidateQueries({ queryKey: ['capacity_budget', userId] });
+  }, [userId, qc, capacityBudget]);
+
+  const addCapacityEntry = useCallback(async (label: string, cost: number) => {
+    if (!userId) return;
+    const today = new Date().toISOString().split('T')[0];
+    const newEntry: CapacityEntry = { id: crypto.randomUUID(), label, cost, time: new Date().toISOString() };
+    if (capacityBudget) {
+      const updated = [...capacityBudget.entries, newEntry];
+      await supabase.from('capacity_budgets' as any).update({ entries: updated }).eq('id', capacityBudget.id);
+    } else {
+      await supabase.from('capacity_budgets' as any).insert([{ user_id: userId, budget_date: today, entries: [newEntry] }]);
+    }
+    qc.invalidateQueries({ queryKey: ['capacity_budget', userId] });
+  }, [userId, qc, capacityBudget]);
+
+  const removeCapacityEntry = useCallback(async (entryId: string) => {
+    if (!userId || !capacityBudget) return;
+    const updated = capacityBudget.entries.filter(e => e.id !== entryId);
+    await supabase.from('capacity_budgets' as any).update({ entries: updated }).eq('id', capacityBudget.id);
+    qc.invalidateQueries({ queryKey: ['capacity_budget', userId] });
+  }, [userId, qc, capacityBudget]);
+
   return (
     <SystemContext.Provider value={{
       alters, frontEvents, currentFront, journalEntries, messages, tasks,
       safetyPlans, calendarEvents, checkIn, settings, handoffNotes, contextSnapshots,
-      alterPermissions, environmentPresets, activePreset, activeInterfaceMode, isLoading,
+      alterPermissions, environmentPresets, activePreset, capacityBudget, activeInterfaceMode, isLoading,
       getAlter, isSectionVisible, setCurrentFronter, addFrontEvent, updateSettings,
       toggleTask, markMessageRead, updateCheckIn,
       createAlter, updateAlter, createJournalEntry, createTask, updateTask, deleteTask, createMessage,
@@ -777,6 +831,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
       createHandoffNote, createContextSnapshot, deleteContextSnapshot,
       setAlterPermission, hasPermission,
       activatePreset, createPreset, updatePreset, deletePreset,
+      updateCapacityBudget, addCapacityEntry, removeCapacityEntry,
     }}>
       {children}
     </SystemContext.Provider>

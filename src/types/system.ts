@@ -178,7 +178,23 @@ export interface ContextSnapshot {
 
 export type DashboardSection =
   | 'front' | 'tasks' | 'messages' | 'journal' | 'calendar'
-  | 'safety' | 'checkin' | 'notes' | 'insights' | 'summary' | 'trends' | 'handoff';
+  | 'safety' | 'checkin' | 'notes' | 'insights' | 'summary' | 'trends' | 'handoff' | 'capacity';
+
+export interface CapacityEntry {
+  id: string;
+  label: string;
+  cost: number;
+  time: string;
+}
+
+export interface CapacityBudget {
+  id: string;
+  budgetDate: string;
+  totalSpoons: number;
+  entries: CapacityEntry[];
+  notes?: string;
+  createdAt: string;
+}
 
 export interface EnvironmentPreset {
   id: string;

@@ -10,6 +10,7 @@ import { InsightCard } from "@/components/InsightCard";
 import { DailySummaryCard } from "@/components/DailySummaryCard";
 import { ContextSnapshotButton } from "@/components/ContextSnapshotButton";
 import { EnvironmentPresetSwitcher } from "@/components/EnvironmentPresetSwitcher";
+import { CapacityBudgetWidget } from "@/components/CapacityBudgetWidget";
 import { Link } from "react-router-dom";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
 import { supabase } from "@/integrations/supabase/client";
@@ -130,6 +131,7 @@ export default function Dashboard() {
       {/* Grid of widgets */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {isSectionVisible('checkin') && <DailyCheckInWidget />}
+        {isSectionVisible('capacity') && <CapacityBudgetWidget />}
         {isSectionVisible('notes') && <QuickNotesWidget />}
 
         {isSectionVisible('tasks') && (

@@ -262,6 +262,76 @@
   }
 }
 
+/* ============================================================
+   Interface comfort polish (Feature Group P)
+   ============================================================ */
+
+/* Gentle card transitions */
+.card,
+[class*="Card"] {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+}
+
+/* Soft hover lift — respects reduced motion */
+@media (prefers-reduced-motion: no-preference) {
+  .card:hover,
+  [class*="Card"]:hover {
+    box-shadow: 0 4px 20px -6px hsl(var(--primary) / 0.1);
+  }
+}
+
+/* Breathing animation for grounding */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+
+.animate-breathe {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+.reduce-motion .animate-breathe {
+  animation: none;
+}
+
+/* Gentle fade-in for page transitions */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.35s ease-out;
+}
+
+.reduce-motion .animate-fade-in {
+  animation: none;
+}
+
+/* Soft pulse for attention without anxiety */
+@keyframes soft-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.animate-soft-pulse {
+  animation: soft-pulse 3s ease-in-out infinite;
+}
+
+.reduce-motion .animate-soft-pulse {
+  animation: none;
+}
+
+/* Comfort spacing for spacious mode */
+.spacing-spacious .card,
+.spacing-spacious [class*="Card"] {
+  padding: 0.5rem;
+}
+
+.spacing-spacious .space-y-6 > * + * {
+  margin-top: 2rem;
+}
+
 /* Simplified interface mode */
 .simplified-mode .tap-target {
   min-height: 52px;
@@ -275,4 +345,9 @@
 
 .simplified-mode .card {
   padding: 0.25rem;
+}
+
+/* Progress bar color overrides */
+[role="progressbar"] [data-state] {
+  transition: width 0.5s ease-out;
 }
