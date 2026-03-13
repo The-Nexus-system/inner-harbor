@@ -56,9 +56,27 @@ export default function LoginPage() {
       const result = await signIn(email, password);
       if (result.error) setError(result.error);
     } else {
+      // Validate invite code if invite-only
+      if (isInviteOnly) {
+        const validation = await validateCode(inviteCode);
+        if (!validation.valid) {
+          setError(validation.error || 'Invalid invite code.');
+          setSubmitting(false);
+          return;
+        }
+      }
       const result = await signUp(email, password, displayName);
-      if (result.error) setError(result.error);
-      else setMessage('Account created. Please check your email to confirm, then sign in.');
+      if (result.error) {
+        setError(result.error);
+      } else {
+        // Redeem code after successful signup
+        if (isInviteOnly && inviteCode) {
+          // We don't have user id yet since email isn't confirmed,
+          // but we increment use_count
+          await redeemCode(inviteCode, '');
+        }
+        setMessage('Account created. Please check your email to confirm, then sign in.');
+      }
     }
     setSubmitting(false);
   };
