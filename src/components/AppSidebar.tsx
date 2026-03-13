@@ -27,6 +27,7 @@ const items = [
   { title: "Grounding", url: "/grounding", icon: Leaf },
   { title: "Insights", url: "/insights", icon: Lightbulb },
   { title: "Timeline", url: "/timeline", icon: Clock },
+  { title: "Quick Actions", url: "/quick-actions", icon: Zap },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
