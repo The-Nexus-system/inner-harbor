@@ -20,6 +20,7 @@ import GroundingPage from "./pages/GroundingPage";
 import SettingsPage from "./pages/SettingsPage";
 import InsightsPage from "./pages/InsightsPage";
 import TimelinePage from "./pages/TimelinePage";
+import QuickActionsPage from "./pages/QuickActionsPage";
 import LoginPage from "./pages/LoginPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
@@ -65,6 +66,7 @@ const App = () => (
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="/insights" element={<InsightsPage />} />
                         <Route path="/timeline" element={<TimelinePage />} />
+                        <Route path="/quick-actions" element={<QuickActionsPage />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </AppLayout>

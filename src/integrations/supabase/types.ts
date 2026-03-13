@@ -173,6 +173,45 @@ export type Database = {
         }
         Relationships: []
       }
+      calendar_accounts: {
+        Row: {
+          access_token: string | null
+          account_email: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          provider: string
+          refresh_token: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token?: string | null
+          account_email?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          provider: string
+          refresh_token?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string | null
+          account_email?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          provider?: string
+          refresh_token?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       calendar_events: {
         Row: {
           created_at: string
@@ -185,6 +224,7 @@ export type Database = {
           reminder_minutes: number | null
           sensory_prep: string | null
           support_needed: string | null
+          sync_preference: string
           title: string
           transport_notes: string | null
           updated_at: string
@@ -201,6 +241,7 @@ export type Database = {
           reminder_minutes?: number | null
           sensory_prep?: string | null
           support_needed?: string | null
+          sync_preference?: string
           title: string
           transport_notes?: string | null
           updated_at?: string
@@ -217,6 +258,7 @@ export type Database = {
           reminder_minutes?: number | null
           sensory_prep?: string | null
           support_needed?: string | null
+          sync_preference?: string
           title?: string
           transport_notes?: string | null
           updated_at?: string
@@ -298,6 +340,100 @@ export type Database = {
           user_notes?: string | null
         }
         Relationships: []
+      }
+      external_calendars: {
+        Row: {
+          calendar_account_id: string
+          color: string | null
+          created_at: string
+          id: string
+          is_selected: boolean
+          name: string
+          provider_calendar_id: string
+          read_only: boolean
+          updated_at: string
+        }
+        Insert: {
+          calendar_account_id: string
+          color?: string | null
+          created_at?: string
+          id?: string
+          is_selected?: boolean
+          name: string
+          provider_calendar_id: string
+          read_only?: boolean
+          updated_at?: string
+        }
+        Update: {
+          calendar_account_id?: string
+          color?: string | null
+          created_at?: string
+          id?: string
+          is_selected?: boolean
+          name?: string
+          provider_calendar_id?: string
+          read_only?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_calendars_calendar_account_id_fkey"
+            columns: ["calendar_account_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_event_links: {
+        Row: {
+          created_at: string
+          etag: string | null
+          id: string
+          internal_event_id: string
+          last_synced_at: string | null
+          provider: string
+          provider_calendar_id: string
+          provider_event_id: string | null
+          sync_state: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          etag?: string | null
+          id?: string
+          internal_event_id: string
+          last_synced_at?: string | null
+          provider: string
+          provider_calendar_id: string
+          provider_event_id?: string | null
+          sync_state?: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          etag?: string | null
+          id?: string
+          internal_event_id?: string
+          last_synced_at?: string | null
+          provider?: string
+          provider_calendar_id?: string
+          provider_event_id?: string | null
+          sync_state?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_event_links_internal_event_id_fkey"
+            columns: ["internal_event_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       front_events: {
         Row: {
@@ -505,6 +641,9 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           display_name: string | null
+          ics_feed_enabled: boolean
+          ics_feed_filter: string
+          ics_feed_token: string | null
           id: string
           system_name: string | null
           updated_at: string
@@ -514,6 +653,9 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          ics_feed_enabled?: boolean
+          ics_feed_filter?: string
+          ics_feed_token?: string | null
           id?: string
           system_name?: string | null
           updated_at?: string
@@ -523,6 +665,9 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          ics_feed_enabled?: boolean
+          ics_feed_filter?: string
+          ics_feed_token?: string | null
           id?: string
           system_name?: string | null
           updated_at?: string
