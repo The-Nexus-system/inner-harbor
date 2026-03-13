@@ -22,7 +22,16 @@ export type AuditAction =
   | 'alter_update'
   | 'alter_archive'
   | 'journal_create'
-  | 'journal_delete';
+  | 'journal_delete'
+  | 'share_create'
+  | 'share_revoke'
+  | 'share_update'
+  | 'integration_change'
+  | 'ics_regenerate'
+  | 'session_revoke_all'
+  | 'permission_change'
+  | 'sync_enable'
+  | 'sync_disable';
 
 interface AuditEntry {
   action: AuditAction;

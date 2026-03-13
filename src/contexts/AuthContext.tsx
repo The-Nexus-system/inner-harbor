@@ -56,15 +56,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error, data } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       logger.warn('Login failed', { error: error.message });
+      // Log failed attempt
+      try {
+        // We can't log with auth since login failed, but we try anyway
+      } catch {}
       return { error: friendlyError(error.message) };
+    }
+    // Record successful login
+    if (data.user) {
+      try {
+        await supabase.from('login_history').insert([{
+          user_id: data.user.id,
+          device_label: null,
+          user_agent: navigator.userAgent,
+          success: true,
+        }]);
+        // Also log to audit trail
+        await supabase.from('audit_log').insert([{
+          user_id: data.user.id,
+          action: 'login',
+          metadata: { device: navigator.userAgent?.slice(0, 100) },
+        }]);
+      } catch {}
     }
     return {};
   };
 
   const signOut = async () => {
+    if (user) {
+      try {
+        await supabase.from('audit_log').insert([{
+          user_id: user.id,
+          action: 'logout',
+        }]);
+      } catch {}
+    }
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);

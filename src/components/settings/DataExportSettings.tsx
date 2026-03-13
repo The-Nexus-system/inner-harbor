@@ -7,6 +7,7 @@ import {
   exportAsText, exportAsJson,
   formatJournalForExport, formatFrontHistoryForExport, formatSafetyPlanForExport,
 } from "@/lib/export";
+import { logAuditEvent } from "@/lib/audit";
 
 function formatTasksForExport(tasks: Array<{ title: string; description?: string; category: string; assignedTo: string; isCompleted: boolean; dueDate?: string; createdAt: string }>) {
   const lines = ['MOSAIC — Tasks Export', `Exported: ${new Date().toLocaleDateString()}`, '', '---', ''];
@@ -49,6 +50,7 @@ export default function DataExportSettings() {
       else exportAsText(formatSafetyPlanForExport(safetyPlans), `mosaic-safety-plans-${date}`);
     }
 
+    logAuditEvent({ action: 'data_export', resource_type: key, metadata: { format, count: exportItems.find(e => e.key === key)?.count } });
     flash(`${key}-${format}`);
   };
 
