@@ -336,8 +336,54 @@ export default function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">Track sensory sensitivities and coping strategies for each alter.</p>
-            <Link to="/sensory" className="text-sm text-primary underline mt-3 inline-block tap-target">View sensory profiles</Link>
+            {sensoryProfiles.length > 0 ? (
+              <div className="space-y-3">
+                {sensoryProfiles.slice(0, 3).map((p: any) => {
+                  const senses = [
+                    { icon: Eye, label: 'Vis', val: p.visual },
+                    { icon: EarOff, label: 'Aud', val: p.auditory },
+                    { icon: Hand, label: 'Tac', val: p.tactile },
+                    { icon: Wind, label: 'Olf', val: p.olfactory },
+                    { icon: Utensils, label: 'Gus', val: p.gustatory },
+                    { icon: RotateCcw, label: 'Ves', val: p.vestibular },
+                    { icon: Move, label: 'Pro', val: p.proprioceptive },
+                  ];
+                  const highSenses = senses.filter(s => s.val >= 4);
+                  const alterName = p.alter_id ? alters.find(a => a.id === p.alter_id)?.name : null;
+                  return (
+                    <div key={p.id} className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">{p.label}</span>
+                        {alterName && <Badge variant="outline" className="text-xs">{alterName}</Badge>}
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {senses.map(s => (
+                          <Badge
+                            key={s.label}
+                            variant="outline"
+                            className={
+                              s.val >= 5 ? 'bg-destructive/15 text-destructive border-destructive/30' :
+                              s.val >= 4 ? 'bg-primary/15 text-primary border-primary/30' :
+                              s.val <= 1 ? 'bg-muted text-muted-foreground' : ''
+                            }
+                          >
+                            <s.icon className="h-3 w-3 mr-0.5" />{s.label}: {s.val}
+                          </Badge>
+                        ))}
+                      </div>
+                      {highSenses.length > 0 && p.coping_strategies && (
+                        <p className="text-xs text-muted-foreground">💡 {p.coping_strategies.slice(0, 80)}{p.coping_strategies.length > 80 ? '…' : ''}</p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No sensory profiles yet. Create one to track sensory needs.</p>
+            )}
+            <Link to="/sensory" className="text-sm text-primary underline mt-3 inline-block tap-target">
+              {sensoryProfiles.length > 0 ? 'View all profiles' : 'Create a profile'}
+            </Link>
           </CardContent>
         </Card>
       )}
