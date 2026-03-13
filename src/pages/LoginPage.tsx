@@ -140,6 +140,25 @@ export default function LoginPage() {
                     </div>
                   </TabsContent>
 
+                  {tab === 'signup' && isInviteOnly && (
+                    <div className="space-y-2">
+                      <Label htmlFor="invite-code" className="flex items-center gap-1.5">
+                        <Key className="h-3.5 w-3.5" /> Invite code
+                      </Label>
+                      <Input
+                        id="invite-code"
+                        value={inviteCode}
+                        onChange={e => setInviteCode(e.target.value.toUpperCase())}
+                        placeholder="XXXX-XXXX"
+                        required
+                        className="tap-target font-mono tracking-wider"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Registration requires an invite code. Ask an existing user for one.
+                      </p>
+                    </div>
+                  )}
+
                   <div className="space-y-2">
                     <Label htmlFor="email">Email address</Label>
                     <Input
