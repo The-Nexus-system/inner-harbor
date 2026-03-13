@@ -157,11 +157,11 @@ export default function ExportPage() {
     tasks: tasks.filter(t => inRange(t.createdAt)),
     calendar: calendarEvents.filter(e => inRange(e.date)),
     safety: safetyPlans,
-    checkins: checkIns.filter(c => inRange(c.date)),
+    checkins: allCheckIns.filter(c => inRange(c.date)),
     handoffs: handoffNotes.filter(h => inRange(h.createdAt)),
     snapshots: contextSnapshots.filter(s => inRange(s.createdAt)),
     medications: medications.filter(m => m.isActive),
-  }), [alters, frontEvents, journalEntries, messages, tasks, calendarEvents, safetyPlans, checkIns, handoffNotes, contextSnapshots, medications, inRange]);
+  }), [alters, frontEvents, journalEntries, messages, tasks, calendarEvents, safetyPlans, allCheckIns, handoffNotes, contextSnapshots, medications, inRange]);
 
   const totalRecords = useMemo(() =>
     selectedTypes.reduce((sum, type) => sum + (filteredData[type]?.length || 0), 0),
