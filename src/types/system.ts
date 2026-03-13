@@ -18,6 +18,24 @@ export type MemoryContinuity = 'present' | 'partial' | 'absent' | 'unknown';
 
 export type MoodLevel = 1 | 2 | 3 | 4 | 5;
 
+export type InterfaceMode = 'standard' | 'simplified' | 'minimal';
+
+export type PermissionScope =
+  | 'edit_safety_plans'
+  | 'edit_system_agreements'
+  | 'modify_integrations'
+  | 'manage_calendar'
+  | 'modify_alter_profiles'
+  | 'manage_settings'
+  | 'manage_support_portal';
+
+export interface AlterPermission {
+  id: string;
+  alterId: string;
+  scope: PermissionScope;
+  granted: boolean;
+}
+
 export interface Alter {
   id: string;
   name: string;
@@ -39,6 +57,7 @@ export interface Alter {
   visibility: Visibility;
   privateFields?: string[];
   isActive: boolean;
+  interfaceMode: InterfaceMode;
   createdAt: string;
 }
 
@@ -169,5 +188,6 @@ export interface AppSettings {
   soundOff: boolean;
   screenReaderOptimized: boolean;
   themeColor: ThemeColor;
-  customThemeHsl?: string; // e.g. "200 40% 40%"
+  customThemeHsl?: string;
+  autoSwitchInterface: boolean;
 }

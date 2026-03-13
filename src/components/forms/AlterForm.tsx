@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Pencil } from 'lucide-react';
-import type { Alter } from '@/types/system';
+import type { Alter, InterfaceMode } from '@/types/system';
 
 interface AlterFormProps {
   alter?: Alter;
@@ -19,7 +19,7 @@ const defaultValues: Partial<Alter> = {
   nickname: '', role: '', ageRange: '', species: '',
   communicationStyle: '', accessNeeds: '', triggersToAvoid: '',
   groundingPreferences: '', safeFoods: '', musicPreferences: '',
-  color: '#7c3aed', emoji: '🌟', notes: '',
+  color: '#7c3aed', emoji: '🌟', notes: '', interfaceMode: 'standard',
 };
 
 export function AlterForm({ alter, onSubmit, trigger }: AlterFormProps) {
@@ -150,6 +150,18 @@ export function AlterForm({ alter, onSubmit, trigger }: AlterFormProps) {
             </Select>
           </div>
 
+          <div className="space-y-1.5">
+            <Label htmlFor="alter-interface-mode">Interface mode</Label>
+            <Select value={form.interfaceMode || 'standard'} onValueChange={v => setForm(prev => ({ ...prev, interfaceMode: v as InterfaceMode }))}>
+              <SelectTrigger id="alter-interface-mode"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="standard">Standard — full features</SelectItem>
+                <SelectItem value="simplified">Simplified — reduced complexity, larger buttons</SelectItem>
+                <SelectItem value="minimal">Minimal — essential tools only</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">Choose a simpler interface for younger alters or those who prefer fewer options</p>
+          </div>
           <div className="space-y-1.5">
             <Label htmlFor="alter-notes">Notes</Label>
             <Textarea id="alter-notes" value={form.notes || ''} onChange={e => set('notes', e.target.value)} placeholder="Anything else" rows={2} maxLength={1000} />

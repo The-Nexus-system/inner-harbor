@@ -18,6 +18,7 @@ export const demoAlters: Alter[] = [
     emoji: '🌊',
     visibility: 'shared',
     isActive: true,
+    interfaceMode: 'standard',
     createdAt: '2024-01-15',
   },
   {
@@ -37,6 +38,7 @@ export const demoAlters: Alter[] = [
     emoji: '⚡',
     visibility: 'shared',
     isActive: true,
+    interfaceMode: 'standard',
     createdAt: '2024-01-15',
   },
   {
@@ -58,6 +60,7 @@ export const demoAlters: Alter[] = [
     emoji: '☁️',
     visibility: 'shared',
     isActive: true,
+    interfaceMode: 'simplified',
     createdAt: '2024-02-01',
   },
   {
@@ -75,6 +78,7 @@ export const demoAlters: Alter[] = [
     notes: 'Rarely fronts. Manages internal scheduling and system communication.',
     visibility: 'shared',
     isActive: true,
+    interfaceMode: 'standard',
     createdAt: '2024-02-10',
   },
   {
@@ -89,6 +93,7 @@ export const demoAlters: Alter[] = [
     notes: 'Appears during high stress. Limited communication. Seems frightened.',
     visibility: 'emergency-only',
     isActive: true,
+    interfaceMode: 'minimal',
     createdAt: '2024-03-01',
   },
 ];

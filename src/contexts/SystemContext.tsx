@@ -2,7 +2,7 @@ import React, { createContext, useContext, useCallback, useEffect, type ReactNod
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import type { Alter, FrontEvent, JournalEntry, InternalMessage, SystemTask, SafetyPlan, CalendarEvent, DailyCheckIn, AppSettings, RecurrencePattern, HandoffNote, ContextSnapshot } from '@/types/system';
+import type { Alter, FrontEvent, JournalEntry, InternalMessage, SystemTask, SafetyPlan, CalendarEvent, DailyCheckIn, AppSettings, RecurrencePattern, HandoffNote, ContextSnapshot, AlterPermission, PermissionScope, InterfaceMode } from '@/types/system';
 import type { Database } from '@/integrations/supabase/types';
 
 type DbAlter = Database['public']['Tables']['alters']['Row'];
@@ -29,7 +29,8 @@ function mapAlter(r: DbAlter): Alter {
     frontingConfidence: (r.fronting_confidence as Alter['frontingConfidence']) ?? undefined,
     color: r.color ?? undefined, emoji: r.emoji ?? undefined, notes: r.notes ?? undefined,
     visibility: r.visibility as Alter['visibility'], privateFields: r.private_fields ?? undefined,
-    isActive: r.is_active, createdAt: r.created_at,
+    isActive: r.is_active, interfaceMode: ((r as any).interface_mode as Alter['interfaceMode']) ?? 'standard',
+    createdAt: r.created_at,
   };
 }
 
@@ -109,6 +110,7 @@ function mapSettings(r: DbSettings): AppSettings {
     soundOff: r.sound_off, screenReaderOptimized: r.screen_reader_optimized,
     themeColor: ((r as any).theme_color as AppSettings['themeColor']) ?? 'sage',
     customThemeHsl: (r as any).custom_theme_hsl ?? undefined,
+    autoSwitchInterface: (r as any).auto_switch_interface ?? false,
   };
 }
 
@@ -129,6 +131,8 @@ interface SystemContextType {
   settings: AppSettings;
   handoffNotes: HandoffNote[];
   contextSnapshots: ContextSnapshot[];
+  alterPermissions: AlterPermission[];
+  activeInterfaceMode: InterfaceMode;
   isLoading: boolean;
   getAlter: (id: string) => Alter | undefined;
   setCurrentFronter: (alterIds: string[], status: FrontEvent['status']) => void;
@@ -151,12 +155,14 @@ interface SystemContextType {
   createHandoffNote: (data: Partial<HandoffNote>) => Promise<void>;
   createContextSnapshot: (notes?: string) => Promise<void>;
   deleteContextSnapshot: (id: string) => Promise<void>;
+  setAlterPermission: (alterId: string, scope: PermissionScope, granted: boolean) => Promise<void>;
+  hasPermission: (alterId: string | undefined, scope: PermissionScope) => boolean;
 }
 
 const defaultSettings: AppSettings = {
   highContrast: false, darkMode: false, fontSize: 'medium', spacing: 'normal',
   reducedMotion: false, plainLanguage: false, soundOff: true, screenReaderOptimized: false,
-  themeColor: 'sage',
+  themeColor: 'sage', autoSwitchInterface: false,
 };
 
 const SystemContext = createContext<SystemContextType | null>(null);
@@ -289,6 +295,18 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     enabled: !!userId,
   });
 
+  const permissionsQ = useQuery({
+    queryKey: ['alter_permissions', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('alter_permissions' as any).select('*').eq('user_id', userId!);
+      if (error) throw error;
+      return (data ?? []).map((r: any): AlterPermission => ({
+        id: r.id, alterId: r.alter_id, scope: r.scope as PermissionScope, granted: r.granted,
+      }));
+    },
+    enabled: !!userId,
+  });
+
   // Derived data
   const alters = altersQ.data ?? [];
   const frontEvents = frontQ.data ?? [];
@@ -301,8 +319,21 @@ export function SystemProvider({ children }: { children: ReactNode }) {
   const settings = settingsQ.data ?? defaultSettings;
   const handoffNotes = handoffQ.data ?? [];
   const contextSnapshots = snapshotQ.data ?? [];
+  const alterPermissions = permissionsQ.data ?? [];
   const currentFront = frontEvents.find(e => !e.endTime) || null;
   const isLoading = altersQ.isLoading || frontQ.isLoading || tasksQ.isLoading;
+
+  // Compute active interface mode from current fronter
+  const activeInterfaceMode: InterfaceMode = (() => {
+    if (!settings.autoSwitchInterface || !currentFront) return 'standard';
+    const frontAlters = currentFront.alterIds.map(id => alters.find(a => a.id === id)).filter(Boolean);
+    if (frontAlters.length === 0) return 'standard';
+    // Use the most simplified mode among current fronters
+    const modes = frontAlters.map(a => a!.interfaceMode);
+    if (modes.includes('minimal')) return 'minimal';
+    if (modes.includes('simplified')) return 'simplified';
+    return 'standard';
+  })();
 
   const getAlter = useCallback((id: string) => alters.find(a => a.id === id), [alters]);
 
@@ -441,7 +472,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     if (s.screenReaderOptimized !== undefined) dbUpdate.screen_reader_optimized = s.screenReaderOptimized;
     if (s.themeColor !== undefined) dbUpdate.theme_color = s.themeColor;
     if (s.customThemeHsl !== undefined) dbUpdate.custom_theme_hsl = s.customThemeHsl;
-
+    if (s.autoSwitchInterface !== undefined) (dbUpdate as any).auto_switch_interface = s.autoSwitchInterface;
     const { data: existing } = await supabase.from('app_settings').select('user_id').eq('user_id', userId).maybeSingle();
     if (existing) {
       await supabase.from('app_settings').update(dbUpdate).eq('user_id', userId);
@@ -486,6 +517,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     if (data.emoji !== undefined) update.emoji = data.emoji || null;
     if (data.notes !== undefined) update.notes = data.notes || null;
     if (data.visibility !== undefined) update.visibility = data.visibility;
+    if (data.interfaceMode !== undefined) (update as any).interface_mode = data.interfaceMode;
     await supabase.from('alters').update(update).eq('id', id).eq('user_id', userId);
     qc.invalidateQueries({ queryKey: ['alters', userId] });
   }, [userId, qc]);
@@ -644,15 +676,35 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     qc.invalidateQueries({ queryKey: ['context_snapshots', userId] });
   }, [userId, qc]);
 
+  const setAlterPermission = useCallback(async (alterId: string, scope: PermissionScope, granted: boolean) => {
+    if (!userId) return;
+    // Upsert: delete existing then insert
+    await supabase.from('alter_permissions' as any).delete().eq('alter_id', alterId).eq('scope', scope).eq('user_id', userId);
+    await supabase.from('alter_permissions' as any).insert([{
+      user_id: userId, alter_id: alterId, scope, granted,
+    }]);
+    qc.invalidateQueries({ queryKey: ['alter_permissions', userId] });
+  }, [userId, qc]);
+
+  // Permission check: if no permission row exists for the alter+scope, default to granted (opt-in restrictions)
+  const hasPermission = useCallback((alterId: string | undefined, scope: PermissionScope): boolean => {
+    if (!alterId) return true; // Unknown fronter = full access (emergency override principle)
+    const perm = alterPermissions.find(p => p.alterId === alterId && p.scope === scope);
+    if (!perm) return true; // No restriction set = allowed
+    return perm.granted;
+  }, [alterPermissions]);
+
   return (
     <SystemContext.Provider value={{
       alters, frontEvents, currentFront, journalEntries, messages, tasks,
-      safetyPlans, calendarEvents, checkIn, settings, handoffNotes, contextSnapshots, isLoading,
+      safetyPlans, calendarEvents, checkIn, settings, handoffNotes, contextSnapshots,
+      alterPermissions, activeInterfaceMode, isLoading,
       getAlter, setCurrentFronter, addFrontEvent, updateSettings,
       toggleTask, markMessageRead, updateCheckIn,
       createAlter, updateAlter, createJournalEntry, createTask, updateTask, deleteTask, createMessage,
       createSafetyPlan, createCalendarEvent, updateCalendarEvent, deleteCalendarEvent,
       createHandoffNote, createContextSnapshot, deleteContextSnapshot,
+      setAlterPermission, hasPermission,
     }}>
       {children}
     </SystemContext.Provider>

@@ -5,6 +5,7 @@ import InsightSettings from "@/components/settings/InsightSettings";
 import AccessibilitySettings from "@/components/settings/AccessibilitySettings";
 import DataExportSettings from "@/components/settings/DataExportSettings";
 import IntegrationSettings from "@/components/settings/IntegrationSettings";
+import InterfaceModeSettings from "@/components/settings/InterfaceModeSettings";
 import { Separator } from "@/components/ui/separator";
 
 export default function SettingsPage() {
@@ -17,6 +18,7 @@ export default function SettingsPage() {
 
       <ProfileSettings />
       <AppearanceSettings />
+      <InterfaceModeSettings />
       <NotificationSettings />
       <InsightSettings />
       <AccessibilitySettings />
