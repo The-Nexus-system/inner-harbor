@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useSystem } from "@/contexts/SystemContext";
+import { SyncStatusIndicator } from "@/components/SyncStatusIndicator";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
