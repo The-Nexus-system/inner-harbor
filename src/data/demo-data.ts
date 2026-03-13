@@ -90,6 +90,7 @@ export const demoAlters: Alter[] = [
     notes: 'Appears during high stress. Limited communication. Seems frightened.',
     visibility: 'emergency-only',
     isActive: true,
+    interfaceMode: 'minimal',
     createdAt: '2024-03-01',
   },
 ];
