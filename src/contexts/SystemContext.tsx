@@ -165,6 +165,9 @@ interface SystemContextType {
   createPreset: (data: Partial<EnvironmentPreset>) => Promise<void>;
   updatePreset: (id: string, data: Partial<EnvironmentPreset>) => Promise<void>;
   deletePreset: (id: string) => Promise<void>;
+  updateCapacityBudget: (totalSpoons: number) => Promise<void>;
+  addCapacityEntry: (label: string, cost: number) => Promise<void>;
+  removeCapacityEntry: (entryId: string) => Promise<void>;
 }
 
 const defaultSettings: AppSettings = {
