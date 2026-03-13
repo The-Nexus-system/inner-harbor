@@ -178,7 +178,8 @@ export interface ContextSnapshot {
 
 export type DashboardSection =
   | 'front' | 'tasks' | 'messages' | 'journal' | 'calendar'
-  | 'safety' | 'checkin' | 'notes' | 'insights' | 'summary' | 'trends' | 'handoff' | 'capacity' | 'medications';
+  | 'safety' | 'checkin' | 'notes' | 'insights' | 'summary' | 'trends' | 'handoff' | 'capacity' | 'medications'
+  | 'sensory' | 'communication';
 
 export interface CapacityEntry {
   id: string;

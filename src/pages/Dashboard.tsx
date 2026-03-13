@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSystem } from "@/contexts/SystemContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckSquare, MessageSquare, BookOpen, Shield, CalendarDays, HandHeart, Pill, Check, X } from "lucide-react";
+import { CheckSquare, MessageSquare, BookOpen, Shield, CalendarDays, HandHeart, Pill, Check, X, Eye, MessageCircle } from "lucide-react";
 import { DailyCheckInWidget } from "@/components/DailyCheckInWidget";
 import { CheckInTrends } from "@/components/CheckInTrends";
 import { QuickNotesWidget } from "@/components/QuickNotesWidget";
@@ -312,6 +312,36 @@ export default function Dashboard() {
               })}
             </div>
             <Link to="/medications" className="text-sm text-primary underline mt-3 inline-block tap-target">View all medications</Link>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Sensory profiles quick view */}
+      {isSectionVisible('sensory') && (
+        <Card aria-label="Sensory profiles">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg font-heading flex items-center gap-2">
+              <Eye className="h-5 w-5" aria-hidden="true" /> Sensory Profiles
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">Track sensory sensitivities and coping strategies for each alter.</p>
+            <Link to="/sensory" className="text-sm text-primary underline mt-3 inline-block tap-target">View sensory profiles</Link>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Communication board quick access */}
+      {isSectionVisible('communication') && (
+        <Card aria-label="Communication board">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg font-heading flex items-center gap-2">
+              <MessageCircle className="h-5 w-5" aria-hidden="true" /> Communication Board
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">Tap cards to communicate when words are hard.</p>
+            <Link to="/communication" className="text-sm text-primary underline mt-3 inline-block tap-target">Open communication board</Link>
           </CardContent>
         </Card>
       )}

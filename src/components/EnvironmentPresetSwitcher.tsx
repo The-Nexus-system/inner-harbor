@@ -25,6 +25,8 @@ const ALL_SECTIONS: { key: DashboardSection; label: string }[] = [
   { key: 'insights', label: 'Insights' },
   { key: 'summary', label: 'Daily summary' },
   { key: 'trends', label: 'Check-in trends' },
+  { key: 'sensory', label: 'Sensory profiles' },
+  { key: 'communication', label: 'Communication board' },
 ];
 
 const DEFAULT_PRESETS: Partial<EnvironmentPreset>[] = [
