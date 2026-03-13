@@ -20,11 +20,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
           <header className="h-14 flex items-center border-b border-border px-4 bg-card" role="banner">
             <SidebarTrigger className="tap-target" aria-label="Toggle navigation menu" />
             <span className="ml-3 font-heading text-lg font-semibold text-foreground">Mosaic</span>
-            {activeInterfaceMode !== 'standard' && (
-              <Badge variant="secondary" className="ml-auto text-xs">
-                {activeInterfaceMode === 'simplified' ? '🌱 Simplified' : '🌿 Minimal'}
-              </Badge>
-            )}
+            <div className="ml-auto flex items-center gap-2">
+              <SyncStatusIndicator compact />
+              {activeInterfaceMode !== 'standard' && (
+                <Badge variant="secondary" className="text-xs">
+                  {activeInterfaceMode === 'simplified' ? '🌱 Simplified' : '🌿 Minimal'}
+                </Badge>
+              )}
+            </div>
           </header>
           <main
             id="main-content"

@@ -6,6 +6,7 @@ import AccessibilitySettings from "@/components/settings/AccessibilitySettings";
 import DataExportSettings from "@/components/settings/DataExportSettings";
 import IntegrationSettings from "@/components/settings/IntegrationSettings";
 import InterfaceModeSettings from "@/components/settings/InterfaceModeSettings";
+import SyncSettings from "@/components/settings/SyncSettings";
 import { Separator } from "@/components/ui/separator";
 
 export default function SettingsPage() {
@@ -22,6 +23,13 @@ export default function SettingsPage() {
       <NotificationSettings />
       <InsightSettings />
       <AccessibilitySettings />
+
+      <Separator />
+      <div>
+        <h2 className="text-xl font-heading font-semibold mb-1">Sync &amp; Devices</h2>
+        <p className="text-sm text-muted-foreground mb-4">Manage how your data syncs across devices and handle offline changes.</p>
+        <SyncSettings />
+      </div>
 
       <Separator />
       <div>
