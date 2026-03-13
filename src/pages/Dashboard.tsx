@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useSystem } from "@/contexts/SystemContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,11 +10,27 @@ import { InsightCard } from "@/components/InsightCard";
 import { DailySummaryCard } from "@/components/DailySummaryCard";
 import { Link } from "react-router-dom";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const moodLabels = ['', 'Very low', 'Low', 'Moderate', 'Good', 'Great'];
 
 export default function Dashboard() {
   const { currentFront, getAlter, alters, tasks, messages, journalEntries, calendarEvents, safetyPlans, isLoading } = useSystem();
+  const { user } = useAuth();
+  const [displayName, setDisplayName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("display_name, system_name")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        setDisplayName(data?.display_name || data?.system_name || null);
+      });
+  }, [user]);
 
   if (isLoading) return <PageSkeleton message="Loading your dashboard..." />;
 
@@ -23,11 +40,13 @@ export default function Dashboard() {
   const recentJournal = journalEntries.slice(0, 2);
   const todayEvents = calendarEvents.slice(0, 2);
 
+  const greeting = displayName ? `Welcome back, ${displayName}` : "Welcome back";
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto animate-fade-in">
       <header>
         <h1 className="text-2xl md:text-3xl font-heading font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Welcome back. Here is what is happening today.</p>
+        <p className="text-muted-foreground mt-1">{greeting}. Here is what is happening today.</p>
       </header>
 
       {/* Current Front */}
