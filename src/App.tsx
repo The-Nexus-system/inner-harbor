@@ -78,6 +78,7 @@ const App = () => (
                         <Route path="/support" element={<SupportPortalPage />} />
                         <Route path="/sensory" element={<SensoryProfilePage />} />
                         <Route path="/communication" element={<CommunicationBoardPage />} />
+                        <Route path="/security" element={<SecurityDashboardPage />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </AppLayout>
