@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      alter_permissions: {
+        Row: {
+          alter_id: string
+          created_at: string
+          granted: boolean
+          id: string
+          scope: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          alter_id: string
+          created_at?: string
+          granted?: boolean
+          id?: string
+          scope: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          alter_id?: string
+          created_at?: string
+          granted?: boolean
+          id?: string
+          scope?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alter_permissions_alter_id_fkey"
+            columns: ["alter_id"]
+            isOneToOne: false
+            referencedRelation: "alters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       alters: {
         Row: {
           access_needs: string | null
@@ -26,6 +64,7 @@ export type Database = {
           fronting_confidence: string | null
           grounding_preferences: string | null
           id: string
+          interface_mode: string
           is_active: boolean
           music_preferences: string | null
           name: string
@@ -52,6 +91,7 @@ export type Database = {
           fronting_confidence?: string | null
           grounding_preferences?: string | null
           id?: string
+          interface_mode?: string
           is_active?: boolean
           music_preferences?: string | null
           name: string
@@ -78,6 +118,7 @@ export type Database = {
           fronting_confidence?: string | null
           grounding_preferences?: string | null
           id?: string
+          interface_mode?: string
           is_active?: boolean
           music_preferences?: string | null
           name?: string
@@ -97,6 +138,7 @@ export type Database = {
       }
       app_settings: {
         Row: {
+          auto_switch_interface: boolean
           created_at: string
           custom_theme_hsl: string | null
           dark_mode: boolean
@@ -112,6 +154,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          auto_switch_interface?: boolean
           created_at?: string
           custom_theme_hsl?: string | null
           dark_mode?: boolean
@@ -127,6 +170,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          auto_switch_interface?: boolean
           created_at?: string
           custom_theme_hsl?: string | null
           dark_mode?: boolean
