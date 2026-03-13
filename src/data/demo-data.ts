@@ -23,6 +23,7 @@ export const demoAlters: Alter[] = [
   },
   {
     id: 'alter-2',
+    name: 'Sparks',
     pronouns: 'he/they',
     role: 'Protector',
     ageRange: '19–22',
