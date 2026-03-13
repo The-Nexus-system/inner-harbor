@@ -261,3 +261,18 @@
     text-wrap: balance;
   }
 }
+
+/* Simplified interface mode */
+.simplified-mode .tap-target {
+  min-height: 52px;
+  min-width: 52px;
+}
+
+.simplified-mode button,
+.simplified-mode [role="button"] {
+  font-size: 1.05em;
+}
+
+.simplified-mode .card {
+  padding: 0.25rem;
+}
