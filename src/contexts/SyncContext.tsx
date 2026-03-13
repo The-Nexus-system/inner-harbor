@@ -148,24 +148,27 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     for (const mutation of queue) {
       try {
         const { table, operation, payload } = mutation;
-        let result;
+        let result: { error: { message: string } | null } | undefined;
+
+        // Use any-cast because table name is dynamic
+        const tbl = supabase.from(table as any);
 
         switch (operation) {
           case 'insert':
-            result = await supabase.from(table).insert(payload as any);
+            result = await (tbl as any).insert(payload);
             break;
           case 'update':
             if ('id' in payload) {
               const { id, ...rest } = payload;
-              result = await supabase.from(table).update(rest as any).eq('id', id as string);
+              result = await (tbl as any).update(rest).eq('id', id);
             }
             break;
           case 'upsert':
-            result = await supabase.from(table).upsert(payload as any);
+            result = await (tbl as any).upsert(payload);
             break;
           case 'delete':
             if ('id' in payload) {
-              result = await supabase.from(table).delete().eq('id', payload.id as string);
+              result = await (tbl as any).delete().eq('id', payload.id);
             }
             break;
         }
