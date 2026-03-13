@@ -50,6 +50,7 @@ export default function DataExportSettings() {
       else exportAsText(formatSafetyPlanForExport(safetyPlans), `mosaic-safety-plans-${date}`);
     }
 
+    logAuditEvent({ action: 'data_export', resource_type: key, metadata: { format, count: exportItems.find(e => e.key === key)?.count } });
     flash(`${key}-${format}`);
   };
 
