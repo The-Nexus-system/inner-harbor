@@ -60,6 +60,7 @@ const App = () => (
               <Route path="/*" element={
                 <ProtectedRoute>
                   <SystemProvider>
+                    <SyncProvider>
                     <AppLayout>
                       <Routes>
                         <Route path="/" element={<Dashboard />} />
