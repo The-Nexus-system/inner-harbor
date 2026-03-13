@@ -676,15 +676,35 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     qc.invalidateQueries({ queryKey: ['context_snapshots', userId] });
   }, [userId, qc]);
 
+  const setAlterPermission = useCallback(async (alterId: string, scope: PermissionScope, granted: boolean) => {
+    if (!userId) return;
+    // Upsert: delete existing then insert
+    await supabase.from('alter_permissions' as any).delete().eq('alter_id', alterId).eq('scope', scope).eq('user_id', userId);
+    await supabase.from('alter_permissions' as any).insert([{
+      user_id: userId, alter_id: alterId, scope, granted,
+    }]);
+    qc.invalidateQueries({ queryKey: ['alter_permissions', userId] });
+  }, [userId, qc]);
+
+  // Permission check: if no permission row exists for the alter+scope, default to granted (opt-in restrictions)
+  const hasPermission = useCallback((alterId: string | undefined, scope: PermissionScope): boolean => {
+    if (!alterId) return true; // Unknown fronter = full access (emergency override principle)
+    const perm = alterPermissions.find(p => p.alterId === alterId && p.scope === scope);
+    if (!perm) return true; // No restriction set = allowed
+    return perm.granted;
+  }, [alterPermissions]);
+
   return (
     <SystemContext.Provider value={{
       alters, frontEvents, currentFront, journalEntries, messages, tasks,
-      safetyPlans, calendarEvents, checkIn, settings, handoffNotes, contextSnapshots, isLoading,
+      safetyPlans, calendarEvents, checkIn, settings, handoffNotes, contextSnapshots,
+      alterPermissions, activeInterfaceMode, isLoading,
       getAlter, setCurrentFronter, addFrontEvent, updateSettings,
       toggleTask, markMessageRead, updateCheckIn,
       createAlter, updateAlter, createJournalEntry, createTask, updateTask, deleteTask, createMessage,
       createSafetyPlan, createCalendarEvent, updateCalendarEvent, deleteCalendarEvent,
       createHandoffNote, createContextSnapshot, deleteContextSnapshot,
+      setAlterPermission, hasPermission,
     }}>
       {children}
     </SystemContext.Provider>
