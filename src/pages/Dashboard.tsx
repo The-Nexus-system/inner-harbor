@@ -3,6 +3,7 @@ import { useSystem } from "@/contexts/SystemContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckSquare, MessageSquare, BookOpen, Shield, CalendarDays, HandHeart, Pill, Check, X, Eye, EarOff, Hand, Wind, Utensils, RotateCcw, Move, MessageCircle } from "lucide-react";
+import { SensoryRadarChart } from "@/components/SensoryRadarChart";
 import { DailyCheckInWidget } from "@/components/DailyCheckInWidget";
 import { CheckInTrends } from "@/components/CheckInTrends";
 import { QuickNotesWidget } from "@/components/QuickNotesWidget";
