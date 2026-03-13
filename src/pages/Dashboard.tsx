@@ -10,6 +10,7 @@ import { InsightCard } from "@/components/InsightCard";
 import { DailySummaryCard } from "@/components/DailySummaryCard";
 import { ContextSnapshotButton } from "@/components/ContextSnapshotButton";
 import { EnvironmentPresetSwitcher } from "@/components/EnvironmentPresetSwitcher";
+import { CapacityBudgetWidget } from "@/components/CapacityBudgetWidget";
 import { Link } from "react-router-dom";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
 import { supabase } from "@/integrations/supabase/client";
