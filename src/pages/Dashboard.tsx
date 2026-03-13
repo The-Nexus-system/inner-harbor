@@ -12,6 +12,7 @@ import { ContextSnapshotButton } from "@/components/ContextSnapshotButton";
 import { EnvironmentPresetSwitcher } from "@/components/EnvironmentPresetSwitcher";
 import { CapacityBudgetWidget } from "@/components/CapacityBudgetWidget";
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
