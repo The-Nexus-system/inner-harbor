@@ -343,6 +343,48 @@ export type Database = {
         }
         Relationships: []
       }
+      communication_cards: {
+        Row: {
+          category: string
+          color: string | null
+          created_at: string
+          emoji: string | null
+          id: string
+          is_active: boolean
+          is_phrase: boolean
+          label: string
+          sort_order: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          color?: string | null
+          created_at?: string
+          emoji?: string | null
+          id?: string
+          is_active?: boolean
+          is_phrase?: boolean
+          label: string
+          sort_order?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          color?: string | null
+          created_at?: string
+          emoji?: string | null
+          id?: string
+          is_active?: boolean
+          is_phrase?: boolean
+          label?: string
+          sort_order?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       context_snapshots: {
         Row: {
           active_tasks: Json
@@ -1068,6 +1110,69 @@ export type Database = {
           status?: string
           title?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      sensory_profiles: {
+        Row: {
+          alter_id: string | null
+          auditory: number
+          coping_strategies: string | null
+          created_at: string
+          gustatory: number
+          id: string
+          is_active: boolean
+          label: string
+          notes: string | null
+          olfactory: number
+          proprioceptive: number
+          safe_environments: string | null
+          sensory_triggers: string | null
+          tactile: number
+          updated_at: string
+          user_id: string
+          vestibular: number
+          visual: number
+        }
+        Insert: {
+          alter_id?: string | null
+          auditory?: number
+          coping_strategies?: string | null
+          created_at?: string
+          gustatory?: number
+          id?: string
+          is_active?: boolean
+          label?: string
+          notes?: string | null
+          olfactory?: number
+          proprioceptive?: number
+          safe_environments?: string | null
+          sensory_triggers?: string | null
+          tactile?: number
+          updated_at?: string
+          user_id: string
+          vestibular?: number
+          visual?: number
+        }
+        Update: {
+          alter_id?: string | null
+          auditory?: number
+          coping_strategies?: string | null
+          created_at?: string
+          gustatory?: number
+          id?: string
+          is_active?: boolean
+          label?: string
+          notes?: string | null
+          olfactory?: number
+          proprioceptive?: number
+          safe_environments?: string | null
+          sensory_triggers?: string | null
+          tactile?: number
+          updated_at?: string
+          user_id?: string
+          vestibular?: number
+          visual?: number
         }
         Relationships: []
       }
