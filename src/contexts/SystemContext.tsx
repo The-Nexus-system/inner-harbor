@@ -131,6 +131,8 @@ interface SystemContextType {
   settings: AppSettings;
   handoffNotes: HandoffNote[];
   contextSnapshots: ContextSnapshot[];
+  alterPermissions: AlterPermission[];
+  activeInterfaceMode: InterfaceMode;
   isLoading: boolean;
   getAlter: (id: string) => Alter | undefined;
   setCurrentFronter: (alterIds: string[], status: FrontEvent['status']) => void;
@@ -153,6 +155,8 @@ interface SystemContextType {
   createHandoffNote: (data: Partial<HandoffNote>) => Promise<void>;
   createContextSnapshot: (notes?: string) => Promise<void>;
   deleteContextSnapshot: (id: string) => Promise<void>;
+  setAlterPermission: (alterId: string, scope: PermissionScope, granted: boolean) => Promise<void>;
+  hasPermission: (alterId: string | undefined, scope: PermissionScope) => boolean;
 }
 
 const defaultSettings: AppSettings = {
