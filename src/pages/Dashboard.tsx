@@ -26,7 +26,7 @@ function getTimeGreeting(): string {
 }
 
 export default function Dashboard() {
-  const { currentFront, getAlter, alters, tasks, messages, journalEntries, calendarEvents, safetyPlans, handoffNotes, activePreset, isSectionVisible, isLoading } = useSystem();
+  const { currentFront, getAlter, alters, tasks, messages, journalEntries, calendarEvents, safetyPlans, handoffNotes, activePreset, isSectionVisible, medications, medicationLogs, logMedication, isLoading } = useSystem();
   const { user } = useAuth();
   const [displayName, setDisplayName] = useState<string | null>(null);
 
