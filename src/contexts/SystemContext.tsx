@@ -110,6 +110,7 @@ function mapSettings(r: DbSettings): AppSettings {
     soundOff: r.sound_off, screenReaderOptimized: r.screen_reader_optimized,
     themeColor: ((r as any).theme_color as AppSettings['themeColor']) ?? 'sage',
     customThemeHsl: (r as any).custom_theme_hsl ?? undefined,
+    autoSwitchInterface: (r as any).auto_switch_interface ?? false,
   };
 }
 
