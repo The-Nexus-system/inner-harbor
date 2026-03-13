@@ -84,6 +84,7 @@ const App = () => (
                         <Route path="/communication" element={<CommunicationBoardPage />} />
                         <Route path="/security" element={<SecurityDashboardPage />} />
                         <Route path="/export" element={<ExportPage />} />
+                        <Route path="/deployment" element={<DeploymentPage />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </AppLayout>

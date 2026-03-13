@@ -36,6 +36,7 @@ const items = [
   { title: "Communicate", url: "/communication", icon: MessageCircle },
   { title: "Security", url: "/security", icon: Shield },
   { title: "Export", url: "/export", icon: Download },
+  { title: "Deployment", url: "/deployment", icon: Rocket },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
