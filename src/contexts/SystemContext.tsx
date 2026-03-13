@@ -332,6 +332,22 @@ export function SystemProvider({ children }: { children: ReactNode }) {
     enabled: !!userId,
   });
 
+  const capacityQ = useQuery({
+    queryKey: ['capacity_budget', userId],
+    queryFn: async () => {
+      const today = new Date().toISOString().split('T')[0];
+      const { data, error } = await supabase.from('capacity_budgets' as any).select('*').eq('user_id', userId!).eq('budget_date', today).maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      return {
+        id: data.id, budgetDate: data.budget_date, totalSpoons: data.total_spoons,
+        entries: (data.entries ?? []) as CapacityEntry[],
+        notes: data.notes ?? undefined, createdAt: data.created_at,
+      } as CapacityBudget;
+    },
+    enabled: !!userId,
+  });
+
   // Derived data
   const alters = altersQ.data ?? [];
   const frontEvents = frontQ.data ?? [];
@@ -347,6 +363,7 @@ export function SystemProvider({ children }: { children: ReactNode }) {
   const alterPermissions = permissionsQ.data ?? [];
   const environmentPresets = presetsQ.data ?? [];
   const activePreset = environmentPresets.find(p => p.isActive) ?? null;
+  const capacityBudget = capacityQ.data ?? null;
   const currentFront = frontEvents.find(e => !e.endTime) || null;
   const isLoading = altersQ.isLoading || frontQ.isLoading || tasksQ.isLoading;
 
