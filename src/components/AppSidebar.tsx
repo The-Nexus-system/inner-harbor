@@ -15,21 +15,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
-import { 
-  LayoutDashboard, Users, ArrowRightLeft, BookOpen, MessageSquare, 
-  CheckSquare, CalendarDays, Shield, Settings, LogOut, Leaf, Lightbulb, Clock, Zap, Camera, Pill, UserCheck
-} from "lucide-react";
-import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
-import {
-  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
-  SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar,
-} from "@/components/ui/sidebar";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { useSystem } from "@/contexts/SystemContext";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
