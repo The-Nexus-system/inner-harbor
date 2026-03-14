@@ -372,12 +372,24 @@ export default function ExportPage() {
       <header>
         <h1 className="text-2xl md:text-3xl font-heading font-bold flex items-center gap-2">
           <Download className="h-6 w-6 text-primary" aria-hidden="true" />
-          Export Your Data
+          Export &amp; Backup
         </h1>
         <p className="text-muted-foreground mt-1">
-          Download your data in accessible formats. You own your information — export it anytime.
+          Export, back up, or restore your data. You own your information — take it anywhere.
         </p>
       </header>
+
+      <Tabs defaultValue="export">
+        <TabsList className="w-full">
+          <TabsTrigger value="export" className="flex-1 gap-1.5">
+            <Download className="h-4 w-4" /> Export
+          </TabsTrigger>
+          <TabsTrigger value="import" className="flex-1 gap-1.5">
+            <Upload className="h-4 w-4" /> Import
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="export" className="space-y-6 mt-4">
 
       {/* Privacy notice */}
       <Card className="border-l-4 border-l-primary/40">
