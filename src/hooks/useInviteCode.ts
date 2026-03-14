@@ -61,9 +61,10 @@ export function useInviteCode() {
       const { data } = await supabase
         .from('app_config')
         .select('invite_only')
+        .eq('invite_only', true)
         .limit(1)
         .maybeSingle();
-      return data?.invite_only ?? false;
+      return !!data;
     } catch {
       return false;
     }
