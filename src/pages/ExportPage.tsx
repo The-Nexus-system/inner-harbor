@@ -125,7 +125,9 @@ export default function ExportPage() {
   const [presetName, setPresetName] = useState('');
   const [savedPresets, setSavedPresets] = useState<ExportPreset[]>([]);
   const [savePresetOpen, setSavePresetOpen] = useState(false);
-
+  const [encryptPassword, setEncryptPassword] = useState('');
+  const [encryptConfirm, setEncryptConfirm] = useState('');
+  const [exporting, setExporting] = useState(false);
   // Load presets from localStorage
   useEffect(() => {
     try {
