@@ -140,18 +140,21 @@ export type Database = {
         Row: {
           demo_mode: boolean
           invite_only: boolean
+          registration_disabled: boolean
           updated_at: string
           user_id: string
         }
         Insert: {
           demo_mode?: boolean
           invite_only?: boolean
+          registration_disabled?: boolean
           updated_at?: string
           user_id: string
         }
         Update: {
           demo_mode?: boolean
           invite_only?: boolean
+          registration_disabled?: boolean
           updated_at?: string
           user_id?: string
         }

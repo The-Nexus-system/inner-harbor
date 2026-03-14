@@ -31,6 +31,7 @@ interface InviteCode {
 interface AppConfig {
   invite_only: boolean;
   demo_mode: boolean;
+  registration_disabled: boolean;
 }
 
 interface CheckItem {
@@ -44,7 +45,7 @@ interface CheckItem {
 // ─── Component ──────────────────────────────────────────────
 export default function DeploymentPage() {
   const { user } = useAuth();
-  const [config, setConfig] = useState<AppConfig>({ invite_only: false, demo_mode: false });
+  const [config, setConfig] = useState<AppConfig>({ invite_only: false, demo_mode: false, registration_disabled: false });
   const [inviteCodes, setInviteCodes] = useState<InviteCode[]>([]);
   const [checkResults, setCheckResults] = useState<Record<string, boolean | null>>({});
   const [checking, setChecking] = useState(false);
@@ -58,7 +59,7 @@ export default function DeploymentPage() {
       supabase.from('app_config').select('*').eq('user_id', user.id).maybeSingle(),
       supabase.from('invite_codes').select('*').eq('created_by', user.id).order('created_at', { ascending: false }),
     ]);
-    if (configRes.data) setConfig({ invite_only: configRes.data.invite_only, demo_mode: configRes.data.demo_mode });
+    if (configRes.data) setConfig({ invite_only: configRes.data.invite_only, demo_mode: configRes.data.demo_mode, registration_disabled: (configRes.data as any).registration_disabled ?? false });
     if (codesRes.data) setInviteCodes(codesRes.data as InviteCode[]);
   }, [user]);
 
@@ -242,6 +243,23 @@ export default function DeploymentPage() {
             </div>
             <Switch checked={config.invite_only} onCheckedChange={(v) => updateConfig({ invite_only: v })} />
           </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-sm font-medium">Disable new registrations</Label>
+              <p className="text-xs text-muted-foreground">Block all new account signups entirely</p>
+            </div>
+            <Switch checked={config.registration_disabled} onCheckedChange={(v) => updateConfig({ registration_disabled: v })} />
+          </div>
+
+          {config.registration_disabled && (
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+              <p className="text-sm text-destructive flex items-center gap-1.5">
+                <Lock className="h-4 w-4 flex-shrink-0" />
+                Registration is fully disabled. No new accounts can be created.
+              </p>
+            </div>
+          )}
 
           <div className="flex items-center justify-between">
             <div>

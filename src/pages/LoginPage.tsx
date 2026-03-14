@@ -8,16 +8,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, EyeOff, Key } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function LoginPage() {
   const { user, loading, signIn, signUp, resetPassword } = useAuth();
-  const { validateCode, redeemCode, checkInviteOnly, validating } = useInviteCode();
+  const { validateCode, redeemCode, checkInviteOnly, checkRegistrationDisabled, validating } = useInviteCode();
   const [tab, setTab] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [inviteCode, setInviteCode] = useState('');
   const [isInviteOnly, setIsInviteOnly] = useState(false);
+  const [registrationDisabled, setRegistrationDisabled] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -26,7 +28,8 @@ export default function LoginPage() {
 
   useEffect(() => {
     checkInviteOnly().then(setIsInviteOnly);
-  }, [checkInviteOnly]);
+    checkRegistrationDisabled().then(setRegistrationDisabled);
+  }, [checkInviteOnly, checkRegistrationDisabled]);
 
   if (loading) {
     return (
@@ -120,10 +123,12 @@ export default function LoginPage() {
                 </Button>
               </form>
             ) : (
-              <Tabs value={tab} onValueChange={v => { setTab(v as 'login' | 'signup'); setError(''); setMessage(''); }}>
-                <TabsList className="grid w-full grid-cols-2">
+              <Tabs value={registrationDisabled ? 'login' : tab} onValueChange={v => { if (!registrationDisabled) { setTab(v as 'login' | 'signup'); } setError(''); setMessage(''); }}>
+                <TabsList className={cn("grid w-full", registrationDisabled ? "grid-cols-1" : "grid-cols-2")}>
                   <TabsTrigger value="login" className="tap-target">Sign in</TabsTrigger>
-                  <TabsTrigger value="signup" className="tap-target">Create account</TabsTrigger>
+                  {!registrationDisabled && (
+                    <TabsTrigger value="signup" className="tap-target">Create account</TabsTrigger>
+                  )}
                 </TabsList>
 
                 <form onSubmit={handleSubmit} className="space-y-4 mt-4">
