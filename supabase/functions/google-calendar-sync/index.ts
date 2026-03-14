@@ -1,16 +1,47 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-serve(async (req) => {
+/**
+ * Google Calendar sync — list and insert events.
+ *
+ * Security: Validates the caller is an authenticated Supabase user via getClaims().
+ * The Google OAuth token is passed through from the client.
+ */
+
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // --- Auth: validate Supabase JWT ---
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'Authorization required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const token = authHeader.replace('Bearer ', '');
+
+    const supabase = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims?.sub) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized — invalid or expired session' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const GOOGLE_API_KEY = Deno.env.get('GOOGLE_API_KEY');
     if (!GOOGLE_API_KEY) {
       return new Response(JSON.stringify({ error: 'Google API key not configured' }), {
@@ -19,9 +50,17 @@ serve(async (req) => {
       });
     }
 
-    const { action, calendarId, event, timeMin, timeMax } = await req.json();
+    const { action, calendarId, event, timeMin, timeMax, googleAccessToken } = await req.json();
+
+    if (!googleAccessToken) {
+      return new Response(JSON.stringify({ error: 'Google OAuth access token is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     const baseUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId || 'primary')}`;
+    const googleAuth = `Bearer ${googleAccessToken}`;
 
     if (action === 'list') {
       const params = new URLSearchParams({
@@ -32,17 +71,8 @@ serve(async (req) => {
       if (timeMin) params.set('timeMin', timeMin);
       if (timeMax) params.set('timeMax', timeMax);
 
-      // For listing, we need OAuth token from the user
-      const authHeader = req.headers.get('authorization');
-      if (!authHeader) {
-        return new Response(JSON.stringify({ error: 'Authorization required for listing events' }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
       const res = await fetch(`${baseUrl}/events?${params}`, {
-        headers: { Authorization: authHeader },
+        headers: { Authorization: googleAuth },
       });
       const data = await res.json();
       if (!res.ok) {
@@ -57,18 +87,10 @@ serve(async (req) => {
     }
 
     if (action === 'insert') {
-      const authHeader = req.headers.get('authorization');
-      if (!authHeader) {
-        return new Response(JSON.stringify({ error: 'Authorization required' }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
       const res = await fetch(`${baseUrl}/events`, {
         method: 'POST',
         headers: {
-          Authorization: authHeader,
+          Authorization: googleAuth,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(event),

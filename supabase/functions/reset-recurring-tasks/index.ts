@@ -3,21 +3,37 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+/**
+ * Reset recurring tasks (daily/weekly/monthly).
+ * Called by pg_cron or service-role only.
+ *
+ * Security: Validates the caller is using the service role key.
+ */
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // --- Auth: require service role key ---
+  const authHeader = req.headers.get("Authorization");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  if (!authHeader || authHeader !== `Bearer ${serviceRoleKey}`) {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized. This function requires service-role access." }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const now = new Date();
-    const dayOfWeek = now.getUTCDay(); // 0=Sun
+    const dayOfWeek = now.getUTCDay();
     const dayOfMonth = now.getUTCDate();
 
     // Reset daily recurring tasks
