@@ -1,3 +1,12 @@
+/**
+ * Mosaic — Demo / Development Data
+ * 
+ * This file contains sample data for local development and testing ONLY.
+ * It is NOT imported by any production code path.
+ * Do not import this file in components or contexts — use database queries instead.
+ * 
+ * To seed this data for development, use: npx tsx scripts/seed.ts
+ */
 import type { Alter, FrontEvent, JournalEntry, InternalMessage, SystemTask, SafetyPlan, CalendarEvent, DailyCheckIn } from '@/types/system';
 
 export const demoAlters: Alter[] = [
