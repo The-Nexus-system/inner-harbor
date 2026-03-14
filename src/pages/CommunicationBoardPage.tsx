@@ -130,9 +130,13 @@ export default function CommunicationBoardPage() {
     setFormOpen(false); resetForm(); fetchCards();
   };
 
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
   const handleDelete = async (id: string) => {
     await supabase.from('communication_cards' as any).delete().eq('id', id);
-    toast({ title: 'Card removed' }); fetchCards();
+    toast({ title: 'Card removed' });
+    setDeleteId(null);
+    fetchCards();
   };
 
   const handleTap = (card: CommCard) => {
