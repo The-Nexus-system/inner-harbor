@@ -52,6 +52,8 @@ export default function DeploymentPage() {
   const [checking, setChecking] = useState(false);
   const [newCodeUses, setNewCodeUses] = useState('1');
   const [newCodeExpiry, setNewCodeExpiry] = useState('never');
+  const [deleteCodeId, setDeleteCodeId] = useState<string | null>(null);
+  const [deactivateCodeId, setDeactivateCodeId] = useState<string | null>(null);
 
   // ─── Load config and codes ─────────────────────────────
   const loadData = useCallback(async () => {
