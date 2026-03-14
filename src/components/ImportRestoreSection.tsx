@@ -323,7 +323,7 @@ export default function ImportRestoreSection() {
                   {preview.map(p => (
                     <div key={p.key} className="flex items-center justify-between py-1.5 px-2 rounded bg-muted/40">
                       <div className="flex items-center gap-2">
-                        <Check className="h-4 w-4 text-green-600 dark:text-green-400" aria-hidden="true" />
+                        <Check className="h-4 w-4 text-primary" aria-hidden="true" />
                         <span className="text-sm">{p.label}</span>
                       </div>
                       <Badge variant="secondary" className="text-xs tabular-nums">{p.count}</Badge>

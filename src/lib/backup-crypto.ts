@@ -37,7 +37,7 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
     'raw', encoder.encode(password), 'PBKDF2', false, ['deriveKey']
   );
   return crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt, iterations: ITERATIONS, hash: 'SHA-256' },
+    { name: 'PBKDF2', salt: salt as unknown as ArrayBuffer, iterations: ITERATIONS, hash: 'SHA-256' },
     keyMaterial,
     { name: ALGORITHM, length: KEY_LENGTH },
     false,
