@@ -75,10 +75,11 @@ export function useInviteCode() {
     try {
       const { data } = await supabase
         .from('app_config')
-        .select('*')
+        .select('registration_disabled')
+        .eq('registration_disabled', true)
         .limit(1)
         .maybeSingle();
-      return (data as any)?.registration_disabled ?? false;
+      return !!data;
     } catch {
       return false;
     }
