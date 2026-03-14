@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 
 // ─── Types ──────────────────────────────────────────────────
 interface InviteCode {
@@ -51,6 +52,8 @@ export default function DeploymentPage() {
   const [checking, setChecking] = useState(false);
   const [newCodeUses, setNewCodeUses] = useState('1');
   const [newCodeExpiry, setNewCodeExpiry] = useState('never');
+  const [deleteCodeId, setDeleteCodeId] = useState<string | null>(null);
+  const [deactivateCodeId, setDeactivateCodeId] = useState<string | null>(null);
 
   // ─── Load config and codes ─────────────────────────────
   const loadData = useCallback(async () => {
@@ -105,12 +108,14 @@ export default function DeploymentPage() {
   const deactivateCode = async (id: string) => {
     await supabase.from('invite_codes').update({ is_active: false }).eq('id', id);
     toast.success('Invite code deactivated.');
+    setDeactivateCodeId(null);
     loadData();
   };
 
   const deleteCode = async (id: string) => {
     await supabase.from('invite_codes').delete().eq('id', id);
     toast.success('Invite code deleted.');
+    setDeleteCodeId(null);
     loadData();
   };
 
@@ -378,11 +383,11 @@ export default function DeploymentPage() {
                         <Copy className="h-3.5 w-3.5" />
                       </Button>
                       {code.is_active ? (
-                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-amber-500" onClick={() => deactivateCode(code.id)}>
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-amber-500" onClick={() => setDeactivateCodeId(code.id)}>
                           <XCircle className="h-3.5 w-3.5" />
                         </Button>
                       ) : (
-                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" onClick={() => deleteCode(code.id)}>
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" onClick={() => setDeleteCodeId(code.id)}>
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       )}
@@ -485,6 +490,25 @@ export default function DeploymentPage() {
           </p>
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        open={!!deactivateCodeId}
+        onOpenChange={(open) => { if (!open) setDeactivateCodeId(null); }}
+        title="Deactivate invite code?"
+        description="This code will no longer be usable for new registrations. You can delete it later if needed."
+        confirmLabel="Deactivate"
+        destructive={false}
+        onConfirm={() => deactivateCodeId && deactivateCode(deactivateCodeId)}
+      />
+
+      <ConfirmDialog
+        open={!!deleteCodeId}
+        onOpenChange={(open) => { if (!open) setDeleteCodeId(null); }}
+        title="Delete invite code?"
+        description="This will permanently remove this invite code. This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={() => deleteCodeId && deleteCode(deleteCodeId)}
+      />
     </div>
   );
 }

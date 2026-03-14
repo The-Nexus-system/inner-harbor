@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Eye, EarOff, Hand, Wind, Utensils, RotateCcw, Move } from "lucide-react";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { SensoryRadarChart } from "@/components/SensoryRadarChart";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -129,9 +130,12 @@ export default function SensoryProfilePage() {
     setFormOpen(false); resetForm(); fetchProfiles();
   };
 
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
   const handleDelete = async (id: string) => {
     await supabase.from('sensory_profiles' as any).delete().eq('id', id);
     toast({ title: 'Profile removed' });
+    setDeleteId(null);
     fetchProfiles();
   };
 
@@ -242,7 +246,7 @@ export default function SensoryProfilePage() {
                 </div>
                 <div className="flex gap-1">
                   <Button variant="ghost" size="icon" onClick={() => openEdit(p)}><Pencil className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleDelete(p.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => setDeleteId(p.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                 </div>
               </div>
             </CardHeader>
@@ -276,6 +280,15 @@ export default function SensoryProfilePage() {
           </Card>
         ))}
       </div>
+
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(open) => { if (!open) setDeleteId(null); }}
+        title="Delete sensory profile?"
+        description="This will permanently remove this sensory profile and all its data. This action cannot be undone."
+        confirmLabel="Delete profile"
+        onConfirm={() => deleteId && handleDelete(deleteId)}
+      />
     </div>
   );
 }

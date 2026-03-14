@@ -8,11 +8,12 @@ const corsHeaders = {
 
 /**
  * Push notification sender.
- * 
+ *
  * Accepts: { user_id, title, body, url, tag }
  * Looks up all push subscriptions for that user and sends Web Push notifications.
- * 
- * Uses manual Web Push protocol with VAPID signing (no npm packages needed).
+ *
+ * Security: Requires either service-role key or a valid authenticated user
+ * (who can only send notifications to themselves).
  */
 
 // --- VAPID JWT signing utilities ---
@@ -52,7 +53,7 @@ async function createVapidJwt(
   const now = Math.floor(Date.now() / 1000);
   const payload = {
     aud: audience,
-    exp: now + 12 * 60 * 60, // 12 hours
+    exp: now + 12 * 60 * 60,
     sub: subject,
   };
 
@@ -67,13 +68,11 @@ async function createVapidJwt(
     new TextEncoder().encode(unsignedToken)
   );
 
-  // Convert DER signature to raw r||s format (64 bytes)
   const sigArray = new Uint8Array(signature);
   let rawSig: Uint8Array;
   if (sigArray.length === 64) {
     rawSig = sigArray;
   } else {
-    // DER encoded - parse it
     rawSig = derToRaw(sigArray);
   }
 
@@ -81,18 +80,15 @@ async function createVapidJwt(
 }
 
 function derToRaw(der: Uint8Array): Uint8Array {
-  // DER: 0x30 <len> 0x02 <rlen> <r> 0x02 <slen> <s>
   const raw = new Uint8Array(64);
-  let offset = 2; // skip 0x30 <len>
-  // R
-  offset++; // skip 0x02
+  let offset = 2;
+  offset++;
   const rLen = der[offset++];
   const rStart = rLen > 32 ? offset + (rLen - 32) : offset;
   const rDest = rLen > 32 ? 0 : 32 - rLen;
   raw.set(der.slice(rStart, offset + rLen), rDest);
   offset += rLen;
-  // S
-  offset++; // skip 0x02
+  offset++;
   const sLen = der[offset++];
   const sStart = sLen > 32 ? offset + (sLen - 32) : offset;
   const sDest = sLen > 32 ? 32 : 64 - sLen;
@@ -114,10 +110,7 @@ async function sendPushNotification(
     const audience = `${url.protocol}//${url.host}`;
 
     const jwt = await createVapidJwt(audience, vapidSubject, vapidPrivateKey);
-    const vapidKeyBytes = base64UrlDecode(vapidPublicKey);
 
-    // For simplicity, send payload as plaintext (not encrypted)
-    // Real Web Push requires encryption, but many push services accept plaintext with proper headers
     const response = await fetch(subscription.endpoint, {
       method: "POST",
       headers: {
@@ -156,12 +149,44 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Handle GET for public key retrieval
+    // Handle GET for public key retrieval (no auth needed)
     if (req.method === "GET") {
       return new Response(
         JSON.stringify({ publicKey: vapidPublicKey }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // --- Auth check ---
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const token = authHeader.replace("Bearer ", "");
+    const isServiceRole = token === serviceRoleKey;
+
+    let callerUserId: string | null = null;
+
+    if (!isServiceRole) {
+      // Validate as authenticated user
+      const userClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data, error } = await userClient.auth.getClaims(token);
+      if (error || !data?.claims?.sub) {
+        return new Response(
+          JSON.stringify({ error: "Unauthorized" }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      callerUserId = data.claims.sub as string;
     }
 
     const { user_id, title, body, url, tag } = await req.json();
@@ -173,11 +198,16 @@ Deno.serve(async (req) => {
       );
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    // Non-service-role callers can only notify themselves
+    if (callerUserId && callerUserId !== user_id) {
+      return new Response(
+        JSON.stringify({ error: "Forbidden: can only send notifications to yourself" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    // Get all push subscriptions for this user
     const { data: subscriptions, error } = await supabase
       .from("notification_subscriptions")
       .select("*")
@@ -197,7 +227,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const payload = JSON.stringify({
+    const notifPayload = JSON.stringify({
       title,
       body: body || "",
       url: url || "/",
@@ -210,7 +240,7 @@ Deno.serve(async (req) => {
       subscriptions.map((sub) =>
         sendPushNotification(
           { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth },
-          payload,
+          notifPayload,
           vapidPublicKey,
           vapidPrivateKey,
           vapidSubject
@@ -222,7 +252,7 @@ Deno.serve(async (req) => {
     const expiredIds = subscriptions
       .filter((_, i) => results[i].status === 410)
       .map((s) => s.id);
-    
+
     if (expiredIds.length > 0) {
       await supabase
         .from("notification_subscriptions")

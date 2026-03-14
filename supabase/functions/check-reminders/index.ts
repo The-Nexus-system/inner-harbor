@@ -8,14 +8,9 @@ const corsHeaders = {
 
 /**
  * Check for upcoming task and calendar event reminders.
- * Called by pg_cron every minute.
- * 
- * Logic:
- * - For calendar_events with reminder_minutes set, check if the event is
- *   within reminder_minutes from now.
- * - For tasks with reminder_minutes and due_date set, check if the task
- *   due date + reminder window is within the current minute.
- * - Sends push notifications via the push-notify function.
+ * Called by pg_cron or service-role only.
+ *
+ * Security: Validates the caller is using the service role key.
  */
 
 Deno.serve(async (req) => {
@@ -23,16 +18,24 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // --- Auth: require service role key ---
+  const authHeader = req.headers.get("Authorization");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  if (!authHeader || authHeader !== `Bearer ${serviceRoleKey}`) {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized. This function requires service-role access." }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const now = new Date();
     const results: { type: string; title: string; userId: string }[] = [];
 
     // --- Calendar event reminders ---
-    // Find events where event_date + event_time - reminder_minutes = now (within 1 min window)
     const { data: calendarEvents } = await supabase
       .from("calendar_events")
       .select("*")
@@ -48,10 +51,8 @@ Deno.serve(async (req) => {
           eventDateTime.getTime() - (event.reminder_minutes || 30) * 60 * 1000
         );
 
-        // Check if reminder time is within the current minute
         const diffMs = Math.abs(now.getTime() - reminderTime.getTime());
         if (diffMs < 60 * 1000) {
-          // Send notification
           const minutesLabel = event.reminder_minutes >= 60
             ? `${Math.round(event.reminder_minutes / 60)} hour(s)`
             : `${event.reminder_minutes} minutes`;
@@ -81,7 +82,6 @@ Deno.serve(async (req) => {
     }
 
     // --- Task reminders ---
-    // Find tasks with due_date and reminder_minutes set
     const { data: taskItems } = await supabase
       .from("tasks")
       .select("*")
@@ -92,7 +92,6 @@ Deno.serve(async (req) => {
 
     if (taskItems) {
       for (const task of taskItems) {
-        // Assume tasks are due at 9:00 AM UTC on their due date
         const taskDateTime = new Date(`${task.due_date}T09:00:00Z`);
         const reminderTime = new Date(
           taskDateTime.getTime() - (task.reminder_minutes || 30) * 60 * 1000

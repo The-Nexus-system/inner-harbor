@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Plus, Pencil, Trash2, MessageCircle, Volume2, ArrowUpDown, Check } from "lucide-react";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { SortableCommCard } from "@/components/SortableCommCard";
@@ -129,9 +130,13 @@ export default function CommunicationBoardPage() {
     setFormOpen(false); resetForm(); fetchCards();
   };
 
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
   const handleDelete = async (id: string) => {
     await supabase.from('communication_cards' as any).delete().eq('id', id);
-    toast({ title: 'Card removed' }); fetchCards();
+    toast({ title: 'Card removed' });
+    setDeleteId(null);
+    fetchCards();
   };
 
   const handleTap = (card: CommCard) => {
@@ -293,7 +298,7 @@ export default function CommunicationBoardPage() {
                     lastTapped={lastTapped}
                     onTap={handleTap}
                     onEdit={openEdit}
-                    onDelete={handleDelete}
+                    onDelete={(id) => setDeleteId(id)}
                     reorderMode={reorderMode}
                   />
                 ))}
@@ -302,6 +307,15 @@ export default function CommunicationBoardPage() {
           </div>
         ))}
       </DndContext>
+
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(open) => { if (!open) setDeleteId(null); }}
+        title="Delete communication card?"
+        description="This will permanently remove this card from your board. This action cannot be undone."
+        confirmLabel="Delete card"
+        onConfirm={() => deleteId && handleDelete(deleteId)}
+      />
     </div>
   );
 }
