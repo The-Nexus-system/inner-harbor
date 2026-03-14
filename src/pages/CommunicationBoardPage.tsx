@@ -298,7 +298,7 @@ export default function CommunicationBoardPage() {
                     lastTapped={lastTapped}
                     onTap={handleTap}
                     onEdit={openEdit}
-                    onDelete={handleDelete}
+                    onDelete={(id) => setDeleteId(id)}
                     reorderMode={reorderMode}
                   />
                 ))}
