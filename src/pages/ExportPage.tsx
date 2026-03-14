@@ -15,13 +15,16 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Download, FileText, FileJson, FileSpreadsheet, Printer, Heart,
-  CalendarIcon, Eye, Save, FolderOpen, AlertTriangle
+  CalendarIcon, Eye, Save, FolderOpen, AlertTriangle, Lock, Upload, Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { logAuditEvent } from "@/lib/audit";
+import { encryptBackup } from "@/lib/backup-crypto";
+import ImportRestoreSection from "@/components/ImportRestoreSection";
 import {
   exportAsText, exportAsJson, exportAsCsv, exportAsHtml,
   formatJournalForExport, journalToCsvRows,
