@@ -246,6 +246,23 @@ export default function DeploymentPage() {
 
           <div className="flex items-center justify-between">
             <div>
+              <Label className="text-sm font-medium">Disable new registrations</Label>
+              <p className="text-xs text-muted-foreground">Block all new account signups entirely</p>
+            </div>
+            <Switch checked={config.registration_disabled} onCheckedChange={(v) => updateConfig({ registration_disabled: v })} />
+          </div>
+
+          {config.registration_disabled && (
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+              <p className="text-sm text-destructive flex items-center gap-1.5">
+                <Lock className="h-4 w-4 flex-shrink-0" />
+                Registration is fully disabled. No new accounts can be created.
+              </p>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between">
+            <div>
               <Label className="text-sm font-medium">Demo mode</Label>
               <p className="text-xs text-muted-foreground">Show demo data and sample content for testing</p>
             </div>
