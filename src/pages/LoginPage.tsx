@@ -11,7 +11,7 @@ import { Eye, EyeOff, Key } from 'lucide-react';
 
 export default function LoginPage() {
   const { user, loading, signIn, signUp, resetPassword } = useAuth();
-  const { validateCode, redeemCode, checkInviteOnly, validating } = useInviteCode();
+  const { validateCode, redeemCode, checkInviteOnly, checkRegistrationDisabled, validating } = useInviteCode();
   const [tab, setTab] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
