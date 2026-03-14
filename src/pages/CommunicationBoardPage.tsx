@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Plus, Pencil, Trash2, MessageCircle, Volume2, ArrowUpDown, Check } from "lucide-react";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { SortableCommCard } from "@/components/SortableCommCard";
