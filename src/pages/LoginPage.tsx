@@ -27,7 +27,8 @@ export default function LoginPage() {
 
   useEffect(() => {
     checkInviteOnly().then(setIsInviteOnly);
-  }, [checkInviteOnly]);
+    checkRegistrationDisabled().then(setRegistrationDisabled);
+  }, [checkInviteOnly, checkRegistrationDisabled]);
 
   if (loading) {
     return (
