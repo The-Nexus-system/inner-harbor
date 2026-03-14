@@ -108,12 +108,14 @@ export default function DeploymentPage() {
   const deactivateCode = async (id: string) => {
     await supabase.from('invite_codes').update({ is_active: false }).eq('id', id);
     toast.success('Invite code deactivated.');
+    setDeactivateCodeId(null);
     loadData();
   };
 
   const deleteCode = async (id: string) => {
     await supabase.from('invite_codes').delete().eq('id', id);
     toast.success('Invite code deleted.');
+    setDeleteCodeId(null);
     loadData();
   };
 
