@@ -74,6 +74,7 @@ const RECORD_LABELS: Record<RecordType, string> = {
 const FORMAT_OPTIONS: { value: ExportFormat; label: string; icon: typeof FileText; desc: string }[] = [
   { value: 'text', label: 'Plain text', icon: FileText, desc: 'Accessible, readable by any device' },
   { value: 'json', label: 'JSON', icon: FileJson, desc: 'Structured data, good for backups' },
+  { value: 'json-encrypted', label: 'Encrypted JSON', icon: Lock, desc: 'Password-protected backup (AES-256-GCM)' },
   { value: 'csv', label: 'CSV', icon: FileSpreadsheet, desc: 'Spreadsheet-compatible tables' },
   { value: 'printable', label: 'Printable report', icon: Printer, desc: 'Clean HTML for printing' },
   { value: 'therapy', label: 'Therapy summary', icon: Heart, desc: 'Aggregated overview for sessions' },
