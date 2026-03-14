@@ -59,7 +59,7 @@ export default function DeploymentPage() {
       supabase.from('app_config').select('*').eq('user_id', user.id).maybeSingle(),
       supabase.from('invite_codes').select('*').eq('created_by', user.id).order('created_at', { ascending: false }),
     ]);
-    if (configRes.data) setConfig({ invite_only: configRes.data.invite_only, demo_mode: configRes.data.demo_mode });
+    if (configRes.data) setConfig({ invite_only: configRes.data.invite_only, demo_mode: configRes.data.demo_mode, registration_disabled: (configRes.data as any).registration_disabled ?? false });
     if (codesRes.data) setInviteCodes(codesRes.data as InviteCode[]);
   }, [user]);
 
