@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, EyeOff, Key } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function LoginPage() {
   const { user, loading, signIn, signUp, resetPassword } = useAuth();
