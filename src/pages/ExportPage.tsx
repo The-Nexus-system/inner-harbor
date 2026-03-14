@@ -565,6 +565,50 @@ export default function ExportPage() {
         </CardContent>
       </Card>
 
+      {/* Encryption password (shown only for encrypted format) */}
+      {selectedFormat === 'json-encrypted' && (
+        <Card className="border-l-4 border-l-primary/60">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-heading flex items-center gap-2">
+              <Lock className="h-4 w-4" aria-hidden="true" />
+              Encryption password
+            </CardTitle>
+            <p className="text-xs text-muted-foreground">
+              Choose a strong password. You will need it to decrypt and restore this backup.
+              There is no way to recover your data if you forget this password.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="encrypt-password">Password (min 8 characters)</Label>
+              <Input
+                id="encrypt-password"
+                type="password"
+                value={encryptPassword}
+                onChange={e => setEncryptPassword(e.target.value)}
+                placeholder="Enter encryption password"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="encrypt-confirm">Confirm password</Label>
+              <Input
+                id="encrypt-confirm"
+                type="password"
+                value={encryptConfirm}
+                onChange={e => setEncryptConfirm(e.target.value)}
+                placeholder="Re-enter password"
+              />
+            </div>
+            {encryptPassword.length > 0 && encryptPassword.length < 8 && (
+              <p className="text-xs text-destructive">Password must be at least 8 characters.</p>
+            )}
+            {encryptConfirm.length > 0 && encryptPassword !== encryptConfirm && (
+              <p className="text-xs text-destructive">Passwords do not match.</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Summary and actions */}
       <Card>
         <CardContent className="p-4 space-y-4">
@@ -585,9 +629,9 @@ export default function ExportPage() {
               <Eye className="h-4 w-4" aria-hidden="true" />
               Preview
             </Button>
-            <Button onClick={handleExport} className="gap-1.5" disabled={selectedTypes.length === 0}>
-              <Download className="h-4 w-4" aria-hidden="true" />
-              Download export
+            <Button onClick={handleExport} className="gap-1.5" disabled={selectedTypes.length === 0 || exporting}>
+              {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" aria-hidden="true" />}
+              {exporting ? 'Encrypting…' : 'Download export'}
             </Button>
             <Button onClick={() => setSavePresetOpen(true)} variant="outline" className="gap-1.5" disabled={selectedTypes.length === 0}>
               <Save className="h-4 w-4" aria-hidden="true" />
@@ -596,6 +640,13 @@ export default function ExportPage() {
           </div>
         </CardContent>
       </Card>
+
+        </TabsContent>
+
+        <TabsContent value="import" className="mt-4">
+          <ImportRestoreSection />
+        </TabsContent>
+      </Tabs>
 
       {/* Preview dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
