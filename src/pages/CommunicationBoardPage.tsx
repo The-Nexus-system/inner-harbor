@@ -307,6 +307,15 @@ export default function CommunicationBoardPage() {
           </div>
         ))}
       </DndContext>
+
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(open) => { if (!open) setDeleteId(null); }}
+        title="Delete communication card?"
+        description="This will permanently remove this card from your board. This action cannot be undone."
+        confirmLabel="Delete card"
+        onConfirm={() => deleteId && handleDelete(deleteId)}
+      />
     </div>
   );
 }
