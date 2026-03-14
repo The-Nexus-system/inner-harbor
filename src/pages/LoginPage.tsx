@@ -18,6 +18,7 @@ export default function LoginPage() {
   const [displayName, setDisplayName] = useState('');
   const [inviteCode, setInviteCode] = useState('');
   const [isInviteOnly, setIsInviteOnly] = useState(false);
+  const [registrationDisabled, setRegistrationDisabled] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
