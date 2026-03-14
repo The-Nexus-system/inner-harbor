@@ -250,64 +250,91 @@ export default function ExportPage() {
   };
 
   // ─── Export ────────────────────────────────────────────
-  const handleExport = () => {
+  const handleExport = async () => {
     if (selectedTypes.length === 0) { toast.error("Please select at least one record type."); return; }
 
+    if (selectedFormat === 'json-encrypted' && encryptPassword.length < 8) {
+      toast.error("Please enter a password of at least 8 characters."); return;
+    }
+    if (selectedFormat === 'json-encrypted' && encryptPassword !== encryptConfirm) {
+      toast.error("Passwords do not match."); return;
+    }
+
+    setExporting(true);
     const date = new Date().toISOString().split('T')[0];
     const basename = `mosaic-export-${date}`;
 
-    if (selectedFormat === 'therapy') {
-      const journalTypes: Record<string, number> = {};
-      filteredData.journal.forEach(e => { journalTypes[e.type] = (journalTypes[e.type] || 0) + 1; });
+    try {
+      if (selectedFormat === 'therapy') {
+        const journalTypes: Record<string, number> = {};
+        filteredData.journal.forEach(e => { journalTypes[e.type] = (journalTypes[e.type] || 0) + 1; });
 
-      const summary = generateTherapySummary({
-        dateRange: {
-          from: dateFrom ? format(dateFrom, 'PP') : 'All time',
-          to: dateTo ? format(dateTo, 'PP') : 'Present',
-        },
-        checkIns: filteredData.checkins,
-        journalCount: filteredData.journal.length,
-        journalTypes,
-        frontSwitches: filteredData.front.length,
-        safetyPlanCount: filteredData.safety.length,
-        tasksCompleted: filteredData.tasks.filter(t => t.isCompleted).length,
-        tasksTotal: filteredData.tasks.length,
+        const summary = generateTherapySummary({
+          dateRange: {
+            from: dateFrom ? format(dateFrom, 'PP') : 'All time',
+            to: dateTo ? format(dateTo, 'PP') : 'Present',
+          },
+          checkIns: filteredData.checkins,
+          journalCount: filteredData.journal.length,
+          journalTypes,
+          frontSwitches: filteredData.front.length,
+          safetyPlanCount: filteredData.safety.length,
+          tasksCompleted: filteredData.tasks.filter(t => t.isCompleted).length,
+          tasksTotal: filteredData.tasks.length,
+        });
+        exportAsText(summary, `mosaic-therapy-summary-${date}`);
+      } else if (selectedFormat === 'printable') {
+        const sections: Array<{ title: string; content: string }> = [];
+        const content = generateContent();
+        sections.push({ title: 'Full Export', content });
+        exportAsHtml(generatePrintableReport(sections), basename);
+      } else if (selectedFormat === 'csv') {
+        if (selectedTypes.includes('journal')) {
+          const mapped = filteredData.journal.map(e => ({ ...e, authorName: e.alterId ? getAlter(e.alterId)?.name : undefined }));
+          exportAsCsv(journalToCsvRows(mapped), `mosaic-journal-${date}`);
+        }
+        if (selectedTypes.includes('front')) {
+          const mapped = filteredData.front.map(e => ({ ...e, alterNames: e.alterIds.map(id => getAlter(id)?.name || 'Unknown') }));
+          exportAsCsv(frontHistoryToCsvRows(mapped), `mosaic-front-${date}`);
+        }
+        if (selectedTypes.includes('tasks')) exportAsCsv(tasksToCsvRows(filteredData.tasks), `mosaic-tasks-${date}`);
+        if (selectedTypes.includes('calendar')) exportAsCsv(calendarToCsvRows(filteredData.calendar), `mosaic-calendar-${date}`);
+        if (selectedTypes.includes('checkins')) exportAsCsv(checkInsToCsvRows(filteredData.checkins), `mosaic-checkins-${date}`);
+      } else if (selectedFormat === 'json' || selectedFormat === 'json-encrypted') {
+        const exportData: Record<string, unknown> = {};
+        selectedTypes.forEach(type => { exportData[type] = filteredData[type]; });
+
+        if (selectedFormat === 'json-encrypted') {
+          const encrypted = await encryptBackup(exportData, encryptPassword);
+          const blob = new Blob([encrypted], { type: 'application/json;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${basename}-encrypted.json`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          setEncryptPassword('');
+          setEncryptConfirm('');
+        } else {
+          exportAsJson(exportData, basename);
+        }
+      } else {
+        exportAsText(generateContent(), basename);
+      }
+
+      logAuditEvent({
+        action: 'data_export',
+        metadata: { format: selectedFormat, types: selectedTypes, totalRecords, dateRange: { from: dateFrom?.toISOString(), to: dateTo?.toISOString() } },
       });
-      exportAsText(summary, `mosaic-therapy-summary-${date}`);
-    } else if (selectedFormat === 'printable') {
-      const sections: Array<{ title: string; content: string }> = [];
-      const content = generateContent();
-      sections.push({ title: 'Full Export', content });
-      exportAsHtml(generatePrintableReport(sections), basename);
-    } else if (selectedFormat === 'csv') {
-      // Export each type as separate CSV
-      if (selectedTypes.includes('journal')) {
-        const mapped = filteredData.journal.map(e => ({ ...e, authorName: e.alterId ? getAlter(e.alterId)?.name : undefined }));
-        exportAsCsv(journalToCsvRows(mapped), `mosaic-journal-${date}`);
-      }
-      if (selectedTypes.includes('front')) {
-        const mapped = filteredData.front.map(e => ({ ...e, alterNames: e.alterIds.map(id => getAlter(id)?.name || 'Unknown') }));
-        exportAsCsv(frontHistoryToCsvRows(mapped), `mosaic-front-${date}`);
-      }
-      if (selectedTypes.includes('tasks')) exportAsCsv(tasksToCsvRows(filteredData.tasks), `mosaic-tasks-${date}`);
-      if (selectedTypes.includes('calendar')) exportAsCsv(calendarToCsvRows(filteredData.calendar), `mosaic-calendar-${date}`);
-      if (selectedTypes.includes('checkins')) exportAsCsv(checkInsToCsvRows(filteredData.checkins), `mosaic-checkins-${date}`);
-    } else if (selectedFormat === 'json') {
-      const exportData: Record<string, unknown> = {};
-      selectedTypes.forEach(type => { exportData[type] = filteredData[type]; });
-      if (!includeMetadata) {
-        // Strip IDs and timestamps for cleaner output
-      }
-      exportAsJson(exportData, basename);
-    } else {
-      exportAsText(generateContent(), basename);
+      toast.success("Export downloaded successfully.");
+    } catch (err) {
+      toast.error("Export failed. Please try again.");
+      console.error('Export error:', err);
+    } finally {
+      setExporting(false);
     }
-
-    logAuditEvent({
-      action: 'data_export',
-      metadata: { format: selectedFormat, types: selectedTypes, totalRecords, dateRange: { from: dateFrom?.toISOString(), to: dateTo?.toISOString() } },
-    });
-    toast.success("Export downloaded successfully.");
   };
 
   // ─── Presets ───────────────────────────────────────────
