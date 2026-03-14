@@ -15,13 +15,16 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Download, FileText, FileJson, FileSpreadsheet, Printer, Heart,
-  CalendarIcon, Eye, Save, FolderOpen, AlertTriangle
+  CalendarIcon, Eye, Save, FolderOpen, AlertTriangle, Lock, Upload, Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { logAuditEvent } from "@/lib/audit";
+import { encryptBackup } from "@/lib/backup-crypto";
+import ImportRestoreSection from "@/components/ImportRestoreSection";
 import {
   exportAsText, exportAsJson, exportAsCsv, exportAsHtml,
   formatJournalForExport, journalToCsvRows,
@@ -43,7 +46,7 @@ type RecordType =
   | 'calendar' | 'safety' | 'checkins' | 'handoffs'
   | 'snapshots' | 'medications';
 
-type ExportFormat = 'text' | 'json' | 'csv' | 'printable' | 'therapy';
+type ExportFormat = 'text' | 'json' | 'json-encrypted' | 'csv' | 'printable' | 'therapy';
 
 interface ExportPreset {
   id: string;
@@ -71,6 +74,7 @@ const RECORD_LABELS: Record<RecordType, string> = {
 const FORMAT_OPTIONS: { value: ExportFormat; label: string; icon: typeof FileText; desc: string }[] = [
   { value: 'text', label: 'Plain text', icon: FileText, desc: 'Accessible, readable by any device' },
   { value: 'json', label: 'JSON', icon: FileJson, desc: 'Structured data, good for backups' },
+  { value: 'json-encrypted', label: 'Encrypted JSON', icon: Lock, desc: 'Password-protected backup (AES-256-GCM)' },
   { value: 'csv', label: 'CSV', icon: FileSpreadsheet, desc: 'Spreadsheet-compatible tables' },
   { value: 'printable', label: 'Printable report', icon: Printer, desc: 'Clean HTML for printing' },
   { value: 'therapy', label: 'Therapy summary', icon: Heart, desc: 'Aggregated overview for sessions' },
@@ -121,7 +125,9 @@ export default function ExportPage() {
   const [presetName, setPresetName] = useState('');
   const [savedPresets, setSavedPresets] = useState<ExportPreset[]>([]);
   const [savePresetOpen, setSavePresetOpen] = useState(false);
-
+  const [encryptPassword, setEncryptPassword] = useState('');
+  const [encryptConfirm, setEncryptConfirm] = useState('');
+  const [exporting, setExporting] = useState(false);
   // Load presets from localStorage
   useEffect(() => {
     try {
@@ -244,64 +250,91 @@ export default function ExportPage() {
   };
 
   // ─── Export ────────────────────────────────────────────
-  const handleExport = () => {
+  const handleExport = async () => {
     if (selectedTypes.length === 0) { toast.error("Please select at least one record type."); return; }
 
+    if (selectedFormat === 'json-encrypted' && encryptPassword.length < 8) {
+      toast.error("Please enter a password of at least 8 characters."); return;
+    }
+    if (selectedFormat === 'json-encrypted' && encryptPassword !== encryptConfirm) {
+      toast.error("Passwords do not match."); return;
+    }
+
+    setExporting(true);
     const date = new Date().toISOString().split('T')[0];
     const basename = `mosaic-export-${date}`;
 
-    if (selectedFormat === 'therapy') {
-      const journalTypes: Record<string, number> = {};
-      filteredData.journal.forEach(e => { journalTypes[e.type] = (journalTypes[e.type] || 0) + 1; });
+    try {
+      if (selectedFormat === 'therapy') {
+        const journalTypes: Record<string, number> = {};
+        filteredData.journal.forEach(e => { journalTypes[e.type] = (journalTypes[e.type] || 0) + 1; });
 
-      const summary = generateTherapySummary({
-        dateRange: {
-          from: dateFrom ? format(dateFrom, 'PP') : 'All time',
-          to: dateTo ? format(dateTo, 'PP') : 'Present',
-        },
-        checkIns: filteredData.checkins,
-        journalCount: filteredData.journal.length,
-        journalTypes,
-        frontSwitches: filteredData.front.length,
-        safetyPlanCount: filteredData.safety.length,
-        tasksCompleted: filteredData.tasks.filter(t => t.isCompleted).length,
-        tasksTotal: filteredData.tasks.length,
+        const summary = generateTherapySummary({
+          dateRange: {
+            from: dateFrom ? format(dateFrom, 'PP') : 'All time',
+            to: dateTo ? format(dateTo, 'PP') : 'Present',
+          },
+          checkIns: filteredData.checkins,
+          journalCount: filteredData.journal.length,
+          journalTypes,
+          frontSwitches: filteredData.front.length,
+          safetyPlanCount: filteredData.safety.length,
+          tasksCompleted: filteredData.tasks.filter(t => t.isCompleted).length,
+          tasksTotal: filteredData.tasks.length,
+        });
+        exportAsText(summary, `mosaic-therapy-summary-${date}`);
+      } else if (selectedFormat === 'printable') {
+        const sections: Array<{ title: string; content: string }> = [];
+        const content = generateContent();
+        sections.push({ title: 'Full Export', content });
+        exportAsHtml(generatePrintableReport(sections), basename);
+      } else if (selectedFormat === 'csv') {
+        if (selectedTypes.includes('journal')) {
+          const mapped = filteredData.journal.map(e => ({ ...e, authorName: e.alterId ? getAlter(e.alterId)?.name : undefined }));
+          exportAsCsv(journalToCsvRows(mapped), `mosaic-journal-${date}`);
+        }
+        if (selectedTypes.includes('front')) {
+          const mapped = filteredData.front.map(e => ({ ...e, alterNames: e.alterIds.map(id => getAlter(id)?.name || 'Unknown') }));
+          exportAsCsv(frontHistoryToCsvRows(mapped), `mosaic-front-${date}`);
+        }
+        if (selectedTypes.includes('tasks')) exportAsCsv(tasksToCsvRows(filteredData.tasks), `mosaic-tasks-${date}`);
+        if (selectedTypes.includes('calendar')) exportAsCsv(calendarToCsvRows(filteredData.calendar), `mosaic-calendar-${date}`);
+        if (selectedTypes.includes('checkins')) exportAsCsv(checkInsToCsvRows(filteredData.checkins), `mosaic-checkins-${date}`);
+      } else if (selectedFormat === 'json' || selectedFormat === 'json-encrypted') {
+        const exportData: Record<string, unknown> = {};
+        selectedTypes.forEach(type => { exportData[type] = filteredData[type]; });
+
+        if (selectedFormat === 'json-encrypted') {
+          const encrypted = await encryptBackup(exportData, encryptPassword);
+          const blob = new Blob([encrypted], { type: 'application/json;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${basename}-encrypted.json`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          setEncryptPassword('');
+          setEncryptConfirm('');
+        } else {
+          exportAsJson(exportData, basename);
+        }
+      } else {
+        exportAsText(generateContent(), basename);
+      }
+
+      logAuditEvent({
+        action: 'data_export',
+        metadata: { format: selectedFormat, types: selectedTypes, totalRecords, dateRange: { from: dateFrom?.toISOString(), to: dateTo?.toISOString() } },
       });
-      exportAsText(summary, `mosaic-therapy-summary-${date}`);
-    } else if (selectedFormat === 'printable') {
-      const sections: Array<{ title: string; content: string }> = [];
-      const content = generateContent();
-      sections.push({ title: 'Full Export', content });
-      exportAsHtml(generatePrintableReport(sections), basename);
-    } else if (selectedFormat === 'csv') {
-      // Export each type as separate CSV
-      if (selectedTypes.includes('journal')) {
-        const mapped = filteredData.journal.map(e => ({ ...e, authorName: e.alterId ? getAlter(e.alterId)?.name : undefined }));
-        exportAsCsv(journalToCsvRows(mapped), `mosaic-journal-${date}`);
-      }
-      if (selectedTypes.includes('front')) {
-        const mapped = filteredData.front.map(e => ({ ...e, alterNames: e.alterIds.map(id => getAlter(id)?.name || 'Unknown') }));
-        exportAsCsv(frontHistoryToCsvRows(mapped), `mosaic-front-${date}`);
-      }
-      if (selectedTypes.includes('tasks')) exportAsCsv(tasksToCsvRows(filteredData.tasks), `mosaic-tasks-${date}`);
-      if (selectedTypes.includes('calendar')) exportAsCsv(calendarToCsvRows(filteredData.calendar), `mosaic-calendar-${date}`);
-      if (selectedTypes.includes('checkins')) exportAsCsv(checkInsToCsvRows(filteredData.checkins), `mosaic-checkins-${date}`);
-    } else if (selectedFormat === 'json') {
-      const exportData: Record<string, unknown> = {};
-      selectedTypes.forEach(type => { exportData[type] = filteredData[type]; });
-      if (!includeMetadata) {
-        // Strip IDs and timestamps for cleaner output
-      }
-      exportAsJson(exportData, basename);
-    } else {
-      exportAsText(generateContent(), basename);
+      toast.success("Export downloaded successfully.");
+    } catch (err) {
+      toast.error("Export failed. Please try again.");
+      console.error('Export error:', err);
+    } finally {
+      setExporting(false);
     }
-
-    logAuditEvent({
-      action: 'data_export',
-      metadata: { format: selectedFormat, types: selectedTypes, totalRecords, dateRange: { from: dateFrom?.toISOString(), to: dateTo?.toISOString() } },
-    });
-    toast.success("Export downloaded successfully.");
   };
 
   // ─── Presets ───────────────────────────────────────────
@@ -339,12 +372,24 @@ export default function ExportPage() {
       <header>
         <h1 className="text-2xl md:text-3xl font-heading font-bold flex items-center gap-2">
           <Download className="h-6 w-6 text-primary" aria-hidden="true" />
-          Export Your Data
+          Export &amp; Backup
         </h1>
         <p className="text-muted-foreground mt-1">
-          Download your data in accessible formats. You own your information — export it anytime.
+          Export, back up, or restore your data. You own your information — take it anywhere.
         </p>
       </header>
+
+      <Tabs defaultValue="export">
+        <TabsList className="w-full">
+          <TabsTrigger value="export" className="flex-1 gap-1.5">
+            <Download className="h-4 w-4" /> Export
+          </TabsTrigger>
+          <TabsTrigger value="import" className="flex-1 gap-1.5">
+            <Upload className="h-4 w-4" /> Import
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="export" className="space-y-6 mt-4">
 
       {/* Privacy notice */}
       <Card className="border-l-4 border-l-primary/40">
@@ -520,6 +565,50 @@ export default function ExportPage() {
         </CardContent>
       </Card>
 
+      {/* Encryption password (shown only for encrypted format) */}
+      {selectedFormat === 'json-encrypted' && (
+        <Card className="border-l-4 border-l-primary/60">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-heading flex items-center gap-2">
+              <Lock className="h-4 w-4" aria-hidden="true" />
+              Encryption password
+            </CardTitle>
+            <p className="text-xs text-muted-foreground">
+              Choose a strong password. You will need it to decrypt and restore this backup.
+              There is no way to recover your data if you forget this password.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="encrypt-password">Password (min 8 characters)</Label>
+              <Input
+                id="encrypt-password"
+                type="password"
+                value={encryptPassword}
+                onChange={e => setEncryptPassword(e.target.value)}
+                placeholder="Enter encryption password"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="encrypt-confirm">Confirm password</Label>
+              <Input
+                id="encrypt-confirm"
+                type="password"
+                value={encryptConfirm}
+                onChange={e => setEncryptConfirm(e.target.value)}
+                placeholder="Re-enter password"
+              />
+            </div>
+            {encryptPassword.length > 0 && encryptPassword.length < 8 && (
+              <p className="text-xs text-destructive">Password must be at least 8 characters.</p>
+            )}
+            {encryptConfirm.length > 0 && encryptPassword !== encryptConfirm && (
+              <p className="text-xs text-destructive">Passwords do not match.</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Summary and actions */}
       <Card>
         <CardContent className="p-4 space-y-4">
@@ -540,9 +629,9 @@ export default function ExportPage() {
               <Eye className="h-4 w-4" aria-hidden="true" />
               Preview
             </Button>
-            <Button onClick={handleExport} className="gap-1.5" disabled={selectedTypes.length === 0}>
-              <Download className="h-4 w-4" aria-hidden="true" />
-              Download export
+            <Button onClick={handleExport} className="gap-1.5" disabled={selectedTypes.length === 0 || exporting}>
+              {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" aria-hidden="true" />}
+              {exporting ? 'Encrypting…' : 'Download export'}
             </Button>
             <Button onClick={() => setSavePresetOpen(true)} variant="outline" className="gap-1.5" disabled={selectedTypes.length === 0}>
               <Save className="h-4 w-4" aria-hidden="true" />
@@ -551,6 +640,13 @@ export default function ExportPage() {
           </div>
         </CardContent>
       </Card>
+
+        </TabsContent>
+
+        <TabsContent value="import" className="mt-4">
+          <ImportRestoreSection />
+        </TabsContent>
+      </Tabs>
 
       {/* Preview dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
