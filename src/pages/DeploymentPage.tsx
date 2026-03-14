@@ -45,7 +45,7 @@ interface CheckItem {
 // ─── Component ──────────────────────────────────────────────
 export default function DeploymentPage() {
   const { user } = useAuth();
-  const [config, setConfig] = useState<AppConfig>({ invite_only: false, demo_mode: false });
+  const [config, setConfig] = useState<AppConfig>({ invite_only: false, demo_mode: false, registration_disabled: false });
   const [inviteCodes, setInviteCodes] = useState<InviteCode[]>([]);
   const [checkResults, setCheckResults] = useState<Record<string, boolean | null>>({});
   const [checking, setChecking] = useState(false);
