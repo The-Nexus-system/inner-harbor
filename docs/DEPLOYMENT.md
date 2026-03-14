@@ -2,19 +2,47 @@
 
 ## Overview
 
-Mosaic is a React + Supabase application designed for eventual self-hosting on DigitalOcean. This guide covers both the current Lovable Cloud setup and future migration to self-hosted infrastructure.
+Mosaic is a React + Supabase application designed for private self-hosting. This guide covers deployment to your own infrastructure.
+
+**This is a private application.** It should not be deployed as a public-facing service.
 
 ---
 
-## Current Setup (Lovable Cloud)
+## Environment Configuration
 
-The app runs on Lovable with Supabase (Lovable Cloud) providing:
-- PostgreSQL database with Row-Level Security
-- Authentication (email/password)
-- File storage
-- Edge functions
+Mosaic supports three environments, controlled by `VITE_APP_ENV`:
 
-No additional setup is needed for development — Lovable Cloud handles everything.
+| Environment | Value | Purpose |
+|-------------|-------|---------|
+| Development | `development` | Local dev, auto-detected when using `npm run dev` |
+| Staging | `staging` | Pre-production testing with real data shape |
+| Production | `production` | Live private deployment |
+
+Key differences:
+- **Development**: Demo data allowed, verbose logging
+- **Staging**: Demo data allowed, production-like config
+- **Production**: Demo data blocked, minimal logging, security hardened
+
+---
+
+## Pre-Deployment Checklist
+
+Use the in-app checklist at `/deployment`, or verify manually:
+
+- [ ] `VITE_APP_ENV=production` is set
+- [ ] Email confirmation is required for signups
+- [ ] Invite-only mode is enabled (or registration is disabled)
+- [ ] Demo mode is off
+- [ ] At least one safety plan exists
+- [ ] System members are configured
+- [ ] Profile (display name / system name) is set
+- [ ] Database backups are configured
+- [ ] All secrets are in environment variables
+- [ ] HTTPS is enforced
+- [ ] ICS feed URLs are private (if enabled)
+- [ ] Export controls are reviewed
+- [ ] Sharing settings are reviewed
+- [ ] Audit logging is active
 
 ---
 
@@ -34,20 +62,20 @@ No additional setup is needed for development — Lovable Cloud handles everythi
 
 3. **Set Environment Variables**
    - Copy values from `.env.example`
-   - Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (or replace with direct Postgres if migrating off Supabase)
+   - Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`
+   - Set `VITE_APP_ENV=production`
    - Set `DATABASE_URL` for migration scripts
    - All secrets go in App Platform's environment settings — never in code
 
 4. **Run Migrations**
    ```bash
-   # Using the migration files in supabase/migrations/
    psql $DATABASE_URL -f supabase/migrations/*.sql
    ```
 
-5. **Seed Demo Data (optional)**
-   ```bash
-   npx tsx scripts/seed.ts
-   ```
+5. **Create Your Account**
+   - Visit the deployed app and create your account
+   - Navigate to `/deployment` and enable invite-only or disable registration
+   - Run the deployment checklist
 
 6. **Enable HTTPS**
    - App Platform provides automatic HTTPS via Let's Encrypt
@@ -97,6 +125,9 @@ No additional setup is needed for development — Lovable Cloud handles everythi
 
 7. **Set environment variables** in `/opt/mosaic/.env`
 
+8. **Lock down access**
+   - Create your account, then enable invite-only or disable registration
+
 ---
 
 ## Database Backups
@@ -116,7 +147,7 @@ gunzip -c backup.sql.gz | psql $DATABASE_URL
 
 ### Attachment backups
 - If using DO Spaces: enable versioning on the bucket
-- If using Supabase Storage: use the Supabase dashboard export
+- If using Supabase Storage: export via the storage API
 
 ---
 
@@ -125,6 +156,7 @@ gunzip -c backup.sql.gz | psql $DATABASE_URL
 - Use DigitalOcean's built-in monitoring for CPU, memory, disk
 - Application logs go to stdout (captured by App Platform or journald on droplets)
 - Database logs available in managed Postgres dashboard
+- In-app audit log tracks security-relevant actions
 
 ---
 
@@ -139,12 +171,25 @@ gunzip -c backup.sql.gz | psql $DATABASE_URL
 
 ---
 
-## Security Checklist for Deployment
+## Security Checklist
 
 - [ ] All secrets in environment variables, not in code
 - [ ] HTTPS enforced (redirect HTTP → HTTPS)
 - [ ] Database not publicly accessible (use private networking)
 - [ ] RLS enabled on all tables
+- [ ] Registration locked down (invite-only or disabled)
 - [ ] Backup schedule configured
 - [ ] Monitoring alerts set up
 - [ ] Firewall configured (ports 80, 443 only)
+- [ ] No demo data in production
+- [ ] Audit log reviewed periodically
+
+---
+
+## Sync & Export Notes
+
+- Sync state is per-user, tracked via `last_synced_at` timestamps
+- Exports are user-initiated and require confirmation
+- Supported formats: JSON, CSV
+- ICS calendar feeds use private tokens — treat feed URLs as secrets
+- No data is shared externally without explicit user action
