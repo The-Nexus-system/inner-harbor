@@ -280,6 +280,15 @@ export default function SensoryProfilePage() {
           </Card>
         ))}
       </div>
+
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(open) => { if (!open) setDeleteId(null); }}
+        title="Delete sensory profile?"
+        description="This will permanently remove this sensory profile and all its data. This action cannot be undone."
+        confirmLabel="Delete profile"
+        onConfirm={() => deleteId && handleDelete(deleteId)}
+      />
     </div>
   );
 }
