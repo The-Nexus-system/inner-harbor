@@ -130,9 +130,12 @@ export default function SensoryProfilePage() {
     setFormOpen(false); resetForm(); fetchProfiles();
   };
 
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
   const handleDelete = async (id: string) => {
     await supabase.from('sensory_profiles' as any).delete().eq('id', id);
     toast({ title: 'Profile removed' });
+    setDeleteId(null);
     fetchProfiles();
   };
 
