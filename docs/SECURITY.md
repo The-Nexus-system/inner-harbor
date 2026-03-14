@@ -14,10 +14,14 @@ Mosaic handles highly sensitive personal data for plural/dissociative systems. S
 - **Rate limiting**: Supabase applies default rate limits to auth endpoints
 - **Password reset**: Secure email-based flow via `resetPasswordForEmail`
 
+### Implemented hardening
+- **Session/device management UI** — view login history, active sessions, and sign out all other devices (`/security`)
+- **Confirmation dialogs** — all destructive actions (delete, deactivate, revoke) require explicit user confirmation
+- **Edge function auth** — all backend functions validate authorization (service-role for cron jobs, JWT for user-facing endpoints)
+
 ### Future hardening
 - Login attempt throttling (configurable per-IP when self-hosting)
 - Session expiration policies
-- Device/session management UI
 - Optional quick re-entry passcode lock
 - CSRF protection for state-changing operations
 
