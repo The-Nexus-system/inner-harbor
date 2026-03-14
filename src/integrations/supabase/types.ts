@@ -1423,7 +1423,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_registration_flags: { Args: never; Returns: Json }
+      get_support_contact_by_token: { Args: { p_token: string }; Returns: Json }
+      redeem_invite_code: { Args: { p_code: string }; Returns: boolean }
+      validate_invite_code: { Args: { p_code: string }; Returns: Json }
     }
     Enums: {
       front_status:
