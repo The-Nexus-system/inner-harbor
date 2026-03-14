@@ -122,10 +122,12 @@ export default function LoginPage() {
                 </Button>
               </form>
             ) : (
-              <Tabs value={tab} onValueChange={v => { setTab(v as 'login' | 'signup'); setError(''); setMessage(''); }}>
-                <TabsList className="grid w-full grid-cols-2">
+              <Tabs value={registrationDisabled ? 'login' : tab} onValueChange={v => { if (!registrationDisabled) { setTab(v as 'login' | 'signup'); } setError(''); setMessage(''); }}>
+                <TabsList className={cn("grid w-full", registrationDisabled ? "grid-cols-1" : "grid-cols-2")}>
                   <TabsTrigger value="login" className="tap-target">Sign in</TabsTrigger>
-                  <TabsTrigger value="signup" className="tap-target">Create account</TabsTrigger>
+                  {!registrationDisabled && (
+                    <TabsTrigger value="signup" className="tap-target">Create account</TabsTrigger>
+                  )}
                 </TabsList>
 
                 <form onSubmit={handleSubmit} className="space-y-4 mt-4">
