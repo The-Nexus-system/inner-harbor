@@ -31,6 +31,7 @@ interface InviteCode {
 interface AppConfig {
   invite_only: boolean;
   demo_mode: boolean;
+  registration_disabled: boolean;
 }
 
 interface CheckItem {
