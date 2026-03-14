@@ -46,7 +46,7 @@ type RecordType =
   | 'calendar' | 'safety' | 'checkins' | 'handoffs'
   | 'snapshots' | 'medications';
 
-type ExportFormat = 'text' | 'json' | 'csv' | 'printable' | 'therapy';
+type ExportFormat = 'text' | 'json' | 'json-encrypted' | 'csv' | 'printable' | 'therapy';
 
 interface ExportPreset {
   id: string;
