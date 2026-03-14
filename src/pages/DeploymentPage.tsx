@@ -383,11 +383,11 @@ export default function DeploymentPage() {
                         <Copy className="h-3.5 w-3.5" />
                       </Button>
                       {code.is_active ? (
-                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-amber-500" onClick={() => deactivateCode(code.id)}>
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-amber-500" onClick={() => setDeactivateCodeId(code.id)}>
                           <XCircle className="h-3.5 w-3.5" />
                         </Button>
                       ) : (
-                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" onClick={() => deleteCode(code.id)}>
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" onClick={() => setDeleteCodeId(code.id)}>
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       )}
