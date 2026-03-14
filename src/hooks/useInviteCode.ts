@@ -69,5 +69,19 @@ export function useInviteCode() {
     }
   }, []);
 
-  return { validateCode, redeemCode, checkInviteOnly, validating };
+  /** Check if new account registration is completely disabled */
+  const checkRegistrationDisabled = useCallback(async (): Promise<boolean> => {
+    try {
+      const { data } = await supabase
+        .from('app_config')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+      return (data as any)?.registration_disabled ?? false;
+    } catch {
+      return false;
+    }
+  }, []);
+
+  return { validateCode, redeemCode, checkInviteOnly, checkRegistrationDisabled, validating };
 }
